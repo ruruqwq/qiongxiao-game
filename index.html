@@ -1,0 +1,2810 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>穹霄圣所 · 回合制模拟</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:rgba(10,14,20,0.15);--bg2:rgba(17,24,32,0.25);--bg3:rgba(26,35,48,0.2);--bg4:rgba(34,45,61,0.25);--bg5:rgba(42,53,72,0.3);
+  --txt:#f0e6d2;--txt2:#c8b896;--txt3:#8a7a6a;
+  --gold:#d4af37;--gold2:#f4d03f;
+  --wind:#5dd4d4;--cloud:#b0c4de;--thunder:#c77dff;--rain:#5b8def;
+  --green:#52d869;--red:#e74c3c;--orange:#e67e22;--blue:#3aa6e0;--pink:#ff6b9d;
+  --border:rgba(212,175,55,0.25);--border2:rgba(212,175,55,0.15);
+  --card-w:100px;--card-h:145px;
+}
+html,body{height:100%;overflow:hidden}
+body{background:#0a0e14;color:var(--txt);font-family:'Microsoft YaHei','SimHei',sans-serif;font-size:14px;line-height:1.5;user-select:none}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:var(--bg2)}
+::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--border)}
+button{font-family:inherit;cursor:pointer;border:none;outline:none;transition:all .15s}
+.btn{padding:7px 16px;border-radius:4px;font-size:13px;background:rgba(26,35,48,0.3);color:var(--txt);border:1px solid var(--border2);backdrop-filter:blur(4px)}
+.btn:hover{background:rgba(42,53,72,0.7);border-color:var(--gold)}
+.btn-gold{background:linear-gradient(135deg,rgba(138,109,26,0.85),rgba(212,175,55,0.85));color:#1a1a1a;font-weight:bold;border:1px solid var(--gold)}
+.btn-gold:hover{background:linear-gradient(135deg,rgba(170,141,42,0.9),rgba(244,208,63,0.9))}
+.btn-wind{background:linear-gradient(135deg,rgba(26,74,74,0.85),rgba(42,138,138,0.85));color:#fff}
+.btn-danger{background:linear-gradient(135deg,rgba(107,26,26,0.85),rgba(192,57,43,0.85));color:#fff}
+.btn-pink{background:linear-gradient(135deg,rgba(107,26,58,0.85),rgba(192,57,123,0.85));color:#fff}
+.btn:disabled,.btn-disabled{opacity:.4;cursor:not-allowed}
+
+#app{display:flex;flex-direction:column;height:100vh;position:relative;z-index:2}
+#scene-bg{position:fixed;top:0;left:0;right:0;bottom:0;background-size:cover;background-position:center;opacity:.55;z-index:0;transition:opacity .6s ease;pointer-events:none}
+#scene-bg.hover-active{opacity:.85}
+
+#top-bar{height:48px;background:rgba(17,24,32,0.3);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px;gap:12px;flex-shrink:0;z-index:10;backdrop-filter:blur(6px)}
+#mid-area{flex:1;display:flex;overflow:hidden}
+#left-panel{width:230px;background:rgba(17,24,32,0.2);border-right:1px solid var(--border);overflow-y:auto;flex-shrink:0;backdrop-filter:blur(8px)}
+#center-panel{flex:1;display:flex;flex-direction:column;overflow:hidden;position:relative}
+#event-area{flex:1;overflow-y:auto;padding:16px;z-index:2}
+#bottom-bar{height:170px;background:rgba(17,24,32,0.3);border-top:2px solid var(--border);display:flex;align-items:center;padding:0 12px;gap:8px;overflow-x:auto;flex-shrink:0;z-index:10;backdrop-filter:blur(6px)}
+#seasonal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;pointer-events:none;z-index:1;overflow:hidden}
+#daynight-overlay{position:fixed;top:0;left:0;right:0;bottom:0;pointer-events:none;z-index:0;transition:background 3s ease}
+
+.particle{position:absolute;pointer-events:none;animation:fall linear infinite}
+@keyframes fall{0%{transform:translateY(-20px) translateX(0)}100%{transform:translateY(100vh) translateX(var(--drift,0px))}}
+@keyframes diceRoll{0%{transform:rotateY(0deg) rotateX(0deg) scale(1)}20%{transform:rotateY(72deg) rotateX(36deg) scale(1.15)}40%{transform:rotateY(144deg) rotateX(72deg) scale(1)}60%{transform:rotateY(216deg) rotateX(108deg) scale(1.15)}80%{transform:rotateY(288deg) rotateX(144deg) scale(1)}100%{transform:rotateY(360deg) rotateX(180deg) scale(1)}}
+@keyframes slideIn{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes glow{0%,100%{box-shadow:0 0 5px var(--gold)}50%{box-shadow:0 0 20px var(--gold),0 0 40px rgba(212,175,55,.3)}}
+
+.tb-title{font-size:16px;color:var(--gold);letter-spacing:2px;white-space:nowrap}
+.tb-time{font-size:12px;color:var(--txt2);white-space:nowrap}
+.tb-season{font-size:13px;white-space:nowrap}
+.tb-semester{font-size:12px;color:var(--txt2);white-space:nowrap}
+.tb-spacer{flex:1}
+.tb-btn{padding:4px 10px;font-size:12px}
+
+.lp-section{padding:10px 12px;border-bottom:1px solid var(--border)}
+.lp-title{font-size:10px;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+.lp-stat{display:flex;justify-content:space-between;align-items:center;margin-bottom:3px}
+.lp-stat-label{font-size:11px;color:var(--txt2)}
+.lp-stat-val{font-size:12px;color:var(--txt);font-weight:bold}
+.bar{height:5px;background:rgba(0,0,0,0.3);border-radius:3px;overflow:hidden;margin-top:2px}
+.bar-fill{height:100%;border-radius:3px;transition:width .3s}
+.bar-hp{background:linear-gradient(90deg,#e74c3c,#e67e22)}
+.bar-ap{background:linear-gradient(90deg,#3aa6e0,#5dd4d4)}
+.bar-exp{background:linear-gradient(90deg,#8a6d1a,#d4af37)}
+.bar-aff{background:linear-gradient(90deg,#6b3a8a,#c77dff)}
+.bar-stress{background:linear-gradient(90deg,#52d869,#e67e22,#e74c3c)}
+.bar-love{background:linear-gradient(90deg,#ff6b9d,#ff1744)}
+
+.event-card{background:rgba(26,35,48,0.25);border:1px solid var(--border);border-radius:8px;padding:16px;margin-bottom:12px;position:relative;backdrop-filter:blur(4px);transition:all .3s}
+.event-card:hover{border-color:rgba(212,175,55,0.5);box-shadow:0 0 20px rgba(212,175,55,0.1)}
+.event-card:hover #scene-bg{opacity:.75}
+.event-title{font-size:15px;color:var(--gold);margin-bottom:8px}
+.event-desc{color:var(--txt);line-height:1.7;margin-bottom:12px}
+.event-slot{min-height:56px;border:2px dashed var(--border2);border-radius:6px;display:flex;align-items:center;justify-content:center;color:var(--txt3);font-size:12px;margin-bottom:8px;transition:all .2s;backdrop-filter:blur(2px)}
+.event-slot.drag-over{border-color:var(--gold);background:rgba(212,175,55,.08)}
+.event-slot.filled{border-style:solid;border-color:var(--border);padding:8px;background:rgba(26,35,48,0.35)}
+.event-slot.locked{border-color:var(--orange);background:rgba(230,126,34,.05);cursor:not-allowed}
+.event-actions{display:flex;gap:8px;flex-wrap:wrap}
+.event-log{background:rgba(26,35,48,0.4);border:1px solid var(--border);border-radius:6px;padding:10px;margin-bottom:12px;max-height:200px;overflow-y:auto;backdrop-filter:blur(4px)}
+.log-entry{padding:4px 0;border-bottom:1px solid rgba(42,58,74,.2);font-size:12px;line-height:1.6}
+.log-entry:last-child{border-bottom:none}
+.log-day{color:var(--gold2);font-size:10px;margin-right:4px}
+
+.char-card{width:var(--card-w);height:var(--card-h);background:rgba(26,35,48,0.3);border:2px solid var(--border2);border-radius:8px;flex-shrink:0;cursor:grab;position:relative;transition:all .2s;overflow:hidden;backdrop-filter:blur(3px)}
+.char-card:hover{border-color:var(--gold);transform:translateY(-4px);box-shadow:0 4px 12px rgba(0,0,0,.4)}
+.char-card.dragging{opacity:.5;cursor:grabbing}
+.char-card.locked{opacity:.5;cursor:not-allowed;border-color:var(--orange)}
+.char-card-portrait{width:100%;height:90px;background:rgba(0,0,0,0.2);display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
+.char-card-portrait svg{width:80px;height:90px}
+.char-card-info{padding:4px 6px;text-align:center}
+.char-card-name{font-size:11px;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.char-card-sub{font-size:9px;color:var(--txt3)}
+.char-card-badge{position:absolute;top:4px;right:4px;font-size:8px;padding:1px 4px;border-radius:6px;background:rgba(0,0,0,.5)}
+.char-card .cc-aff{position:absolute;bottom:18px;left:4px;right:4px;height:3px;background:rgba(0,0,0,0.3);border-radius:2px;overflow:hidden}
+.char-card .cc-aff-fill{height:100%;background:var(--thunder);transition:width .3s}
+.char-card .cc-love{position:absolute;bottom:18px;left:4px;right:4px;height:3px;background:rgba(0,0,0,0.3);border-radius:2px;overflow:hidden}
+.char-card .cc-love-fill{height:100%;background:var(--pink);transition:width .3s}
+.char-card-player{border-color:var(--gold)}
+.char-card-player .char-card-badge{background:rgba(212,175,55,.3);color:var(--gold)}
+.char-card-status{position:absolute;bottom:1px;left:0;right:0;text-align:center;font-size:9px;padding:1px 0;border-bottom-left-radius:6px;border-bottom-right-radius:6px}
+.char-card-status.done{color:var(--green);background:rgba(82,216,105,.2)}
+.char-card-status.wait{color:var(--orange);background:rgba(230,126,34,.2)}
+
+#modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:1000;backdrop-filter:blur(4px)}
+#modal-overlay.show{display:flex}
+.modal{background:rgba(17,24,32,0.6);border:1px solid var(--border2);border-radius:10px;max-width:600px;width:90%;max-height:85vh;overflow-y:auto;padding:28px;animation:modalIn .3s ease;backdrop-filter:blur(10px)}
+@keyframes modalIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.modal-title{font-size:18px;color:var(--gold);margin-bottom:16px;text-align:center}
+.modal-body{color:var(--txt);margin-bottom:20px;line-height:1.8}
+.modal-choices{display:flex;flex-direction:column;gap:8px}
+.choice-btn{padding:10px 16px;background:rgba(26,35,48,0.6);border:1px solid var(--border2);border-radius:5px;color:var(--txt);text-align:left;cursor:pointer;transition:all .15s;font-size:13px;backdrop-filter:blur(4px)}
+.choice-btn:hover{background:rgba(42,53,72,0.7);border-color:var(--gold);transform:translateX(4px)}
+.choice-btn.danger{border-color:var(--red)}
+.choice-btn.danger:hover{background:rgba(231,76,60,.15)}
+.choice-btn.love{border-color:var(--pink)}
+.choice-btn.love:hover{background:rgba(255,107,157,.15)}
+
+#wi-screen{position:fixed;top:0;left:0;right:0;bottom:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;z-index:3000;overflow-y:auto}
+#wi-screen .wi-bg{position:absolute;top:0;left:0;right:0;bottom:0;background-size:cover;background-position:center;opacity:.3;z-index:0}
+#wi-screen .wi-content{position:relative;z-index:1;max-width:700px;width:90%;padding:40px 20px}
+.wi-title{font-size:36px;color:var(--gold);letter-spacing:8px;text-align:center;margin-bottom:8px;text-shadow:0 0 30px rgba(212,175,55,.4)}
+.wi-sub{font-size:14px;color:var(--txt2);text-align:center;letter-spacing:4px;margin-bottom:30px}
+.wi-section{background:rgba(17,24,32,0.6);border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:16px;backdrop-filter:blur(8px)}
+.wi-section h3{color:var(--gold);font-size:16px;margin-bottom:10px;letter-spacing:2px}
+.wi-section p{color:var(--txt);line-height:2;font-size:13px;margin-bottom:8px}
+.wi-section .wi-quote{color:var(--txt3);font-style:italic;font-size:12px;border-left:3px solid var(--gold);padding-left:12px;margin:10px 0}
+
+#cc-screen{position:fixed;top:0;left:0;right:0;bottom:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:2000;flex-direction:column;overflow-y:auto;padding:20px}
+#cc-screen h1{font-size:36px;color:var(--gold);letter-spacing:6px;margin-bottom:6px;text-shadow:0 0 20px rgba(212,175,55,.3)}
+#cc-screen .cc-sub{font-size:14px;color:var(--txt2);margin-bottom:30px;letter-spacing:3px}
+.cc-step{display:none;max-width:600px;width:90%}
+.cc-step.active{display:block}
+.cc-step-title{font-size:20px;color:var(--gold);margin-bottom:16px;text-align:center}
+.cc-input{width:100%;padding:10px 14px;background:rgba(26,35,48,0.6);border:1px solid var(--border2);border-radius:5px;color:var(--txt);font-size:14px;font-family:inherit;margin-bottom:12px;backdrop-filter:blur(4px)}
+.cc-input:focus{border-color:var(--gold)}
+.cc-gender-row{display:flex;gap:12px;justify-content:center;margin-bottom:16px}
+.cc-gender-opt{padding:20px 30px;background:rgba(26,35,48,0.6);border:2px solid var(--border2);border-radius:8px;cursor:pointer;text-align:center;transition:all .2s;backdrop-filter:blur(4px)}
+.cc-gender-opt:hover{border-color:var(--gold)}
+.cc-gender-opt.selected{border-color:var(--gold);background:rgba(42,53,72,0.7)}
+.cc-gender-opt .g-icon{font-size:32px}
+.cc-gender-opt .g-label{font-size:13px;margin-top:4px}
+.cc-appearance{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px}
+.cc-appearance-group{margin-bottom:16px}
+.cc-appearance-group-label{font-size:12px;color:var(--txt2);margin-bottom:6px}
+.cc-appearance-opt{padding:8px;background:rgba(26,35,48,0.6);border:1px solid var(--border2);border-radius:4px;cursor:pointer;text-align:center;font-size:11px;transition:all .15s;backdrop-filter:blur(4px)}
+.cc-appearance-opt:hover{border-color:var(--gold)}
+.cc-appearance-opt.selected{border-color:var(--gold);background:rgba(42,53,72,0.7);color:var(--gold)}
+.cc-portrait-preview{width:140px;height:170px;margin:0 auto 16px;background:rgba(26,35,48,0.6);border:2px solid var(--border2);border-radius:8px;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.cc-portrait-preview svg{width:120px;height:150px}
+.cc-quiz-q{font-size:15px;color:var(--txt);margin-bottom:12px;line-height:1.6}
+.cc-quiz-opts{display:flex;flex-direction:column;gap:8px}
+.cc-quiz-opt{padding:12px 16px;background:rgba(26,35,48,0.6);border:1px solid var(--border2);border-radius:5px;cursor:pointer;transition:all .15s;font-size:13px;color:var(--txt);backdrop-filter:blur(4px)}
+.cc-quiz-opt:hover{background:rgba(42,53,72,0.7);border-color:var(--gold)}
+.cc-quiz-progress{display:flex;gap:4px;justify-content:center;margin-bottom:16px}
+.cc-quiz-dot{width:8px;height:8px;border-radius:50%;background:rgba(42,53,72,0.7)}
+.cc-quiz-dot.done{background:var(--green)}
+.cc-quiz-dot.current{background:var(--gold)}
+.dice-screen{text-align:center}
+.dice-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
+.dice-stat{background:rgba(26,35,48,0.6);border:1px solid var(--border2);border-radius:6px;padding:12px;backdrop-filter:blur(4px)}
+.dice-stat-label{font-size:11px;color:var(--txt2);margin-bottom:4px}
+.dice-stat-val{font-size:24px;color:var(--gold);font-weight:bold}
+.dice-rerolls{font-size:13px;color:var(--txt2);margin-bottom:12px}
+.dice-result-college{font-size:16px;color:var(--gold);margin:16px 0}
+
+#dice-overlay{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:5000;display:none;text-align:center;pointer-events:none}
+#dice-overlay.show{display:block}
+.dice-box{width:100px;height:100px;background:rgba(26,35,48,0.7);border:3px solid var(--gold);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:bold;color:var(--gold);margin:0 auto 16px;animation:diceRoll .8s ease-in-out;backdrop-filter:blur(4px)}
+.dice-label{color:var(--txt);font-size:14px;margin-bottom:8px;text-shadow:0 1px 4px rgba(0,0,0,0.8)}
+.dice-result{color:var(--gold);font-size:18px;font-weight:bold;margin-top:8px;text-shadow:0 1px 4px rgba(0,0,0,0.8)}
+
+#yesterday-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.75);display:none;align-items:center;justify-content:center;z-index:4500;backdrop-filter:blur(4px)}
+#yesterday-overlay.show{display:flex}
+.yesterday-panel{background:rgba(17,24,32,0.8);border:2px solid var(--gold);border-radius:12px;max-width:700px;width:90%;max-height:85vh;overflow-y:auto;padding:24px;animation:modalIn .4s ease;backdrop-filter:blur(12px)}
+.yesterday-title{font-size:20px;color:var(--gold);text-align:center;margin-bottom:16px;letter-spacing:2px}
+.yesterday-entry{background:rgba(26,35,48,0.5);border:1px solid var(--border2);border-radius:6px;padding:10px;margin-bottom:8px;backdrop-filter:blur(4px)}
+.yesterday-entry.success{border-left:3px solid var(--green)}
+.yesterday-entry.fail{border-left:3px solid var(--red)}
+.yesterday-entry .npc-name{color:var(--txt2);font-size:11px}
+.yesterday-entry .event-name{color:var(--gold);font-size:13px;margin-bottom:4px}
+.yesterday-entry .result{color:var(--txt);font-size:12px}
+
+.club-detail{background:rgba(26,35,48,0.5);border:1px solid var(--border);border-radius:8px;padding:16px;margin-bottom:12px;backdrop-filter:blur(4px)}
+.club-detail-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.club-detail-name{font-size:16px;color:var(--gold)}
+.club-detail-info{font-size:12px;color:var(--txt2);margin-bottom:8px}
+.club-detail-desc{font-size:13px;color:var(--txt);line-height:1.7;margin-bottom:8px}
+.club-detail-stats{display:flex;gap:12px;font-size:12px;color:var(--txt2)}
+.club-detail-stats span{color:var(--txt)}
+.race-result{background:rgba(26,35,48,0.5);border:1px solid var(--border);border-radius:8px;padding:16px;margin-bottom:8px;backdrop-filter:blur(4px)}
+.race-pos{font-size:20px;font-weight:bold;text-align:center;margin-bottom:8px}
+.race-pos.gold{color:var(--gold)}
+.race-pos.silver{color:#c0c0c0}
+.race-pos.bronze{color:#cd7f32}
+.race-pos.other{color:var(--txt2)}
+
+#tutorial-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);display:none;z-index:1500;pointer-events:none}
+#tutorial-overlay.show{display:block;pointer-events:auto}
+.tut-bubble{position:absolute;background:rgba(17,24,32,0.8);border:2px solid var(--gold);border-radius:10px;padding:18px 20px;max-width:420px;min-width:300px;font-size:13px;color:var(--txt);line-height:1.8;z-index:1501;box-shadow:0 4px 20px rgba(0,0,0,.5);word-wrap:break-word;overflow-wrap:break-word;white-space:normal;backdrop-filter:blur(8px)}
+.tut-bubble .tut-title{color:var(--gold);font-size:15px;margin-bottom:8px;font-weight:bold}
+.tut-bubble .tut-text{margin-bottom:10px}
+.tut-bubble .tut-next{margin-top:10px}
+
+.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px}
+.badge-wind{background:rgba(93,212,212,.2);color:var(--wind)}
+.badge-cloud{background:rgba(176,196,222,.2);color:var(--cloud)}
+.badge-thunder{background:rgba(199,125,255,.2);color:var(--thunder)}
+.badge-rain{background:rgba(91,141,239,.2);color:var(--rain)}
+.badge-gold{background:rgba(212,175,55,.2);color:var(--gold)}
+.badge-pink{background:rgba(255,107,157,.2);color:var(--pink)}
+.badge-red{background:rgba(231,76,60,.2);color:var(--red)}
+.badge-green{background:rgba(82,216,105,.2);color:var(--green)}
+
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--border);margin-bottom:12px;flex-wrap:wrap}
+.tab{padding:7px 12px;font-size:12px;color:var(--txt2);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s}
+.tab:hover{color:var(--txt)}
+.tab.active{color:var(--gold);border-bottom-color:var(--gold)}
+
+#rand-event-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:1200;backdrop-filter:blur(2px)}
+#rand-event-overlay.show{display:flex}
+.rand-event-box{background:rgba(17,24,32,0.75);border:2px solid var(--gold);border-radius:12px;max-width:500px;width:90%;padding:24px;animation:slideIn .4s ease;backdrop-filter:blur(10px)}
+.rand-event-box.good{border-color:var(--green)}
+.rand-event-box.bad{border-color:var(--red)}
+.rand-event-box.neutral{border-color:var(--blue)}
+.rand-event-box.love{border-color:var(--pink)}
+.rand-event-title{font-size:17px;color:var(--gold);margin-bottom:12px;text-align:center}
+.rand-event-box.good .rand-event-title{color:var(--green)}
+.rand-event-box.bad .rand-event-title{color:var(--red)}
+.rand-event-box.love .rand-event-title{color:var(--pink)}
+.rand-event-desc{color:var(--txt);line-height:1.8;margin-bottom:16px;font-size:13px}
+.rand-event-choices{display:flex;flex-direction:column;gap:8px}
+
+.shop-item{display:flex;justify-content:space-between;align-items:center;padding:8px;background:rgba(26,35,48,0.4);border-radius:4px;margin-bottom:4px;backdrop-filter:blur(4px)}
+.shop-item-name{font-size:12px;color:var(--txt)}
+.shop-item-desc{font-size:10px;color:var(--txt3)}
+.shop-item-price{color:var(--gold);font-weight:bold;font-size:13px}
+
+.hw-item{background:rgba(26,35,48,0.4);border:1px solid var(--border);border-radius:6px;padding:10px;margin-bottom:8px;backdrop-filter:blur(4px)}
+.hw-title{font-size:13px;color:var(--txt)}
+.hw-status{font-size:11px}
+.hw-status.done{color:var(--green)}
+.hw-status.pending{color:var(--orange)}
+
+.love-icon{color:var(--pink);font-size:14px}
+.friend-icon{color:var(--blue);font-size:14px}
+.broken-icon{color:var(--red);font-size:14px}
+
+.ending-screen{text-align:center;padding:40px}
+.ending-screen .end-title{font-size:26px;color:var(--gold);margin-bottom:16px}
+.ending-screen .end-desc{font-size:15px;color:var(--txt);max-width:480px;margin:0 auto 20px;line-height:2}
+.ending-screen .end-quote{font-size:13px;color:var(--txt2);font-style:italic;margin-top:16px}
+.portrait-svg{display:block}
+
+.thesis-stage{background:rgba(26,35,48,0.4);border:1px solid var(--border);border-radius:8px;padding:16px;margin-bottom:12px;backdrop-filter:blur(4px)}
+.thesis-stage-title{font-size:14px;color:var(--gold);margin-bottom:8px}
+.thesis-input{width:100%;min-height:80px;padding:10px;background:rgba(0,0,0,0.3);border:1px solid var(--border2);border-radius:5px;color:var(--txt);font-family:inherit;font-size:13px;resize:vertical;backdrop-filter:blur(4px)}
+.thesis-input:focus{border-color:var(--gold)}
+.thesis-review{background:rgba(231,76,60,.08);border:1px solid var(--red);border-radius:6px;padding:10px;margin:8px 0;font-size:12px;color:var(--txt)}
+.thesis-approved{background:rgba(82,216,105,.08);border:1px solid var(--green);border-radius:6px;padding:10px;margin:8px 0;font-size:12px;color:var(--txt)}
+
+.elim-info{background:rgba(231,76,60,.08);border:1px solid var(--red);border-radius:6px;padding:12px;margin-bottom:12px;backdrop-filter:blur(4px)}
+.elim-info-title{color:var(--red);font-size:13px;font-weight:bold;margin-bottom:6px}
+.elim-info-item{font-size:12px;color:var(--txt2);margin-bottom:2px}
+.elim-info-item span{color:var(--txt)}
+
+.food-active{background:rgba(82,216,105,.1);border:1px solid var(--green);border-radius:6px;padding:6px 12px;font-size:11px;color:var(--green);margin-bottom:8px}
+
+.festival-banner{background:rgba(212,175,55,.1);border:1px solid var(--gold);border-radius:8px;padding:12px;margin-bottom:12px;text-align:center;backdrop-filter:blur(4px)}
+.fb-name{font-size:15px;color:var(--gold);margin-bottom:4px}
+.fb-desc{font-size:12px;color:var(--txt2)}
+
+.npc-portrait{width:80px;height:100px;border-radius:6px;object-fit:cover;border:2px solid var(--border2);background:rgba(0,0,0,0.3)}
+
+#scene-preview{position:fixed;top:0;left:0;right:0;bottom:0;background-size:cover;background-position:center;opacity:0;z-index:0;transition:opacity .4s ease;pointer-events:none}
+#scene-preview.show{opacity:.8}
+
+.day-dawn .event-title{color:#f4c430}
+.day-dawn .tb-title{color:#f4c430}
+.day-day .event-title{color:var(--gold)}
+.day-day .tb-title{color:var(--gold)}
+.day-dusk .event-title{color:#ff9f43}
+.day-dusk .tb-title{color:#ff9f43}
+.day-night .event-title{color:#a78bfa}
+.day-night .tb-title{color:#a78bfa}
+
+@media(max-width:1000px){#left-panel{width:190px}}
+
+/* 换装弹窗 */
+#wardrobe-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:5000;backdrop-filter:blur(4px)}
+#wardrobe-overlay.show{display:flex}
+.wardrobe-panel{background:rgba(17,24,32,0.8);border:2px solid var(--gold);border-radius:12px;max-width:600px;width:90%;max-height:85vh;overflow-y:auto;padding:24px;animation:modalIn .4s ease;backdrop-filter:blur(12px)}
+.wardrobe-title{font-size:20px;color:var(--gold);text-align:center;margin-bottom:16px}
+.wardrobe-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
+.wardrobe-item{text-align:center;padding:10px;background:rgba(26,35,48,0.5);border:2px solid var(--border2);border-radius:8px;cursor:pointer;transition:all .2s}
+.wardrobe-item:hover{border-color:var(--gold)}
+.wardrobe-item.active{border-color:var(--gold);background:rgba(212,175,55,.12)}
+.wardrobe-item img{width:80px;height:100px;object-fit:cover;border-radius:6px;margin-bottom:6px}
+.wardrobe-item-name{font-size:12px;color:var(--txt)}
+
+/* 事件详情弹窗（点击事件查看+选角色） */
+#event-detail-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.8);display:none;align-items:center;justify-content:center;z-index:5500;backdrop-filter:blur(6px)}
+#event-detail-overlay.show{display:flex}
+.event-detail-box{position:relative;max-width:700px;width:90%;max-height:85vh;overflow-y:auto;border-radius:12px;animation:modalIn .4s ease}
+.event-detail-bg{position:absolute;top:0;left:0;right:0;bottom:0;background-size:cover;background-position:center;opacity:.3;border-radius:12px;z-index:0}
+.event-detail-content{position:relative;z-index:1;background:rgba(17,24,32,0.85);border:2px solid var(--gold);border-radius:12px;padding:24px;backdrop-filter:blur(8px)}
+.event-detail-title{font-size:20px;color:var(--gold);margin-bottom:12px;text-align:center}
+.event-detail-desc{color:var(--txt);line-height:1.8;margin-bottom:16px;font-size:14px}
+.event-detail-char-select-title{font-size:13px;color:var(--txt2);margin-bottom:8px}
+.event-detail-chars{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.event-detail-char-btn{padding:8px 12px;background:rgba(26,35,48,0.6);border:1px solid var(--border2);border-radius:5px;color:var(--txt);font-size:12px;cursor:pointer;transition:all .15s}
+.event-detail-char-btn:hover{border-color:var(--gold)}
+.event-detail-char-btn.selected{border-color:var(--gold);background:rgba(212,175,55,.15)}
+
+/* BGM控制 */
+#bgm-control{position:fixed;bottom:180px;right:12px;z-index:100;background:rgba(17,24,32,0.7);border:1px solid var(--border);border-radius:20px;padding:4px 10px;font-size:11px;color:var(--txt3);cursor:pointer;backdrop-filter:blur(4px)}
+#bgm-control:hover{color:var(--gold)}
+</style>
+</head>
+<body>
+<div id="scene-bg"></div>
+<div id="scene-preview"></div>
+<div id="daynight-overlay"></div>
+<div id="seasonal-overlay"></div>
+
+<!-- World Intro Screen -->
+<div id="wi-screen">
+<div class="wi-bg" id="wi-bg"></div>
+<div class="wi-content">
+<div class="wi-title">穹霄圣所</div>
+<div class="wi-sub">风不停，路不止</div>
+<div class="wi-section">
+<h3>长风界</h3>
+<p>在穹门另一侧的世界，被称为"长风界"。这里的大地不是完整的陆地，而是无数悬浮在云海中的大陆碎片——每一块碎片的下方，都垂落着水流与根须，像倒悬的岛屿。</p>
+<p>风金是长风界唯一的货币。它从矿脉中开采，但矿脉正在萎缩——没有人知道为什么，只知道每年能挖到的越来越少。</p>
+<div class="wi-quote">"风金不是石头。风金是凝固的风。风少了，风金就少了。"</div>
+</div>
+<div class="wi-section">
+<h3>四神创世</h3>
+<p>太古之时，四位神灵从虚无中醒来——驰（风/金色）、栖（云/白色）、鸣（雷/蓝色）、沉（雨/紫色）。他们用气核的力量创造了天气：风、云、雷、雨，四种最原初的天象。</p>
+<p>四神隐退后，气核孕育了生命。长风界的万物都从气核中汲取能量，修行者将这种能量称为"风序"——从一序轻风境到九序超台风境，共九个层级。</p>
+<div class="wi-quote">"风起初不在高处——它只是最早睁开眼睛的那一个。"</div>
+</div>
+<div class="wi-section">
+<h3>穹霄圣所</h3>
+<p>穹霄圣所是长风界唯一的学府，悬浮在苍瞳核心区。四大学院分别继承四神之力：驰风院（自由不羁）、栖云院（中庸包容）、鸣雷院（骄傲炽烈）、沉雨院（沉静坚韧）。</p>
+<p>学生在这里度过四年八个学期，学习控制气核、创造天气。最终的考核——毕业论文——要求学生亲自前往地球，执行一次完整的天气创造。</p>
+<div class="wi-quote">"他们最后都会变成天气，只是变成的天气不一样。"</div>
+</div>
+<div class="wi-section">
+<h3>毕业论文与消散</h3>
+<p>毕业论文不是学术研究，而是往地球送天象。每一次毕业论文执行，地球上就会多出一种非自然天气。执行完毕后，学生的气核能量耗尽，意识消散——这就是"消散"。</p>
+<p>消散的毕业生不会回到长风界。他们的名字可能被编入教材，也可能被遗忘。但从穹门走出来的那一刻，没有人会问"你改了几版"。</p>
+<div class="wi-quote">"那些改了几百次的人，后来在风痕市集最远的那块陆块边缘开了一间很小的铺子，门口只挂一块旧木牌——'改到能过'。"</div>
+</div>
+<div class="wi-section">
+<h3>穹门历</h3>
+<p>穹门历元年为公元前3000年——那是穹门第一次被打开的年份。当前是穹门历5026年，对应地球的2026年。</p>
+<p>地球与长风界通过穹门相连。穹门一侧是长风界的苍瞳核心区，另一侧是地球的大气层。毕业论文的能量通过穹门传输到地球，化为天气。</p>
+</div>
+<div style="text-align:center;margin-top:20px">
+<button class="btn btn-gold" style="padding:14px 40px;font-size:16px" onclick="startCharCreation()">踏入穹门</button>
+</div>
+</div>
+</div>
+
+<!-- Character Creation -->
+<div id="cc-screen" style="display:none">
+<h1>穹霄圣所</h1>
+<div class="cc-sub">回合制模拟 · 风不停，路不止</div>
+<div class="cc-step active" id="cc-step-1">
+<div class="cc-step-title">创建角色</div>
+<input class="cc-input" id="cc-name" placeholder="输入你的名字" maxlength="6" value="周台回">
+<div class="cc-appearance-group"><div class="cc-appearance-group-label">选择性别</div>
+<div class="cc-gender-row">
+<div class="cc-gender-opt selected" onclick="ccSelectGender('male')"><div class="g-icon">♂</div><div class="g-label">男</div></div>
+<div class="cc-gender-opt" onclick="ccSelectGender('female')"><div class="g-icon">♀</div><div class="g-label">女</div></div>
+</div></div>
+<button class="btn btn-gold" style="width:100%;padding:12px" onclick="ccNext(3)">下一步</button>
+</div>
+
+<div class="cc-step" id="cc-step-3">
+<div class="cc-step-title">风碑共鸣测试</div>
+<div class="cc-quiz-progress" id="cc-quiz-progress"></div>
+<div id="cc-quiz-container"></div>
+</div>
+<div class="cc-step" id="cc-step-4">
+<div class="cc-step-title">气核觉醒</div>
+<div class="dice-screen">
+<div class="cc-portrait-preview" id="cc-portrait-final" style="margin-bottom:12px"></div>
+<div class="dice-result-college" id="cc-result-college"></div>
+<div class="dice-stats" id="cc-dice-stats"></div>
+<div class="dice-rerolls" id="cc-reroll-info"></div>
+<div style="display:flex;gap:8px"><button class="btn" style="flex:1;padding:10px" onclick="ccReroll()">重新投掷</button><button class="btn btn-gold" style="flex:1;padding:10px" onclick="ccFinish()">踏入穹门</button></div>
+</div>
+</div>
+</div>
+
+<!-- Main App -->
+<div id="app" style="display:none">
+<div id="top-bar">
+<span class="tb-title">穹霄圣所</span>
+<span class="tb-season" id="tb-season"></span>
+<span class="tb-semester" id="tb-semester"></span>
+<div class="tb-spacer"></div>
+<span class="tb-time" id="tb-time"></span>
+<button class="btn tb-btn" onclick="saveGame()">存档</button>
+<button class="btn tb-btn" onclick="loadGame()">读档</button>
+<button class="btn tb-btn" onclick="showWardrobe()">换装</button>
+<button class="btn tb-btn" onclick="confirmRestart()">重开</button>
+</div>
+<div id="mid-area">
+<div id="left-panel">
+<div class="lp-section" id="lp-player"></div>
+<div class="lp-section" id="lp-stats"></div>
+<div class="lp-section" id="lp-inventory"></div>
+<div class="lp-section" id="lp-spirits"></div>
+<div class="lp-section" id="lp-faction"></div>
+<div class="lp-section" id="lp-truth"></div>
+<div class="lp-section" id="lp-elim"></div>
+</div>
+<div id="center-panel">
+<div id="event-area">
+<div id="festival-banner-container"></div>
+<div id="food-effect-container"></div>
+<div id="tab-bar" style="margin-bottom:12px"></div>
+<div id="main-content"></div>
+</div>
+<div id="bottom-bar"></div>
+</div>
+</div>
+</div>
+
+<!-- Tutorial Overlay -->
+<div id="tutorial-overlay" onclick="tutNext(event)">
+<div class="tut-bubble" id="tut-bubble" style="top:60px;left:260px">
+<div class="tut-title" id="tut-title">欢迎来到穹霄圣所</div>
+<div class="tut-text" id="tut-text">这里是新手教学。点击空白处继续。</div>
+<div class="tut-next"><button class="btn btn-gold" onclick="tutNext(event)">下一步</button></div>
+</div>
+</div>
+
+<!-- Modal Overlay -->
+<div id="modal-overlay">
+<div class="modal" id="modal-box">
+<div class="modal-title" id="modal-title"></div>
+<div class="modal-body" id="modal-body"></div>
+<div class="modal-choices" id="modal-choices"></div>
+</div>
+</div>
+
+<!-- Dice Overlay -->
+<div id="dice-overlay">
+<div class="dice-box" id="dice-box">?</div>
+<div class="dice-label" id="dice-label">投掷中...</div>
+<div class="dice-result" id="dice-result"></div>
+</div>
+
+<!-- Yesterday Results Overlay -->
+<div id="yesterday-overlay">
+<div class="yesterday-panel" id="yesterday-panel">
+<div class="yesterday-title">昨日回顾</div>
+<div id="yesterday-content"></div>
+<div style="text-align:center;margin-top:16px">
+<button class="btn btn-gold" onclick="closeYesterday()">新的一天</button>
+</div>
+</div>
+</div>
+
+<!-- Random Event Overlay -->
+<div id="rand-event-overlay">
+<div class="rand-event-box" id="rand-event-box">
+<div class="rand-event-title" id="rand-event-title"></div>
+<div class="rand-event-desc" id="rand-event-desc"></div>
+<div class="rand-event-choices" id="rand-event-choices"></div>
+</div>
+</div>
+
+<!-- 换装弹窗 -->
+<div id="wardrobe-overlay">
+<div class="wardrobe-panel">
+<div class="wardrobe-title">换装</div>
+<div id="wardrobe-content"></div>
+<div style="text-align:center;margin-top:16px">
+<button class="btn btn-gold" onclick="closeWardrobe()">关闭</button>
+</div>
+</div>
+</div>
+
+<!-- 事件详情弹窗 -->
+<div id="event-detail-overlay">
+<div class="event-detail-box">
+<div class="event-detail-bg" id="event-detail-bg"></div>
+<div class="event-detail-content">
+<div class="event-detail-title" id="event-detail-title"></div>
+<div class="event-detail-desc" id="event-detail-desc"></div>
+<div class="event-detail-char-select-title">选择参与事件的角色：</div>
+<div class="event-detail-chars" id="event-detail-chars"></div>
+<div style="display:flex;gap:8px;justify-content:center">
+<button class="btn btn-gold" id="event-detail-confirm" onclick="confirmEventDetail()">确认派遣</button>
+<button class="btn btn-danger" id="event-detail-withdraw" onclick="withdrawFromEvent()" style="display:none">撤回</button>
+<button class="btn" onclick="closeEventDetail()">取消</button>
+</div>
+</div>
+</div>
+</div>
+
+<!-- BGM控制 -->
+<div id="bgm-control" onclick="toggleBGM()">♪ 音乐: 关</div>
+
+<script>
+// ===== SCENE IMAGES =====
+const IMG='';
+const SCENE_IMG={
+world:IMG+'image.png',campus:IMG+'image(1).png',
+wind_college:IMG+'image(2).png',wind_lounge:IMG+'image(3).png',
+cloud_college:IMG+'image(4).png',cloud_lounge:IMG+'image(5).png',
+thunder_college:IMG+'image(6).png',thunder_lounge:IMG+'image(7).png',
+rain_college:IMG+'image(8).png',rain_lounge:IMG+'image(9).png',
+race_track:IMG+'image(10).png',market:IMG+'image(11).png',
+spirit_shop:IMG+'image(12).png',stamp_shop:IMG+'image(13).png',
+pen_shop:IMG+'image(14).png',clothing_shop:IMG+'image(15).png',
+race_shop:IMG+'image(16).png',medicine_shop:IMG+'image(17).png',
+sound_shop:IMG+'image(18).png',book_shop:IMG+'image(19).png',
+grocery_shop:IMG+'image(20).png',bread_shop:IMG+'image(21).png',
+tea_stall:IMG+'image(22).png',guifeng_slope:IMG+'image(23).png',
+fest_wind:IMG+'image(24).png',fest_thunder:IMG+'image(25).png',
+fest_rain:IMG+'image(26).png',fest_music:IMG+'image(27).png',
+fest_fourgod:IMG+'image(28).png',fest_rainbow:IMG+'image(29).png',
+fest_cloudopen:IMG+'image(30).png',fest_gate:IMG+'image(31).png',
+fest_stillwind:IMG+'image(32).png',fest_snow:IMG+'image(33).png',
+exc_1a:IMG+'image(34).png',exc_1s:IMG+'image(35).png',
+exc_2a:IMG+'image(36).png',exc_2s:IMG+'image(37).png',
+exc_3a:IMG+'image(38).png',exc_3s:IMG+'image(39).png',
+exc_4a:IMG+'image(40).png',exc_4s:IMG+'image(41).png',
+item_copycore:IMG+'image(42).png',item_silentpen:IMG+'image(43).png',
+uniform_wind:IMG+'image(44).png',uniform_cloud:IMG+'image(45).png',
+uniform_thunder:IMG+'image(46).png',uniform_rain:IMG+'image(47).png',
+canteen:IMG+'image(48).png',
+};
+
+// Hover scene images (shown on mouseover)
+const HOVER_SCENES={
+class:'wind_college',train:'wind_college',meditate:'rain_college',
+lounge:'campus',stroll:'campus',library:'cloud_college',
+homework:'book_shop',club_act:'campus',frost_tree:'guifeng_slope',
+job_market_patrol:'market',job_herb_sort:'medicine_shop',
+job_bread_bake:'bread_shop',job_book_organize:'book_shop',
+job_grocery_help:'grocery_shop',canteen_visit:'canteen'
+};
+
+// ===== NPC PORTRAIT IMAGES =====
+const NPC_PORTRAITS={
+zhou_zhi:'npc-zhuozhi-20260819031000.png',
+lu_ji:'npc-luji-20260819031001.png',
+he_shi:'npc-heshi-20260819031002.png',
+shen_lan:'npc-shenlanyan-20260819031003.png',
+lu_wanju:'npc-luwanju-20260819031004.png',
+gu_chang:'npc-guchangfeng-v2-20260819033500.png',
+pei_chang:'npc-peichangqing-20260819031006.png',
+fang_yan:'npc-fangyan-20260819031007.png',
+zhuo_yun:'npc-zhuoyun-20260819031008.png',
+qi_yuan:'npc-qiyuan-20260819031009.png'
+};
+
+// ===== PLAYER PORTRAITS (4 colleges x 2 genders = 8) =====
+const PLAYER_PORTRAITS={
+wind:{male:'player-wind-male-20260819033505.png',female:'player-wind-female-20260819033506.png'},
+cloud:{male:'player-cloud-male-20260819033507.png',female:'player-cloud-female-20260819033508.png'},
+thunder:{male:'player-thunder-male-20260819033501.png',female:'player-thunder-female-20260819033502.png'},
+rain:{male:'player-rain-male-20260819033503.png',female:'player-rain-female-20260819033504.png'}
+};
+
+// ===== COSTUME PORTRAITS (purchasable in clothing shop) =====
+const COSTUME_PORTRAITS=[
+// 第一档：第1学期开放，无好感度要求
+{id:'crimson_phoenix',name:'凤舞烈焰',desc:'红金色华服，如凤凰涅槃',price:30,img:'costume-crimson-phoenix-20260819033509.png',gender:'any',semester:1,affinityReq:null},
+{id:'moonlit_silver',name:'月华银辉',desc:'黑银配色，月光般清冷',price:32,img:'costume-moonlit-silver-20260819033510.png',gender:'any',semester:1,affinityReq:null},
+{id:'jade_bamboo',name:'翠竹清韵',desc:'绿金配色，竹影婆娑',price:30,img:'costume-jade-bamboo-20260819033511.png',gender:'any',semester:1,affinityReq:null},
+{id:'frost_winter',name:'凝霜傲雪',desc:'白蓝配色，冰清玉洁',price:35,img:'costume-frost-winter-20260819033512.png',gender:'any',semester:1,affinityReq:null},
+{id:'golden_sunset',name:'金霞落日',desc:'金橙配色，晚霞流光',price:30,img:'costume-golden-sunset-20260819033513.png',gender:'any',semester:1,affinityReq:null},
+// 第二档：第2学期开放，需指定NPC好感度>=20
+{id:'tang_imperial',name:'唐宫华裳',desc:'唐制宫廷风，红金雍容',price:50,img:'costume-tang-imperial-female-20260819034500.png',gender:'female',semester:2,affinityReq:{npc:'shen_lan',val:20}},
+{id:'heian_japanese',name:'平安十二单',desc:'日本平安时代，粉樱层叠',price:55,img:'costume-japanese-heian-female-20260819034501.png',gender:'female',semester:2,affinityReq:{npc:'pei_chang',val:20}},
+{id:'korean_hanbok',name:'韩制韩服',desc:'青绿米白，朝鲜风情',price:50,img:'costume-korean-hanbok-female-20260819034502.png',gender:'female',semester:2,affinityReq:{npc:'he_shi',val:20}},
+{id:'vietnamese_aodai',name:'越制奥黛',desc:'蓝银凤纹，越南韵味',price:55,img:'costume-vietnamese-aodai-female-20260819034503.png',gender:'female',semester:2,affinityReq:{npc:'lu_ji',val:20}},
+{id:'ming_porcelain',name:'明制青花',desc:'白蓝相映，青花瓷纹',price:60,img:'costume-ming-porcelain-female-20260819034504.png',gender:'female',semester:2,affinityReq:{npc:'lu_wanju',val:20}},
+// 第三档：第3学期开放，需指定NPC好感度>=40
+{id:'song_ruqun',name:'宋制襦裙',desc:'粉米色系，水墨山水',price:70,img:'costume-song-ruqun-female-20260819034505.png',gender:'female',semester:3,affinityReq:{npc:'shen_lan',val:40}},
+{id:'tibetan',name:'藏式盛装',desc:'松石珊瑚，高原风情',price:75,img:'costume-tibetan-female-20260819034506.png',gender:'female',semester:3,affinityReq:{npc:'qi_yuan',val:40}},
+{id:'weijin_fairy',name:'魏晋风骨',desc:'薰衣草白，仙气飘逸',price:80,img:'costume-weijin-fairy-female-20260819034507.png',gender:'female',semester:3,affinityReq:{npc:'zhuo_yun',val:40}},
+{id:'qinhan_warrior',name:'秦汉武甲',desc:'黑红战甲，将军气概',price:75,img:'costume-qinhan-warrior-male-20260819034508.png',gender:'male',semester:3,affinityReq:{npc:'zhou_zhi',val:40}},
+{id:'tang_warrior_f',name:'唐制女甲',desc:'红金女将甲，双剑英姿',price:80,img:'costume-tang-warrior-female-20260819034509.png',gender:'female',semester:3,affinityReq:{npc:'gu_chang',val:40}}
+];
+
+// Helper: get NPC portrait image HTML
+function getNpcPortraitImg(npcId,size){
+let img=NPC_PORTRAITS[npcId];
+if(img)return '<img src="'+img+'" style="width:'+size+'px;height:'+(size*1.1)+'px;object-fit:cover;border-radius:6px" />';
+return generatePortraitSVG({gender:NPCS[npcId].gender,hair:NPCS[npcId].hair,hairColor:NPCS[npcId].hairColor,eyeColor:NPCS[npcId].eyeColor,outfit:NPCS[npcId].outfit,skin:NPCS[npcId].skin,college:NPCS[npcId].college,size:size});
+}
+
+// Helper: get player portrait image HTML
+function getPlayerPortraitImg(p,size){
+let college=p.college||'wind';
+let gender=p.gender||'male';
+let portraitId=p.portraitId; // custom portrait from costume shop
+if(portraitId){
+let cp=COSTUME_PORTRAITS.find(c=>c.id===portraitId);
+if(cp)return '<img src="'+cp.img+'" style="width:'+size+'px;height:'+(size*1.1)+'px;object-fit:cover;border-radius:6px" />';
+}
+let pp=PLAYER_PORTRAITS[college];
+if(pp){
+let img=pp[gender];
+if(img)return '<img src="'+img+'" style="width:'+size+'px;height:'+(size*1.1)+'px;object-fit:cover;border-radius:6px" />';
+}
+return generatePortraitSVG({gender:gender,hair:p.appearance.hair,hairColor:p.appearance.hairColor,eyeColor:p.appearance.eyeColor,outfit:college,skin:p.appearance.skin,college:college,size:size});
+}
+
+// ===== GAME DATA =====
+const COLLEGES={
+wind:{name:'驰风院',color:'#5dd4d4',badge:'badge-wind',motto:'风不问路，我们也不问',desc:'自由、不羁、像风一样难以预测',scene:'wind_college',lounge:'wind_lounge',loungeName:'风牙厅',ceremony:'第一阵风仪式',ceremonyDesc:'入学第一晚，全体新生在露台上站成一排，闭上眼睛感受吹过来的第一阵风。学长说："记住这个感觉——以后不管你去哪里，风都认识你。"'},
+cloud:{name:'栖云院',color:'#b0c4de',badge:'badge-cloud',motto:'中庸之道，以和为贵',desc:'温和包容，从不主动与人起冲突',scene:'cloud_college',lounge:'cloud_lounge',loungeName:'雾隐厅',ceremony:'添茶之约',ceremonyDesc:'训练后给同院的人沏一盏茶。不说什么，只是把茶放在对方面前。这就是"我在乎你"的表达。'},
+thunder:{name:'鸣雷院',color:'#c77dff',badge:'badge-thunder',motto:'亮起来，哪怕只有一瞬间',desc:'骄傲、炽烈、好胜，永远要站在最高处',scene:'thunder_college',lounge:'thunder_lounge',loungeName:'雷烬厅',ceremony:'雷声契约',ceremonyDesc:'单膝跪在火塘前，院长将荆棘王冠轻轻放在你头顶三秒。院长问："痛吗？"你答："痛。"院长说："记住这个痛。痛的意思是——你还活着，你还能选择。"'},
+rain:{name:'沉雨院',color:'#5b8def',badge:'badge-rain',motto:'深水无波，静流有力',desc:'沉静、深邃、坚韧，永远站在最后面',scene:'rain_college',lounge:'rain_lounge',loungeName:'雨歇厅',ceremony:'静水时刻',ceremonyDesc:'入学第一晚，围坐在冥想池前看自己的倒影。院长说："你们倒映着别人，但你们自己是谁？记住这个时刻。"'}
+};
+
+const ELEMENTS={
+wind:{name:'风',icon:'气',color:'#5dd4d4',counter:'云',strongVs:'云'},
+cloud:{name:'云',icon:'云',color:'#b0c4de',counter:'雷',strongVs:'雷'},
+thunder:{name:'雷',icon:'雷',color:'#c77dff',counter:'雨',strongVs:'雨'},
+rain:{name:'雨',icon:'雨',color:'#5b8def',counter:'风',strongVs:'风'}
+};
+
+const WIND_ORDERS=[
+{name:'一序·轻风境',desc:'掌心产生持续气流，感知一米内风向'},
+{name:'二序·和风境',desc:'气旋可离体存在30秒以上'},
+{name:'三序·清风境',desc:'气旋范围达直径三米'},
+{name:'四序·疾风境',desc:'气旋可推动几十公斤重物'},
+{name:'五序·烈风境',desc:'独立制造气旋核心'},
+{name:'六序·狂风境',desc:'风眼完整成型'},
+{name:'七序·暴风境',desc:'复合天象操控'},
+{name:'八序·飓风境',desc:'创造全新天象，可短暂改写局部物理规则'},
+{name:'九序·超台风境',desc:'触及原初之力，感知完整能量循环'}
+];
+
+const HAIR_STYLES=['short','medium','long','ponytail','bun','spiky'];
+const HAIR_COLORS=['#1a1a2e','#4a3520','#8b4513','#c4a262','#d4af37','#5dd4d4','#c77dff','#b0c4de'];
+const EYE_COLORS=['#1a1a2e','#4a6a8a','#5dd4d4','#c77dff','#d4af37','#52d869','#5b8def'];
+const OUTFITS=['wind','cloud','thunder','rain','casual'];
+const OUTFIT_NAMES={wind:'驰风袍',cloud:'栖云衫',thunder:'鸣雷铠',rain:'沉雨衣',casual:'便装'};
+
+const QUIZ_QUESTIONS=[
+{q:'你在暴风雨来临时，第一反应是什么？',opts:[{text:'冲出去感受风的力量',college:'wind'},{text:'找个安全的地方安静等待',college:'rain'},{text:'兴奋地想要在最前面看到闪电',college:'thunder'},{text:'检查周围是否有人需要帮助',college:'cloud'}]},
+{q:'你最喜欢什么样的天气？',opts:[{text:'狂风大作的日子',college:'wind'},{text:'细雨绵绵的午后',college:'rain'},{text:'雷声轰鸣的夜晚',college:'thunder'},{text:'多云但平静的清晨',college:'cloud'}]},
+{q:'在团队中，你通常扮演什么角色？',opts:[{text:'冲在最前面的探路者',college:'wind'},{text:'默默提供支持的守护者',college:'rain'},{text:'带领大家冲锋的旗手',college:'thunder'},{text:'调解矛盾的润滑剂',college:'cloud'}]},
+{q:'你最看重什么品质？',opts:[{text:'自由和冒险精神',college:'wind'},{text:'坚韧和内心的平静',college:'rain'},{text:'勇气和不屈的意志',college:'thunder'},{text:'善良和包容的胸怀',college:'cloud'}]},
+{q:'面对一道难题，你会？',opts:[{text:'凭直觉快速尝试',college:'wind'},{text:'安静思考很长时间',college:'rain'},{text:'全力以赴攻克它',college:'thunder'},{text:'找人一起讨论解决',college:'cloud'}]},
+{q:'你理想中的修炼场所是？',opts:[{text:'高山之巅，风声呼啸',college:'wind'},{text:'深水之畔，万籁俱寂',college:'rain'},{text:'雷暴中心，电光火石',college:'thunder'},{text:'云雾缭绕的山谷',college:'cloud'}]},
+{q:'如果朋友遇到危险，你会？',opts:[{text:'毫不犹豫冲上去',college:'wind'},{text:'冷静分析后行动',college:'rain'},{text:'全力以赴保护他们',college:'thunder'},{text:'想办法化解危机',college:'cloud'}]}
+];
+
+const NPCS={
+zhou_zhi:{name:'卓峙',college:'thunder',desc:'卓筠之子，鸣雷院完美学生',baseLocation:'鸣雷院·雷烬厅',clubs:['lei_huo','zhui_feng','bian_lun'],defaultAff:0,hair:'short',hairColor:'#1a1a2e',eyeColor:'#c77dff',outfit:'thunder',skin:'#e8d5b7',gender:'male',giftLikes:['雷火疤痕膏','风向标'],giftDislikes:['云雾茶'],subj:'气象格斗'},
+lu_ji:{name:'陆霁',college:'rain',desc:'雨音社社长，沉默的感知天才',baseLocation:'沉雨院·雨音室',clubs:['yu_yin','jing_shui'],defaultAff:5,hair:'medium',hairColor:'#1a1a2e',eyeColor:'#5b8def',outfit:'rain',skin:'#d4c4a8',gender:'male',giftLikes:['雨滴瓶','旧信纸'],giftDislikes:['风干肉'],subj:'穹门学'},
+he_shi:{name:'何拾',college:'wind',desc:'雨音社副社长，驰风院的不合群者',baseLocation:'风痕市集·雨音器材铺',clubs:['yu_yin'],defaultAff:10,hair:'short',hairColor:'#4a3520',eyeColor:'#5dd4d4',outfit:'wind',skin:'#e8d5b7',gender:'male',giftLikes:['风向标','回音砂'],giftDislikes:['静露粉'],subj:'气旋原理'},
+shen_lan:{name:'沈兰言',college:'cloud',desc:'云读会社长兼制香社社长',baseLocation:'栖云院·云廊',clubs:['yun_du','zhi_sha','zhi_xiang'],defaultAff:0,hair:'long',hairColor:'#1a1a2e',eyeColor:'#b0c4de',outfit:'cloud',skin:'#f0d8c0',gender:'female',giftLikes:['云雾茶','雨滴瓶','旧信纸'],giftDislikes:['风干肉'],subj:'风痕史'},
+lu_wanju:{name:'陆晚菊',college:'rain',desc:'气象观测社社长，倔强的孤狼',baseLocation:'沉雨院·冥想池',clubs:['qi_xiang','yun_du'],defaultAff:0,hair:'ponytail',hairColor:'#4a3520',eyeColor:'#5b8def',outfit:'rain',skin:'#d4c4a8',gender:'female',giftLikes:['雨滴瓶','风向标'],giftDislikes:['雷火疤痕膏'],subj:'感知训练'},
+gu_chang:{name:'顾长锋',college:'wind',desc:'追风社王牌，纯粹的速度信徒',baseLocation:'驰风院·风向塔',clubs:['zhui_feng','yuan_zu'],defaultAff:0,hair:'spiky',hairColor:'#c4a262',eyeColor:'#5dd4d4',outfit:'wind',skin:'#e8d5b7',gender:'male',giftLikes:['风向标','风干肉'],giftDislikes:['云雾茶'],subj:'追风竞速'},
+pei_chang:{name:'裴长青',college:'cloud',desc:'气象辩论社社长，逻辑即信仰',baseLocation:'栖云院·大礼堂',clubs:['bian_lun'],defaultAff:0,hair:'short',hairColor:'#1a1a2e',eyeColor:'#b0c4de',outfit:'cloud',skin:'#e8d5b7',gender:'male',giftLikes:['云雾茶','回音砂'],giftDislikes:['风干肉'],subj:'气象辩论'},
+fang_yan:{name:'方岩',college:'none',desc:'风痕市集杂货铺老板，无灵者情报中枢',baseLocation:'风痕市集·杂货铺',clubs:[],defaultAff:5,hair:'short',hairColor:'#4a3520',eyeColor:'#4a6a8a',outfit:'casual',skin:'#c8b896',gender:'male',giftLikes:['风干肉','面包'],giftDislikes:['雷火疤痕膏'],subj:'无'},
+zhuo_yun:{name:'卓筠',college:'thunder',desc:'守旧派领袖，议会议长',baseLocation:'圣所主楼·议事厅',clubs:['bian_lun'],defaultAff:0,hair:'short',hairColor:'#8b4513',eyeColor:'#c77dff',outfit:'thunder',skin:'#d4c4a8',gender:'male',giftLikes:['雷火疤痕膏'],giftDislikes:['云雾茶'],subj:'高阶气旋'},
+qi_yuan:{name:'齐远',college:'wind',desc:'穹霄圣所校长，神秘的归风者',baseLocation:'圣所主楼·校长室',clubs:[],defaultAff:0,hair:'long',hairColor:'#c4a262',eyeColor:'#5dd4d4',outfit:'wind',skin:'#e8d5b7',gender:'male',giftLikes:['风向标','旧信纸'],giftDislikes:['静露粉'],subj:'论文导论'}
+};
+
+const CLUBS_DATA={
+yun_du:{name:'云读会',college:'cloud',restrict:'cloud_only',difficulty:'极低',apCost:1,credits:1,desc:'躺草坪看云，期末写200字就能过。栖云院的传统社团。',members:23,president:'shen_lan',vice:null,effects:{credits:1,stress:-5,charisma:2}},
+zhi_sha:{name:'纸莎草社',college:'cloud',restrict:'cloud_only',difficulty:'极低',apCost:1,credits:1,desc:'写一封信就能拿学分。',members:18,president:'shen_lan',vice:null,effects:{credits:1,stress:-3}},
+jing_shui:{name:'静水社',college:'rain',restrict:'rain_only',difficulty:'极低',apCost:1,credits:1,desc:'来坐够次数就行。沉雨院的入门社团。',members:15,president:null,vice:'lu_ji',effects:{credits:1,stress:-8,perception:1}},
+shi_ji:{name:'风痕市集巡查社',college:'none',restrict:'any',difficulty:'低',apCost:1,credits:2,desc:'帮店铺干活就能拿学分。跨院社团。',members:30,president:'fang_yan',vice:null,effects:{credits:2,windGold:10,charisma:3}},
+shuang_yu:{name:'霜余树养护社',college:'rain',restrict:'any',difficulty:'低',apCost:1,credits:1,desc:'每周浇水扫地。',members:12,president:null,vice:null,effects:{credits:1,stress:-3}},
+qi_xiang:{name:'气象观测社',college:'cloud',restrict:'any',difficulty:'中等',apCost:1,credits:2,desc:'提交连续观测记录。',members:20,president:'lu_wanju',vice:null,effects:{credits:2,perception:3,knowledge:3}},
+xing_xiang:{name:'星象社',college:'cloud',restrict:'any',difficulty:'中等',apCost:1,credits:2,desc:'熬夜观星记录。浪漫但伤身。',members:14,president:null,vice:null,effects:{credits:2,perception:2,knowledge:2,stress:5}},
+zhi_xiang:{name:'制香社',college:'cloud',restrict:'any',difficulty:'中等',apCost:1,credits:2,desc:'制作一根线香并点燃。沈兰言的领域。',members:16,president:'shen_lan',vice:null,effects:{credits:2,knowledge:3,stress:-2}},
+bian_lun:{name:'气象辩论社',college:'cloud',restrict:'any',difficulty:'中等',apCost:1,credits:2,desc:'参加辩论并担任主辩手。',members:25,president:'pei_chang',vice:'zhou_zhi',effects:{credits:2,knowledge:4,charisma:3}},
+yuan_zu:{name:'远足勘探社',college:'wind',restrict:'any',difficulty:'中等偏难',apCost:2,credits:3,desc:'参加远足并提交路线记录。',members:18,president:null,vice:'gu_chang',effects:{credits:3,stamina:5,knowledge:4,stress:8}},
+yi_shu:{name:'气象艺术社',college:'none',restrict:'any',difficulty:'中等',apCost:1,credits:2,desc:'用气象元素创作艺术作品。',members:16,president:null,vice:null,effects:{credits:2,charisma:4,stress:-5}},
+lei_huo:{name:'雷火演练社',college:'thunder',restrict:'thunder_only',difficulty:'中等偏难',apCost:1,credits:2,desc:'鸣雷院实战训练社团。',members:20,president:'zhou_zhi',vice:null,effects:{credits:2,combat:5,stress:6}},
+zhui_feng:{name:'追风社',college:'wind',restrict:'any',difficulty:'中等偏难',apCost:1,credits:2,desc:'追风竞速训练。顾长锋的地盘。',members:22,president:null,vice:'gu_chang',effects:{credits:2,combat:2,stamina:3,windOrderExp:8}},
+yun_yin:{name:'雨音社',college:'rain',restrict:'any',difficulty:'中等',apCost:1,credits:2,desc:'用雨铃创作音乐。陆霁的领域。',members:18,president:'lu_ji',vice:'he_shi',effects:{credits:2,perception:4,stress:-6}},
+};
+
+const SPIRITS={
+wind:{name:'风精灵',icon:'风',rarity:'常见',ability:'送信、感知风向',desc:'半透明的银白色小鸟',color:'#5dd4d4',price:20},
+cloud:{name:'云精灵',icon:'云',rarity:'较常见',ability:'记录视觉信息、净化空气',desc:'蓬松的白色团状物',color:'#b0c4de',price:25},
+rain:{name:'雨精灵',icon:'雨',rarity:'较罕见',ability:'调节湿度、治愈脱水',desc:'蓝色水滴形',color:'#5b8def',price:35},
+thunder:{name:'雷精灵',icon:'雷',rarity:'罕见',ability:'充能、预警雷暴',desc:'金紫色光点',color:'#c77dff',price:50},
+frost:{name:'霜精灵',icon:'霜',rarity:'很罕见',ability:'制冷、保存药材',desc:'淡蓝色六角形冰晶',color:'#a0d8ef',price:60},
+fog:{name:'雾精灵',icon:'雾',rarity:'极罕见',ability:'隐匿、制造幻象',desc:'灰白色薄雾状',color:'#888',price:80}
+};
+
+const FESTIVALS=[
+{name:'风息节',month:2,scene:'fest_wind',desc:'纪念风神诞生。全校停课，日出时面朝东方站立。',effects:{stress:-15,charisma:3},activities:['面朝东方迎接日出','和同学一起放风船']},
+{name:'惊雷大典',month:4,scene:'fest_thunder',desc:'纪念雷神诞生。全国比武大会"雷音擂"。',effects:{combat:5,stress:-10},activities:['参加雷音擂比武','观看学长学姐对决']},
+{name:'落雨节',month:6,scene:'fest_rain',desc:'纪念雨神诞生。全民听雨，雨音晚会。',effects:{perception:5,stress:-15},activities:['参加雨音晚会','在雨中漫步']},
+{name:'四神祭',month:6,scene:'fest_fourgod',desc:'四学院交换学生，四味宴。',effects:{charisma:5,stress:-10},activities:['参加四味宴','和交换生交流']},
+{name:'虹桥节',month:8,scene:'fest_rainbow',desc:'纪念彩和虹。人工彩虹横跨市集。',effects:{charisma:3,stress:-8,windGold:20},activities:['和恋人一起走虹桥','在市集看彩虹']},
+{name:'云开日',month:10,scene:'fest_cloudopen',desc:'纪念云神诞生。全民观云。',effects:{perception:5,knowledge:3,stress:-10},activities:['观云比赛','云朵雕塑']},
+{name:'穹门日',month:10,scene:'fest_gate',desc:'纪念穹门出现。列队走向穹门大厅。',effects:{knowledge:8,stress:-5},activities:['列队走向穹门','听校长讲述穹门历史']},
+{name:'静风日',month:12,scene:'fest_stillwind',desc:'纪念消散的毕业生。全圣所静默一天。',effects:{perception:8,stress:-15},activities:['静默纪念','在霜余树下放置花环']},
+{name:'初雪祭',month:12,scene:'fest_snow',desc:'纪念发明雪的"白"。无声的雪覆盖沉雨院。',effects:{perception:8,stress:-10,knowledge:5},activities:['在雪中漫步','堆气象雪人']}
+];
+
+const MONTHS=[
+{name:'风月',season:'wind',color:'#1a2a2a',particle:'leaf',icon:'叶'},
+{name:'风息月',season:'wind',color:'#1a2a2a',particle:'petal',icon:'花'},
+{name:'雷月',season:'thunder',color:'#2a1a2a',particle:'spark',icon:'闪'},
+{name:'惊雷月',season:'thunder',color:'#2a1a2a',particle:'spark',icon:'震'},
+{name:'云月',season:'cloud',color:'#1a1a2a',particle:'cloud',icon:'云'},
+{name:'雨月',season:'rain',color:'#1a2a3a',particle:'rain',icon:'滴'},
+{name:'晴月',season:'cloud',color:'#1a2a2a',particle:'dust',icon:'光'},
+{name:'虹月',season:'cloud',color:'#2a2a1a',particle:'light',icon:'虹'},
+{name:'霜月',season:'rain',color:'#1a2a3a',particle:'frost',icon:'霜'},
+{name:'云开月',season:'cloud',color:'#1a1a2a',particle:'cloud',icon:'开'},
+{name:'雪月',season:'rain',color:'#1a2a3a',particle:'snow',icon:'雪'},
+{name:'静风月',season:'wind',color:'#1a1a1a',particle:'ash',icon:'静'}
+];
+
+const DAY_PHASES=[{name:'黎明',color:'rgba(255,180,80,.15)',icon:'晨'},{name:'白昼',color:'rgba(255,255,200,.06)',icon:'昼'},{name:'黄昏',color:'rgba(255,120,60,.2)',icon:'昏'},{name:'黑夜',color:'rgba(5,5,25,.55)',icon:'夜'}];
+
+const EXCURSIONS=[
+{semester:1,name:'飞廉风廊',scene:'exc_1a',desc:'新生第一次外出，风痕市集边缘的风廊。',effects:{knowledge:5,perception:3,stress:5}},
+{semester:2,name:'彩虹谷',scene:'exc_1s',desc:'彩的彩虹论文留下的彩色岩层山谷。',effects:{knowledge:8,charisma:3,stress:-5}},
+{semester:3,name:'铁棘峡谷',scene:'exc_2a',desc:'铁棘的冰雹论文留下的冰蚀峡谷。',effects:{knowledge:10,combat:3,stress:8}},
+{semester:4,name:'白脊山脉',scene:'exc_2s',desc:'白的雪论文留下的雪山。',effects:{knowledge:12,perception:5,stamina:5,stress:10}},
+{semester:5,name:'因陀罗雨林',scene:'exc_3a',desc:'持续降雨论文留下的雨林。',effects:{knowledge:15,perception:8,stress:10}},
+{semester:6,name:'盐潮墟',scene:'exc_3s',desc:'远古毕业生留下的干涸盐湖。',effects:{knowledge:18,perception:5,stamina:8,stress:12}},
+{semester:7,name:'索尔高原',scene:'exc_4a',desc:'鸣雷的雷暴论文留下的极光区。',effects:{knowledge:20,perception:10,combat:5,stress:15}},
+{semester:8,name:'狂欢之夜',scene:'exc_4s',desc:'毕业典礼结束当晚，风痕市集全域。',effects:{charisma:20,stress:-30}}
+];
+
+const EXAM_REQS=[
+{semester:1,name:'新生大清洗',minKnowledge:25,minHomework:3,minClass:5,minCredits:2,desc:'气象原理+气旋基础+感知测试'},
+{semester:2,name:'基础巩固',minKnowledge:40,minHomework:4,minClass:6,minCredits:3,desc:'气旋控制+理论综合+体能'},
+{semester:3,name:'实战初筛',minKnowledge:60,minHomework:5,minClass:7,minCredits:3,desc:'气象格斗+选修展示+压力测试'},
+{semester:4,name:'复合入门',minKnowledge:80,minHomework:6,minClass:8,minCredits:4,desc:'复合气象+远足报告+三序中段'},
+{semester:5,name:'团队拓展',minKnowledge:110,minHomework:7,minClass:9,minCredits:4,desc:'组队对抗+选修进阶+高阶理论'},
+{semester:6,name:'深度积累',minKnowledge:140,minHomework:8,minClass:10,minCredits:4,desc:'100米气旋+论文选题+四序中段'},
+{semester:7,name:'论文开题',minKnowledge:175,minHomework:9,minClass:12,minCredits:3,desc:'开题报告+方案答辩+四序巅峰'},
+{semester:8,name:'论文执行',minKnowledge:210,minHomework:10,minClass:14,minCredits:2,desc:'最终评审+毕业预演+论文执行'}
+];
+
+const FACTIONS={
+guifeng:{name:'归风者',motto:'我们不是叛逆者。我们只是记住了——风从哪里来。',desc:'知晓地球真相的地下组织，目标是公开真相。',color:'#5dd4d4'},
+shoumi:{name:'守密人',motto:'不是所有真相都该被知道。',desc:'替议会抹消不该被知道的信息。',color:'#c77dff'},
+xinwu:{name:'信物守护者',motto:'信物不是工具。信物是记忆。',desc:'四院院长单线指定的秘密守护者。',color:'#d4af37'}
+};
+
+const TRUTH_FRAGMENTS=[
+{id:1,title:'论文的本质',desc:'毕业论文不是学术研究，是往地球送天象。每一次毕业论文执行，地球上就会多出一种非自然天气。',triggerSemester:2},
+{id:2,title:'消散的真相',desc:'毕业生执行论文后不会回到长风界。他们的气核能量在执行过程中耗尽，意识消散。这就是消散。',triggerSemester:3},
+{id:3,title:'地球的反制',desc:'地球并非被动承受。大气抗体、人类技术干扰、共鸣反噬——三层反制体系正在侵蚀穹门的连接。',triggerSemester:4},
+{id:4,title:'风金萎缩',desc:'风金矿脉的分布正在萎缩。这与气核消散导致长风界总能量减少有关。',triggerSemester:5},
+{id:5,title:'苍瞳护盾',desc:'苍瞳核心区的稳定靠毕业生消散时释放的能量形成的防护场。',triggerSemester:6},
+{id:6,title:'穹门密约',desc:'上古失衡战争后签订《穹门密约》，永久限制论文规模。',triggerSemester:7},
+{id:7,title:'四神预言',desc:'四神隐退前留下预言——一个来自穹门另一侧的人将打破循环，让风从地球那边吹回来。',triggerSemester:7}
+];
+
+const COURSES=[
+{id:'wind_history',name:'风痕史',desc:'讲述穹霄圣所的历史、四神传说、毕业论文的创造由来、节日的由来等',knowledgeGain:5,homeworkType:'essay',content:'今日讲授：四神创世——驰（风）、栖（云）、鸣（雷）、沉（雨）四位神灵从虚无中醒来，用气核创造天气。风神驰最先睁眼，他呼出的第一口气形成了风。之后栖凝聚了云，鸣发出了雷，沉降下了雨。四神隐退后，气核孕育了生命。'},
+{id:'cyclone_basics',name:'气旋原理',desc:'学习基础气旋控制、气核能量循环、气象物理法则',knowledgeGain:5,homeworkType:'practice',content:'今日讲授：气旋的本质——气旋是气核能量的可视化表现。一序轻风境的修行者只能掌心产风，二序可以离体，三序范围达三米。气旋维持的关键是"风眼"——没有风眼，气旋只会散开。'},
+{id:'perception_training',name:'感知训练',desc:'提升对风向、气压、湿度的感知能力',knowledgeGain:6,homeworkType:'practice',content:'今日讲授：感知的层次——初学者只能感知一米内的风向。进阶者能感知气压变化、湿度梯度。高阶者能"听见"风的语言——风在告诉你它从哪里来，要到哪里去。'},
+{id:'weather_creation',name:'天气创造原理',desc:'学习如何从气核中提取能量创造天气现象',knowledgeGain:7,homeworkType:'essay',content:'今日讲授：天气的本质——天气不是自然现象，是被创造出来的。每一次天气创造都需要消耗气核能量。这就是为什么毕业论文执行后学生会消散——他们的气核被完全消耗了。'},
+{id:'combat_theory',name:'气象格斗',desc:'四系元素克制关系、战斗技巧、气旋攻防',knowledgeGain:6,homeworkType:'combat',content:'今日讲授：四系克制——风克云（风吹散云）、云克雷（云层阻隔雷电）、雷克雨（雷电蒸发雨水）、雨克风（雨水压制风力）。战斗时选择克制对手的元素是制胜关键。受伤后需要对应元素的治疗药剂。'},
+{id:'complex_weather',name:'复合气象',desc:'学习创造复合天象、多元素协同',knowledgeGain:8,homeworkType:'essay',content:'今日讲授：复合天象——单一元素只能创造简单天气。复合天象需要多种元素协同：风+水=暴风雨，雷+水=雷暴雨，风+雷=雷暴。复合天象消耗的能量是单元素的3-5倍。'},
+{id:'thesis_prep',name:'论文导论',desc:'毕业论文制度详解、选题方法、安全规范',knowledgeGain:8,homeworkType:'essay',content:'今日讲授：论文制度——毕业论文不是学术研究，是往地球送天象。选题方向必须包含：创造什么气象、初步构思、预期效果。方案需要通过审核（创新性、可行性、安全性）。被驳回是常态，有人改了三百多次。'},
+{id:'advanced_cyclone',name:'高阶气旋',desc:'风眼构造、气旋维持、能量效率优化',knowledgeGain:7,homeworkType:'practice',content:'今日讲授：风眼成型——五序烈风境的标志是独立制造气旋核心。风眼是气旋的中心，它必须是静止的——越是外围狂暴，中心越要平静。这就是"风眼"的哲学。'},
+{id:'earth_connection',name:'穹门学',desc:'穹门结构、地球关联、能量传输原理',knowledgeGain:10,homeworkType:'essay',content:'今日讲授：穹门——穹门是连接长风界与地球的通道。穹门历元年为公元前3000年。能量通过穹门传输到地球，化为天气。穹门正在衰弱——裂纹越来越多，这可能与地球的反制体系有关。'},
+{id:'thesis_seminar',name:'论文研讨',desc:'分析历史毕业论文案例、评审标准、创新方向',knowledgeGain:10,homeworkType:'essay',content:'今日讲授：案例分析——彩虹谷是"彩"的彩虹论文留下的。铁棘峡谷是铁棘的冰雹论文留下的。每一个远足地点都是一篇被执行的毕业论文的痕迹。你的论文也会留下痕迹。'}
+];
+
+const JOBS=[
+{id:'market_patrol',name:'市集巡查帮工',desc:'帮风痕市集的店铺搬运货物、打扫卫生。体力活，但报酬稳定。',reward:15,reqAttr:'stamina',reqVal:5,diceTarget:7,scene:'market'},
+{id:'herb_sort',name:'药材铺帮工',desc:'帮药材铺分拣、晾晒药材。需要一定的知识基础。',reward:22,reqAttr:'knowledge',reqVal:8,diceTarget:9,scene:'medicine_shop'},
+{id:'bread_bake',name:'面包铺帮工',desc:'帮面包铺揉面、烤面包。体力消耗大但门槛低。',reward:12,reqAttr:'stamina',reqVal:4,diceTarget:6,scene:'bread_shop'},
+{id:'book_organize',name:'旧书铺整理',desc:'帮旧书铺整理书籍、修复旧笔记。需要细心。',reward:18,reqAttr:'perception',reqVal:6,diceTarget:8,scene:'book_shop'},
+{id:'grocery_help',name:'杂货铺帮工',desc:'帮方岩的杂货铺进货、盘点。需要和人打交道。',reward:16,reqAttr:'charisma',reqVal:5,diceTarget:7,scene:'grocery_shop'}
+];
+
+const GIFTS=[
+{name:'云雾茶',price:15,desc:'栖云院特产，温和清香',npcBoost:{shen_lan:12,pei_chang:8,lu_ji:5}},
+{name:'风向标',price:15,desc:'精密的风向仪器',npcBoost:{gu_chang:12,he_shi:10,qi_yuan:8}},
+{name:'雨滴瓶',price:25,desc:'封装雨音的玻璃瓶',npcBoost:{lu_ji:12,lu_wanju:10,shen_lan:8}},
+{name:'旧信纸',price:10,desc:'风痕市集旧书铺的旧信纸',npcBoost:{qi_yuan:10,shen_lan:8,lu_ji:6}},
+{name:'风干肉',price:8,desc:'市集最受欢迎的零食',npcBoost:{gu_chang:10,fang_yan:12,zhou_zhi:5}},
+{name:'回音砂',price:15,desc:'能记录声音的特殊沙粒',npcBoost:{pei_chang:10,he_shi:8}},
+{name:'雷火疤痕膏',price:25,desc:'雷系伤害专用药膏',npcBoost:{zhou_zhi:12,zhuo_yun:10}},
+{name:'静露粉',price:15,desc:'安神静心的粉末',npcBoost:{shen_lan:6,lu_ji:8}},
+{name:'面包',price:5,desc:'面包铺的新鲜面包',npcBoost:{fang_yan:10,gu_chang:5}},
+{name:'风精笼',price:30,desc:'风精坊的精致风精笼',npcBoost:{he_shi:8,gu_chang:6}}
+];
+
+// Foods with SEASONAL availability
+const FOODS=[
+{name:'云絮糕',price:5,effect:{stamina:3,stress:-3},weather:'any',seasons:['wind','cloud','thunder','rain'],desc:'蓬松如云的糕点'},
+{name:'风干肉',price:8,effect:{stamina:5,hp:10},weather:'wind',seasons:['wind'],desc:'驰风院的风干肉干'},
+{name:'雷火面',price:10,effect:{stamina:6,combat:2},weather:'thunder',seasons:['thunder'],desc:'辣到冒雷火的面'},
+{name:'雨露茶',price:6,effect:{stamina:2,stress:-5,perception:1},weather:'rain',seasons:['rain'],desc:'沉雨院的雨露茶'},
+{name:'云吞汤',price:7,effect:{stamina:4,hp:5,stress:-2},weather:'cloud',seasons:['cloud'],desc:'栖云院的云吞汤'},
+{name:'霜饼',price:9,effect:{stamina:5,stress:-4,hp:8},weather:'any',seasons:['rain'],desc:'霜月限定的冰脆饼'},
+{name:'彩虹糖',price:12,effect:{stamina:4,charisma:3,stress:-6},weather:'any',seasons:['cloud'],desc:'虹桥节特制的彩色糖果'},
+{name:'静风粥',price:8,effect:{stamina:3,stress:-8,perception:2},weather:'any',seasons:['wind'],desc:'静风月的安神粥'},
+{name:'春芽饼',price:7,effect:{stamina:4,stress:-3,perception:2},weather:'any',seasons:['wind'],desc:'风月特供的嫩叶饼'},
+{name:'夏凉糕',price:6,effect:{stamina:3,stress:-6},weather:'any',seasons:['thunder'],desc:'雷月解暑的凉糕'},
+{name:'秋叶酥',price:8,effect:{stamina:4,knowledge:2},weather:'any',seasons:['wind','cloud'],desc:'秋季落叶时节的酥饼'},
+{name:'冬暖汤',price:9,effect:{stamina:5,hp:15,stress:-5},weather:'any',seasons:['rain'],desc:'雪月暖身的浓汤'}
+];
+
+const MEDICINES=[
+{name:'风伤膏',price:15,effect:{hp:20},desc:'治疗风系伤害',healsElement:'wind'},
+{name:'云灵散',price:15,effect:{hp:20},desc:'治疗云系伤害',healsElement:'cloud'},
+{name:'雷火疤痕膏',price:25,effect:{hp:25,combat:2},desc:'治疗雷系伤害',healsElement:'thunder'},
+{name:'雨露丹',price:18,effect:{hp:22},desc:'治疗雨系伤害',healsElement:'rain'},
+{name:'静露粉',price:15,effect:{stress:-15},desc:'安神静心',healsElement:'stress'},
+{name:'复写芯',price:30,effect:{windPen:3},desc:'补充3支风痕笔',healsElement:'pen'}
+];
+
+// CANTEEN - daily menu based on weather/season
+const CANTEEN_MENU={
+wind:[
+{name:'旋风沙拉',price:5,effect:{stamina:3,stress:-2},desc:'清爽的蔬菜沙拉，配风干肉碎'},
+{name:'疾风炒面',price:8,effect:{stamina:6,combat:1},desc:'快速翻炒的劲道面条'},
+{name:'风息清汤',price:4,effect:{stamina:2,stress:-4,hp:5},desc:'清淡的汤，喝完整个人都静下来了'}
+],
+cloud:[
+{name:'云朵蒸蛋',price:5,effect:{stamina:3,perception:1},desc:'像云一样蓬松的蒸蛋'},
+{name:'雾隐炖菜',price:8,effect:{stamina:5,stress:-3},desc:'多种蔬菜慢炖，味道温和'},
+{name:'云吞小笼',price:7,effect:{stamina:4,hp:3},desc:'皮薄馅多，一口一个'}
+],
+thunder:[
+{name:'雷电炒饭',price:8,effect:{stamina:6,combat:2},desc:'辣椒爆炒，吃完浑身发热'},
+{name:'雷火麻辣烫',price:10,effect:{stamina:7,stress:5,combat:3},desc:'又麻又辣，挑战你的极限'},
+{name:'雷鸣炸物',price:6,effect:{stamina:4,stress:-1},desc:'酥脆的炸物，像雷声一样响亮'}
+],
+rain:[
+{name:'雨滴汤圆',price:5,effect:{stamina:3,stress:-4},desc:'软糯的汤圆，雨中吃最有味道'},
+{name:'雨幕粥品',price:6,effect:{stamina:4,hp:8,stress:-3},desc:'温润的粥，暖身又暖心'},
+{name:'沉雨炖汤',price:9,effect:{stamina:5,perception:2,stress:-5},desc:'长时间熬制的浓汤，营养满满'}
+]
+};
+
+const LOVE_THRESHOLDS=[10,20,30,40,50,60,70,80,90,100];
+const LOVE_EVENTS={
+10:{title:'初次心动',desc:'你注意到{name}今天的样子有些不同。心跳莫名加速了一拍。',choices:[{text:'主动找话题聊天',effects:{aff:5,romanceUp:true},style:'love'},{text:'假装没注意到',effects:{aff:2},style:''}],canBreak:false},
+20:{title:'暧昧的距离',desc:'和{name}独处时，空气似乎变得微妙。你们的距离不知不觉近了很多。',choices:[{text:'试探性地表达心意',effects:{aff:5,romanceUp:true},style:'love',reqCharisma:8},{text:'保持朋友关系',effects:{aff:1},style:''}],canBreak:false},
+30:{title:'告白的机会',desc:'{name}在霜余树下等你，夕阳从树叶间洒下来。"我有话想对你说。"',choices:[{text:'告白——我喜欢你',effects:{aff:10,becomesLovers:true},style:'love',reqCharisma:12},{text:'说"我也想和你说点什么"',effects:{aff:5,romanceUp:true},style:'love'},{text:'岔开话题',effects:{aff:0,breakRomance:true},style:'danger'}],canBreak:true},
+40:{title:'第一次约会',desc:'{name}提议一起去风痕市集逛逛。"就我们两个。"',choices:[{text:'欣然答应',effects:{aff:8},style:'love'},{text:'叫上朋友一起',effects:{aff:-5,breakRomance:true},style:'danger'}],canBreak:true},
+50:{title:'甜蜜日常',desc:'你们的关系已经不是秘密了。{name}开始每天给你带早餐。',choices:[{text:'也给对方准备惊喜',effects:{aff:8},style:'love'},{text:'享受被照顾的感觉',effects:{aff:3},style:''}],canBreak:false},
+60:{title:'深入交心',desc:'{name}告诉你一个从未对别人说过的秘密。"你是第一个知道的人。"',choices:[{text:'也分享你的秘密',effects:{aff:10},style:'love'},{text:'安静地倾听',effects:{aff:5},style:''}],canBreak:false},
+70:{title:'矛盾与选择',desc:'因为一次误会，{name}生气了。"你根本不理解我！"',choices:[{text:'主动道歉并解释',effects:{aff:8},style:'love',reqCharisma:15},{text:'等对方冷静再说',effects:{aff:0},style:''},{text:'觉得无理取闹',effects:{aff:-10,breakRomance:true},style:'danger'}],canBreak:true},
+80:{title:'风雨同舟',desc:'{name}在训练中受伤了。你守在医务室一整夜。',choices:[{text:'一直陪在身边',effects:{aff:10},style:'love'},{text:'帮忙买药送饭',effects:{aff:5},style:''}],canBreak:false},
+90:{title:'心心相印',desc:'你们已经不需要语言就能理解对方。{name}看着你的眼神，像看着整个世界。',choices:[{text:'许下承诺',effects:{aff:10},style:'love'},{text:'享受当下的每一刻',effects:{aff:5},style:''}],canBreak:false},
+100:{title:'永恒之约',desc:'{name}在虹桥节的人工彩虹下单膝跪地。"不管风把吹到哪里，我想和你在一起。"',choices:[{text:'我愿意',effects:{aff:0,married:true},style:'love'},{text:'我愿意',effects:{aff:0,married:true},style:'love'}],canBreak:false}
+};
+
+const COMPETITIONS=[
+{id:'race',name:'追风竞速赛',desc:'气旋板竞速，比拼速度与控制力',scene:'race_track',semester:'every',calc:(p)=>p.combat*2+p.stamina+p.windOrder*5+rand(0,20)},
+{id:'combat_tourney',name:'气象格斗大赛',desc:'四系元素对战锦标赛',scene:'thunder_college',semester:'even',calc:(p)=>p.combat*3+p.windOrder*4+rand(0,20)},
+{id:'perception_contest',name:'感知挑战赛',desc:'在复杂气象中寻找目标',scene:'rain_college',semester:'odd',calc:(p)=>p.perception*3+p.windOrder*3+rand(0,15)},
+{id:'knowledge_debate',name:'气象知识辩论赛',desc:'关于气象理论的辩论比赛',scene:'cloud_college',semester:'every',calc:(p)=>p.knowledge*2+p.charisma*2+rand(0,15)},
+{id:'craft_contest',name:'气旋工艺赛',desc:'用气旋创造艺术品',scene:'market',semester:'even',calc:(p)=>p.perception*2+p.charisma*2+p.windOrder*3+rand(0,15)}
+];
+
+const RANDOM_EVENTS=[
+{type:'good',title:'走廊偶遇',desc:'你在走廊上遇到了一个同学，对方热情地和你打招呼。',choices:[{text:'热情回应',effects:{charisma:2,stress:-3}},{text:'点头示意',effects:{charisma:1}}]},
+{type:'good',title:'图书馆发现',desc:'在图书馆翻书时，你发现了一本夹着旧笔记的书。',choices:[{text:'仔细阅读',effects:{knowledge:4,perception:1}},{text:'交给管理员',effects:{charisma:3,windGold:5}}]},
+{type:'bad',title:'训练受伤',desc:'训练时你不小心扭伤了脚踝。',choices:[{text:'去药材铺买药',effects:{hp:-10,windGold:-15}},{text:'硬撑过去',effects:{hp:-20,stress:5}}]},
+{type:'neutral',title:'风精送信',desc:'一只风精停在你肩上，叼着一封匿名信。',choices:[{text:'打开阅读',effects:{perception:3}},{text:'放它走',effects:{stress:-2}}]},
+{type:'good',title:'食堂惊喜',desc:'食堂今天做了限量云絮糕！',choices:[{text:'抢到一份',effects:{stamina:5,stress:-5}},{text:'让别人先吃',effects:{charisma:3}}]},
+{type:'bad',title:'压力爆发',desc:'最近学业压力大，你感到喘不过气。',choices:[{text:'去霜余树下坐坐',effects:{stress:-10,perception:1}},{text:'继续硬撑',effects:{stress:10,hp:-5}}]},
+{type:'neutral',title:'旧书铺打折',desc:'旧书铺今天全场八折！',choices:[{text:'去看看',effects:{windGold:-10,knowledge:5}},{text:'下次再说',effects:{}}]},
+{type:'love',title:'心跳加速',desc:'你在路上和某个特别的人擦肩而过，心跳莫名加速。',choices:[{text:'回头看一眼',effects:{charisma:2}},{text:'加快脚步',effects:{stress:-1}}]},
+{type:'good',title:'灵感涌现',desc:'冥想时突然对气旋有了新的理解。',choices:[{text:'立刻记录下来',effects:{knowledge:3,windOrderExp:5}},{text:'记住就好',effects:{knowledge:1}}]},
+{type:'neutral',title:'天气突变',desc:'窗外突然下起了大雨，气压急剧变化。',choices:[{text:'感受气压变化',effects:{perception:3}},{text:'关窗继续休息',effects:{stress:-3}}]},
+{type:'bad',title:'钱包丢失',desc:'你发现钱包不见了！',choices:[{text:'原路返回寻找',effects:{windGold:-10,stress:5}},{text:'自认倒霉',effects:{windGold:-20}}]},
+{type:'good',title:'精灵亲近',desc:'一只野生精灵主动靠近你。',choices:[{text:'尝试驯服',effects:{spirit:'wind'}},{text:'给它食物',effects:{windGold:-5,charisma:2}}]}
+];
+
+// ===== SVG PORTRAIT =====
+function generatePortraitSVG(opts){
+let{gender,hair,hairColor,eyeColor,outfit,skin,college,size=100}=opts;
+if(!skin)skin=gender==='female'?'#f0d8c0':'#e8d5b7';
+let cc=college?COLLEGES[college].color:'#4a6a8a';
+let w=size,h=size*1.15;
+let hp={
+short:'<path d="M28,30 Q50,16 72,30 L74,38 Q72,33 67,31 L33,31 Q28,33 26,38 Z" fill="'+hairColor+'"/><path d="M30,30 Q40,22 50,24 L50,28 Q42,26 32,32 Z" fill="'+hairColor+'" opacity="0.7"/>',
+medium:'<path d="M26,28 Q50,14 74,28 L76,50 Q74,44 70,42 L30,42 Q26,44 24,50 Z M24,50 L22,72 L28,70 L30,48 Z M76,50 L78,72 L72,70 L70,48 Z" fill="'+hairColor+'"/>',
+long:'<path d="M24,26 Q50,10 76,26 L78,54 Q76,48 72,46 L28,46 Q24,48 22,54 Z M22,54 L20,82 L28,80 L30,52 Z M78,54 L80,82 L72,80 L70,52 Z" fill="'+hairColor+'"/>',
+ponytail:'<path d="M28,28 Q50,14 72,28 L74,40 Q72,36 68,34 L32,34 Q28,36 26,40 Z" fill="'+hairColor+'"/><path d="M72,33 Q82,38 80,62 L76,60 Q78,46 70,38 Z" fill="'+hairColor+'"/>',
+bun:'<path d="M30,30 Q50,16 70,30 L72,38 Q70,33 65,31 L35,31 Q30,33 28,38 Z" fill="'+hairColor+'"/><circle cx="50" cy="20" r="9" fill="'+hairColor+'"/><circle cx="50" cy="20" r="6" fill="'+hairColor+'" opacity="0.7"/>',
+spiky:'<path d="M28,32 L33,18 L38,28 L43,16 L48,26 L53,16 L58,28 L63,18 L68,28 L72,32 L74,40 Q70,35 65,33 L35,33 Q30,35 26,40 Z" fill="'+hairColor+'"/>'
+};
+let op={
+wind:'<path d="M28,84 Q50,75 72,84 L78,100 L22,100 Z" fill="'+cc+'" opacity="0.85"/><path d="M42,82 Q50,78 58,82 L56,90 L44,90 Z" fill="rgba(255,255,255,0.12)"/><path d="M40,84 L50,80 L60,84" stroke="rgba(255,255,255,0.3)" stroke-width="1.5" fill="none"/><path d="M48,80 L50,95 L52,80" stroke="'+hairColor+'" stroke-width="1" fill="none" opacity="0.4"/>',
+cloud:'<path d="M26,84 Q50,76 74,84 L76,100 L24,100 Z" fill="'+cc+'" opacity="0.8"/><path d="M38,84 Q50,81 62,84 L60,92 L40,92 Z" fill="rgba(255,255,255,0.15)"/><circle cx="50" cy="88" r="2" fill="rgba(255,255,255,0.4)"/>',
+thunder:'<path d="M26,82 Q50,72 74,82 L78,100 L22,100 Z" fill="'+cc+'" opacity="0.9"/><path d="M40,80 L50,75 L60,80 L50,88 Z" fill="rgba(212,175,55,0.2)"/><circle cx="50" cy="82" r="2" fill="#d4af37"/><path d="M44,82 L56,82" stroke="#d4af37" stroke-width="1" fill="none"/>',
+rain:'<path d="M26,84 Q50,75 74,84 L76,100 L24,100 Z" fill="'+cc+'" opacity="0.85"/><path d="M30,88 Q50,82 70,88 L70,100 L30,100 Z" fill="rgba(0,0,0,0.12)"/><path d="M40,86 Q50,83 60,86" stroke="rgba(255,255,255,0.15)" stroke-width="1" fill="none"/>',
+casual:'<path d="M28,84 Q50,77 72,84 L74,100 L26,100 Z" fill="#3a4a5a" opacity="0.75"/>'
+};
+let fs=gender==='female'?'<ellipse cx="50" cy="46" rx="15" ry="19" fill="'+skin+'"/>':'<ellipse cx="50" cy="48" rx="16" ry="20" fill="'+skin+'"/>';
+let eyeY=gender==='female'?46:48;
+return'<svg class="portrait-svg" viewBox="0 0 100 '+h+'" width="'+w+'" height="'+h+'" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="'+h+'" fill="rgba(0,0,0,0)"/>'+fs+(hp[hair]||hp.short)+'<ellipse cx="43" cy="'+eyeY+'" rx="2.5" ry="3" fill="'+eyeColor+'"/><ellipse cx="57" cy="'+eyeY+'" rx="2.5" ry="3" fill="'+eyeColor+'"/><circle cx="43" cy="'+eyeY+'" r="1" fill="#000"/><circle cx="57" cy="'+eyeY+'" r="1" fill="#000"/><path d="M39,'+(eyeY-6)+' Q43,'+(eyeY-8)+' 47,'+(eyeY-6)+'" stroke="'+hairColor+'" stroke-width="1.2" fill="none"/><path d="M53,'+(eyeY-6)+' Q57,'+(eyeY-8)+' 61,'+(eyeY-6)+'" stroke="'+hairColor+'" stroke-width="1.2" fill="none"/><path d="M50,'+(eyeY+4)+' L48,'+(eyeY+8)+' L52,'+(eyeY+8)+' Z" fill="rgba(0,0,0,0.06)"/><path d="M45,'+(eyeY+12)+' Q50,'+(eyeY+15)+' 55,'+(eyeY+12)+'" stroke="#8a6a5a" stroke-width="1.2" fill="none"/>'+(op[outfit]||op.casual)+'</svg>';
+}
+
+// ===== GAME STATE =====
+let G={};
+let ccData={name:'周台回',gender:'male',hair:'short',hairColor:'#1a1a2e',eyeColor:'#5dd4d4',outfit:'casual',skin:'#e8d5b7',college:null};
+let quizAnswers=[];
+let quizCurrentQ=0;
+let diceRolls=[];
+
+function initState(){
+G={
+player:{
+name:ccData.name,gender:ccData.gender,appearance:{hair:ccData.hair,hairColor:ccData.hairColor,eyeColor:ccData.eyeColor,outfit:ccData.outfit,skin:ccData.skin},
+college:null,element:'wind',year:1,semester:1,day:1,month:1,
+hp:100,maxHp:100,windGold:50,windOrder:1,windOrderExp:0,
+knowledge:0,combat:5,perception:5,charisma:5,stamina:10,stress:0,
+credits:0,creditsNeeded:2,clubs:[],spirits:[],truthFragments:[],
+faction:null,factionRank:0,alive:true,graduated:false,
+clubPositions:{},raceHistory:[],compHistory:[],
+drugBoxItems:['风油精','维生素B','创可贴','纱布','体温计','闹钟'],
+windPens:3,windPenMax:10,
+homework:[],homeworkDone:0,classAttended:[],classCount:0,
+injuries:[],medicineBox:[],
+thesisStage:0,thesisTopic:'',thesisRevisions:0,thesisApproved:false,thesisExecuted:false,thesisFeedback:'',
+todayEventNpc:null,todayEventId:null,todayInteractNpc:null,todayInteractCount:0,
+foodEffect:null,foodEffectDays:0,
+married:null,
+portraitId:null,ownedCostumes:[],
+},
+npcs:{},eventLog:[],flags:{},
+currentTab:'events',semesterDays:30,excursionDone:false,endingTriggered:false,
+draggedNpc:null,dayPhase:0,tutorialStep:0,tutorialDone:false,
+currentScene:'campus',
+// Multi-character action system: each character can act once per day
+charActions:{}, // npcId -> eventId
+};
+for(let id in NPCS)G.npcs[id]={met:false,affinity:NPCS[id].defaultAff||0,recruited:false,romanceLevel:0,romanceBroken:false,interactedToday:0,giftCount:0,actedToday:false};
+}
+
+// ===== WORLD INTRO =====
+function startCharCreation(){
+document.getElementById('wi-screen').style.display='none';
+document.getElementById('cc-screen').style.display='flex';
+}
+
+// ===== CHARACTER CREATION =====
+function ccSelectGender(g){ccData.gender=g;ccData.skin=g==='female'?'#f0d8c0':'#e8d5b7';document.querySelectorAll('.cc-gender-opt').forEach(e=>e.classList.remove('selected'));event.currentTarget.classList.add('selected');renderCCPortraitPreview();}
+function ccNext(step){
+document.querySelectorAll('.cc-step').forEach(e=>e.classList.remove('active'));
+document.getElementById('cc-step-'+step).classList.add('active');
+if(step===3)initQuiz();
+if(step===4)initDiceRoll();
+}
+// Appearance customization removed - portraits auto-matched by college
+function getCCPreviewPortrait(){
+let college=ccData.college||'wind';
+let pp=PLAYER_PORTRAITS[college];
+if(pp){
+let img=pp[ccData.gender||'male'];
+if(img)return '<img src="'+img+'" style="width:120px;height:140px;object-fit:cover;border-radius:8px;border:2px solid var(--gold)" />';
+}
+return generatePortraitSVG({gender:ccData.gender,hair:ccData.hair,hairColor:ccData.hairColor,eyeColor:ccData.eyeColor,outfit:college,skin:ccData.skin,college:college,size:120});
+}
+function initQuiz(){quizCurrentQ=0;quizAnswers=[];renderQuizQ();}
+function renderQuizQ(){
+let dHtml='';QUIZ_QUESTIONS.forEach((q,i)=>{dHtml+='<div class="cc-quiz-dot '+(i<quizCurrentQ?'done':'')+' '+(i===quizCurrentQ?'current':'')+'"></div>';});
+document.getElementById('cc-quiz-progress').innerHTML=dHtml;
+let q=QUIZ_QUESTIONS[quizCurrentQ];let html='<div class="cc-quiz-q">'+(quizCurrentQ+1)+'. '+q.q+'</div><div class="cc-quiz-opts">';
+q.opts.forEach((o,i)=>{html+='<div class="cc-quiz-opt" onclick="ccAnswerQuiz('+i+')">'+o.text+'</div>';});
+html+='</div>';document.getElementById('cc-quiz-container').innerHTML=html;
+}
+function ccAnswerQuiz(idx){quizAnswers.push(QUIZ_QUESTIONS[quizCurrentQ].opts[idx].college);quizCurrentQ++;if(quizCurrentQ>=QUIZ_QUESTIONS.length)ccNext(4);else renderQuizQ();}
+function initDiceRoll(){
+let counts={wind:0,cloud:0,thunder:0,rain:0};quizAnswers.forEach(c=>counts[c]++);
+let sorted=Object.entries(counts).sort((a,b)=>b[1]-a[1]);ccData.college=sorted[0][0];
+diceRolls=[];['knowledge','combat','perception','charisma','stamina'].forEach(s=>{diceRolls.push({stat:s,val:rand(3,10)});});
+diceRolls.rerollsLeft=3;renderDiceRoll();
+}
+function ccReroll(){if(diceRolls.rerollsLeft<=0)return;diceRolls.rerollsLeft--;['knowledge','combat','perception','charisma','stamina'].forEach((s,i)=>{diceRolls[i].val=rand(3,10);});renderDiceRoll();}
+function renderDiceRoll(){
+let c=COLLEGES[ccData.college];
+document.getElementById('cc-result-college').innerHTML='风碑共鸣结果：<b style="color:'+c.color+'">'+c.name+'</b><br><span style="font-size:12px;color:var(--txt2)">'+c.motto+'</span>';
+ccData.outfit=ccData.college;
+let pp=PLAYER_PORTRAITS[ccData.college];
+if(pp){
+let img=pp[ccData.gender||'male'];
+if(img)document.getElementById('cc-portrait-final').innerHTML='<img src="'+img+'" style="width:120px;height:140px;object-fit:cover;border-radius:8px;border:2px solid var(--gold)" />';
+else document.getElementById('cc-portrait-final').innerHTML=generatePortraitSVG({...ccData,college:ccData.college,size:120});
+}else{
+document.getElementById('cc-portrait-final').innerHTML=generatePortraitSVG({...ccData,college:ccData.college,size:120});
+}
+let sn={knowledge:'知识',combat:'战力',perception:'感知',charisma:'魅力',stamina:'体力'};let html='';
+diceRolls.forEach(d=>{html+='<div class="dice-stat"><div class="dice-stat-label">'+sn[d.stat]+'</div><div class="dice-stat-val">'+d.val+'</div></div>';});
+document.getElementById('cc-dice-stats').innerHTML=html;
+document.getElementById('cc-reroll-info').innerHTML='剩余重投次数: '+diceRolls.rerollsLeft;
+}
+function ccFinish(){
+initState();
+let p=G.player;
+p.name=ccData.name;p.gender=ccData.gender;
+p.appearance={hair:ccData.hair,hairColor:ccData.hairColor,eyeColor:ccData.eyeColor,outfit:ccData.college,skin:ccData.skin};
+p.college=ccData.college;p.element=ccData.college;
+p.portraitId=null; // Will be set when purchasing costumes
+diceRolls.forEach(d=>{p[d.stat]=(p[d.stat]||0)+d.val;});
+p.maxHp=80+(p.stamina||10)*2;p.hp=p.maxHp;
+document.getElementById('cc-screen').style.display='none';
+document.getElementById('app').style.display='flex';
+let c=COLLEGES[ccData.college];
+setScene(c.scene);
+log('分院结果：'+c.name,'festival');
+showModal(c.name+' · 入学仪式',
+'<div style="color:var(--gold);font-size:16px;margin-bottom:8px">'+c.ceremony+'</div>'+
+'<div style="color:var(--txt);line-height:1.8;margin-bottom:12px">'+c.ceremonyDesc+'</div>'+
+'<div style="color:var(--txt2);font-style:italic">"'+c.motto+'"</div>',
+[{text:'完成入学仪式',onClick:()=>{
+hideModal();log('完成'+c.ceremony+'入学仪式','festival');
+let sn={wind:'gu_chang',cloud:'shen_lan',thunder:'zhou_zhi',rain:'lu_ji'};
+setTimeout(()=>meetNpc(sn[ccData.college]),300);
+renderAll();startTutorial();
+}}]);
+}
+
+// ===== TUTORIAL =====
+const TUTORIAL_STEPS=[
+{title:'欢迎来到穹霄圣所',text:'这是一个回合制模拟游戏。你将在圣所度过8个学期，每个学期30天。手上有几张角色卡牌，每天就能派几个角色去不同地点执行任务，每个角色每天只能行动一次。',target:null},
+{title:'多角色行动',text:'你有几张角色卡牌，每天就可以派几个角色去不同地点！比如你有3张卡牌，就可以派3个角色分别去上课、训练、打工。每个角色每天只能行动一次。',target:'main-content'},
+{title:'属性面板',text:'左侧面板显示你的所有属性。知识是考试及格的关键，风痕笔是做作业的必需品。注意压力值，太高会扣血。',target:'lp-stats'},
+{title:'淘汰标准',text:'左侧面板底部显示本学期的淘汰要求。知识、学分、作业、上课次数都要达标，否则会被退学！当前是第1学期，共30天。',target:'lp-elim'},
+{title:'人物卡片',text:'底部的卡片栏显示你和已招募的NPC。好感度达到30的NPC会自动加入手牌！将卡片拖拽到事件槽中即可派遣执行。每个角色每天只能行动一次！',target:'bottom-bar'},
+{title:'结束今日',text:'安排好今天所有角色的行动后，点击"结束今日"按钮进入下一天。点击后会显示昨日结算：哪些事件成功了、骰子投了几点、获得了什么奖励。',target:null},
+{title:'开始游戏',text:'教学结束！记住：每学期需要足够的知识、学分、作业和上课次数才能通过考试。手上的角色越多，每天能做的事就越多！',target:null}
+];
+function startTutorial(){if(G.tutorialDone)return;G.tutorialStep=0;showTutorialStep();}
+function showTutorialStep(){
+let step=TUTORIAL_STEPS[G.tutorialStep];if(!step){document.getElementById('tutorial-overlay').classList.remove('show');G.tutorialDone=true;return;}
+document.getElementById('tut-title').textContent=step.title;
+document.getElementById('tut-text').textContent=step.text;
+document.getElementById('tutorial-overlay').classList.add('show');
+let bubble=document.getElementById('tut-bubble');
+if(step.target){
+let el=document.getElementById(step.target);
+if(el){
+let r=el.getBoundingClientRect();
+let bx=r.right+20,by=r.top+r.height/2-60;
+if(bx+440>window.innerWidth)bx=Math.max(20,r.left-440);
+if(by<10)by=10;
+if(by+200>window.innerHeight)by=window.innerHeight-220;
+bubble.style.left=bx+'px';bubble.style.top=by+'px';
+}else{
+bubble.style.left=(window.innerWidth/2-200)+'px';
+bubble.style.top=(window.innerHeight/2-100)+'px';
+}
+}else{
+bubble.style.left=(window.innerWidth/2-200)+'px';
+bubble.style.top=(window.innerHeight/2-100)+'px';
+}
+}
+function tutNext(e){
+if(e)e.stopPropagation();
+G.tutorialStep++;
+if(G.tutorialStep>=TUTORIAL_STEPS.length){
+document.getElementById('tutorial-overlay').classList.remove('show');
+G.tutorialDone=true;renderAll();
+}else showTutorialStep();
+}
+
+// ===== SCENE SYSTEM =====
+function setScene(sceneId){
+G.currentScene=sceneId;
+let img=SCENE_IMG[sceneId];
+if(img){document.getElementById('scene-bg').style.backgroundImage='url("'+img+'")';}
+switchBGMByScene(sceneId);
+}
+
+// ===== DICE SYSTEM (with animation) =====
+function rollDice(label,target,attrBonus,callback){
+let overlay=document.getElementById('dice-overlay');
+let box=document.getElementById('dice-box');
+let lbl=document.getElementById('dice-label');
+let res=document.getElementById('dice-result');
+overlay.classList.add('show');
+box.textContent='?';lbl.textContent=label||'投掷中...';res.textContent='';
+let count=0;
+let interval=setInterval(()=>{
+box.textContent=rand(1,6);
+count++;
+if(count>=12){
+clearInterval(interval);
+let d1=rand(1,6),d2=rand(1,6);
+let total=d1+d2+(attrBonus||0);
+box.textContent=d1+' + '+d2;
+lbl.textContent=label+' (属性加成+'+(attrBonus||0)+')';
+let success=total>=target;
+res.textContent=(success?'成功！':'失败...')+' 总点数: '+total+' / 目标: '+target;
+res.style.color=success?'var(--green)':'var(--red)';
+setTimeout(()=>{
+overlay.classList.remove('show');
+callback({d1,d2,total,success,target,attrBonus});
+},1800);
+}
+},120);
+}
+
+// ===== RENDERING =====
+function renderAll(){
+renderTopBar();renderLeftPanel();renderMainContent();renderBottomBar();updateSeasonalEffect();updateDayNight();
+}
+function renderTopBar(){
+let p=G.player;let mi=MONTHS[p.month-1];
+document.getElementById('tb-season').innerHTML='<span style="color:'+(mi.season==='wind'?'var(--wind)':mi.season==='thunder'?'var(--thunder)':mi.season==='cloud'?'var(--cloud)':'var(--rain)')+'">'+mi.icon+' '+mi.name+'</span>';
+let exam=EXAM_REQS.find(e=>e.semester===p.semester);
+document.getElementById('tb-semester').textContent='大'+['一','二','三','四'][p.year-1]+' · 第'+p.semester+'学期 · 第'+p.day+'/'+G.semesterDays+'天';
+let phase=DAY_PHASES[G.dayPhase];
+document.getElementById('tb-time').textContent=phase.icon+' '+phase.name;
+}
+function renderLeftPanel(){
+let p=G.player,c=COLLEGES[p.college]||{color:'#888',name:'无'},oi=WIND_ORDERS[p.windOrder-1],ei=ELEMENTS[p.element];
+document.getElementById('lp-player').innerHTML='<div class="lp-title">角色</div>'+
+'<div class="lp-stat"><span class="lp-stat-label">姓名</span><span class="lp-stat-val">'+p.name+'</span></div>'+
+'<div class="lp-stat"><span class="lp-stat-label">学院</span><span class="lp-stat-val" style="color:'+c.color+'">'+c.name+'</span></div>'+
+'<div class="lp-stat"><span class="lp-stat-label">风序</span><span class="lp-stat-val" style="color:'+ei.color+'">'+oi.name+'</span></div>'+
+'<div class="lp-stat"><span class="lp-stat-label">生命</span><span class="lp-stat-val">'+p.hp+'/'+p.maxHp+'</span></div>'+
+'<div class="bar"><div class="bar-fill bar-hp" style="width:'+(p.hp/p.maxHp*100)+'%"></div></div>';
+let s='<div class="lp-title">属性</div>'+
+'<div class="lp-stat"><span class="lp-stat-label">知识</span><span class="lp-stat-val" style="color:var(--cloud)">'+p.knowledge+'</span></div>'+
+'<div class="lp-stat"><span class="lp-stat-label">战力</span><span class="lp-stat-val" style="color:var(--thunder)">'+p.combat+'</span></div>'+
+'<div class="lp-stat"><span class="lp-stat-label">感知</span><span class="lp-stat-val" style="color:var(--rain)">'+p.perception+'</span></div>'+
+'<div class="lp-stat"><span class="lp-stat-label">魅力</span><span class="lp-stat-val" style="color:var(--green)">'+p.charisma+'</span></div>'+
+'<div class="lp-stat"><span class="lp-stat-label">体力</span><span class="lp-stat-val" style="color:var(--orange)">'+p.stamina+'</span></div>'+
+'<div class="lp-stat" style="margin-top:6px"><span class="lp-stat-label">压力</span><span class="lp-stat-val" style="color:'+(p.stress>=80?'var(--red)':p.stress>=50?'var(--orange)':'var(--green)')+'">'+p.stress+'</span></div>'+
+'<div class="bar"><div class="bar-fill bar-stress" style="width:'+p.stress+'%"></div></div>'+
+'<div class="lp-stat" style="margin-top:6px"><span class="lp-stat-label">风金</span><span class="lp-stat-val" style="color:var(--gold)">'+p.windGold+'</span></div>'+
+'<div class="lp-stat"><span class="lp-stat-label">学分</span><span class="lp-stat-val">'+p.credits+'/'+p.creditsNeeded+'</span></div>'+
+'<div class="lp-stat" style="margin-top:6px"><span class="lp-stat-label">修为</span><span class="lp-stat-val" style="color:var(--gold)">'+p.windOrderExp+'/100</span></div>'+
+'<div class="bar"><div class="bar-fill bar-exp" style="width:'+p.windOrderExp+'%"></div></div>';
+document.getElementById('lp-stats').innerHTML=s;
+let inv='<div class="lp-title">物品</div>'+
+'<div class="lp-stat"><span class="lp-stat-label">风痕笔</span><span class="lp-stat-val" style="color:'+(p.windPens<=1?'var(--red)':'var(--gold)')+'">'+p.windPens+'支</span></div>'+
+'<div class="lp-stat"><span class="lp-stat-label">作业完成</span><span class="lp-stat-val">'+p.homeworkDone+'份</span></div>'+
+'<div class="lp-stat"><span class="lp-stat-label">上课次数</span><span class="lp-stat-val">'+p.classCount+'次</span></div>';
+if(p.injuries.length>0){
+inv+='<div class="lp-stat" style="margin-top:4px"><span class="lp-stat-label" style="color:var(--red)">伤势</span><span class="lp-stat-val" style="color:var(--red)">'+p.injuries.length+'处</span></div>';
+}
+if(p.foodEffect){
+inv+='<div class="food-active" style="margin-top:4px;padding:3px 6px;font-size:10px">🍽️ '+p.foodEffect+' ('+p.foodEffectDays+'天)</div>';
+}
+document.getElementById('lp-inventory').innerHTML=inv;
+let sp='<div class="lp-title">精灵 ('+p.spirits.length+')</div>';
+if(p.spirits.length===0)sp+='<div style="font-size:10px;color:var(--txt3);text-align:center;padding:4px">尚未驯服</div>';
+else p.spirits.forEach(sp2=>{let s2=SPIRITS[sp2.type];sp+='<div style="display:flex;align-items:center;padding:3px 0"><span style="font-size:16px;margin-right:4px;color:'+s2.color+'">'+s2.icon+'</span><span style="font-size:11px">'+s2.name+'</span></div>';});
+document.getElementById('lp-spirits').innerHTML=sp;
+let fh='<div class="lp-title">阵营</div>';
+if(p.faction){let f=FACTIONS[p.faction];fh+='<div style="font-size:12px;color:'+f.color+';font-weight:bold">'+f.name+'</div><div style="font-size:10px;color:var(--txt3)">阶级 '+p.factionRank+'</div>';}
+else fh+='<div style="font-size:10px;color:var(--txt3);text-align:center;padding:4px">未加入</div>';
+document.getElementById('lp-faction').innerHTML=fh;
+let th='<div class="lp-title">真相 ('+p.truthFragments.length+'/7)</div>';
+if(p.truthFragments.length===0)th+='<div style="font-size:10px;color:var(--txt3);text-align:center;padding:4px">未发现</div>';
+else p.truthFragments.forEach(t=>{th+='<div style="font-size:10px;color:var(--gold);margin-bottom:2px">• '+t.title+'</div>';});
+document.getElementById('lp-truth').innerHTML=th;
+let exam=EXAM_REQS.find(e=>e.semester===p.semester);
+let eh='<div class="lp-title">淘汰标准</div>';
+if(exam){
+eh+='<div class="elim-info"><div class="elim-info-title">'+exam.name+'</div>';
+eh+='<div class="elim-info-item">知识: <span style="color:'+(p.knowledge>=exam.minKnowledge?'var(--green)':'var(--red)')+'">'+p.knowledge+'/'+exam.minKnowledge+'</span></div>';
+eh+='<div class="elim-info-item">学分: <span style="color:'+(p.credits>=exam.minCredits?'var(--green)':'var(--red)')+'">'+p.credits+'/'+exam.minCredits+'</span></div>';
+eh+='<div class="elim-info-item">作业: <span style="color:'+(p.homeworkDone>=exam.minHomework?'var(--green)':'var(--red)')+'">'+p.homeworkDone+'/'+exam.minHomework+'</span></div>';
+eh+='<div class="elim-info-item">上课: <span style="color:'+(p.classCount>=exam.minClass?'var(--green)':'var(--red)')+'">'+p.classCount+'/'+exam.minClass+'</span></div>';
+eh+='</div>';
+}
+document.getElementById('lp-elim').innerHTML=eh;
+}
+
+// ===== DAY/NIGHT CYCLE =====
+function updateDayNight(){
+let phase=DAY_PHASES[G.dayPhase];
+let overlay=document.getElementById('daynight-overlay');
+if(overlay)overlay.style.background=phase.color;
+}
+
+// ===== MAIN CONTENT RENDERER =====
+function renderMainContent(){
+let p=G.player;
+let festival=FESTIVALS.find(f=>f.month===p.month);
+let fb='';
+if(festival&&p.day===15){
+setScene(festival.scene);
+fb='<div class="festival-banner"><div class="fb-name">🎉 '+festival.name+'</div><div class="fb-desc">'+festival.desc+'</div></div>';
+}
+document.getElementById('festival-banner-container').innerHTML=fb;
+let fec='';
+if(p.foodEffect){
+fec='<div class="food-active">🍽️ 当前食物效果: '+p.foodEffect+' (剩余'+p.foodEffectDays+'天)</div>';
+}
+document.getElementById('food-effect-container').innerHTML=fec;
+let tabs=[
+{id:'events',name:'事件',icon:'📜'},
+{id:'social',name:'人脉',icon:'🤝'},
+{id:'market',name:'市集',icon:'🏪'},
+{id:'clubs',name:'社团',icon:'🎪'},
+{id:'compete',name:'比赛',icon:'🏆'},
+{id:'thesis',name:'论文',icon:'📝'}
+];
+if(p.semester<6)tabs=tabs.filter(t=>t.id!=='thesis');
+let th='<div class="tabs">';tabs.forEach(t=>{th+='<div class="tab '+(G.currentTab===t.id?'active':'')+'" onclick="setTab(\''+t.id+'\')">'+t.icon+' '+t.name+'</div>';});th+='</div>';
+document.getElementById('tab-bar').innerHTML=th;
+let html='';
+if(G.endingTriggered)html=renderEnding();
+else if(G.currentTab==='events')html=renderEvents();
+else if(G.currentTab==='social')html=renderSocial();
+else if(G.currentTab==='market')html=renderMarket();
+else if(G.currentTab==='clubs')html=renderClubs();
+else if(G.currentTab==='compete')html=renderCompete();
+else if(G.currentTab==='thesis')html=renderThesis();
+document.getElementById('main-content').innerHTML=html;
+}
+
+// ===== EVENTS RENDERER (Multi-character action system) =====
+function renderEvents(){
+let p=G.player;
+let h='<div class="event-card"><div class="event-title">📜 今日事件</div>';
+// Show today's assigned actions
+let assignedCount=Object.keys(G.charActions||{}).length;
+let metCount=Object.keys(G.npcs).filter(id=>G.npcs[id].met).length+1; // +1 for player
+if(assignedCount>0){
+h+='<div style="background:rgba(230,126,34,.1);border:1px solid var(--orange);border-radius:6px;padding:10px;margin-bottom:8px">';
+h+='<div style="font-size:13px;color:var(--orange)">⏳ 今日已安排: '+assignedCount+'/'+metCount+' 个角色行动</div>';
+for(let npcId in G.charActions){
+let evId=G.charActions[npcId];
+let ev=findEventById(evId);
+let nn=npcId==='player'?'你':NPCS[npcId].name;
+h+='<div style="font-size:12px;color:var(--txt2);margin-top:4px;display:flex;justify-content:space-between;align-items:center">• '+nn+' → '+(ev?ev.title:evId)+' <button class="btn btn-danger" style="padding:2px 8px;font-size:10px" onclick="undoAction(\''+npcId+'\')">撤回</button></div>';
+}
+h+='</div>';
+}
+// Available events
+let evs=getAvailableEvents();
+evs.forEach(e=>{
+let hasSlot=!G.charActions||Object.values(G.charActions).indexOf(e.id)===-1;
+// Check if any character already assigned to this event
+let assignedToThis=Object.keys(G.charActions||{}).find(k=>G.charActions[k]===e.id);
+h+='<div style="background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:12px;margin-bottom:8px;position:relative;cursor:pointer" '+
+'onclick="openEventDetail(\''+e.id+'\')" '+
+'onmouseenter="showHoverScene(\''+(e.scene||HOVER_SCENES[e.id]||'campus')+'\')" onmouseleave="hideHoverScene()">';
+h+='<div style="font-size:14px;color:var(--gold);margin-bottom:4px">'+e.title+'</div>';
+h+='<div style="font-size:12px;color:var(--txt2);margin-bottom:8px">'+e.desc+'</div>';
+if(e.diceTarget){
+h+='<div style="font-size:11px;color:var(--txt3);margin-bottom:4px">判定: 双骰+'+e.attrName+' 对比 '+e.diceTarget+'</div>';
+}
+// Show assigned character if any
+if(assignedToThis){
+let nn=assignedToThis==='player'?'你':NPCS[assignedToThis].name;
+h+='<div style="font-size:12px;color:var(--green);margin-bottom:8px">✓ 已派遣: '+nn+'</div>';
+}
+h+='<div class="event-slot" id="event-slot-'+e.id+'" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,\''+e.id+'\')">拖拽角色卡片到此处，或点击事件</div>';
+h+='</div>';
+});
+// End day button
+h+='<button class="btn btn-gold" style="width:100%;padding:10px;margin-top:8px" onclick="endDay()">结束今日 → 下一天</button>';
+h+='</div>';
+// Event log
+h+='<div class="event-card"><div class="event-title">📋 事件日志</div><div class="event-log">';
+let r=G.eventLog.slice(-20).reverse();
+if(r.length===0)h+='<div style="text-align:center;color:var(--txt3);padding:12px">还没有事件记录</div>';
+else r.forEach(e=>{h+='<div class="log-entry"><span class="log-day">'+e.day+'</span>'+e.msg+'</div>';});
+h+='</div></div>';
+return h;
+}
+
+function getAvailableEvents(){
+let p=G.player;
+let evs=[];
+evs.push({id:'class',title:'上课',desc:'参加今日课程，获得知识并产生作业',diceTarget:0});
+evs.push({id:'train',title:'训练',desc:'在训练场练习气旋操控，提升战力',diceTarget:8,attrName:'combat'});
+evs.push({id:'meditate',title:'冥想',desc:'在冥想池静坐，提升感知',diceTarget:7,attrName:'perception'});
+let cl=COLLEGES[p.college];
+if(cl){
+evs.push({id:'lounge',title:'去'+cl.loungeName,desc:'在学院休息室休息，恢复生命和体力，降低压力',diceTarget:0,scene:cl.lounge});
+}
+evs.push({id:'stroll',title:'随便逛逛',desc:'在圣所里闲逛，可能遇到新朋友或获得意外收获',diceTarget:0});
+evs.push({id:'library',title:'图书馆研究',desc:'在图书馆翻阅旧书，获得知识和修为',diceTarget:9,attrName:'perception'});
+if(p.homework.length>0){
+evs.push({id:'homework',title:'做作业 ('+p.homework.length+'份待完成)',desc:'使用风痕笔完成作业。需要'+p.homework.length+'支风痕笔',diceTarget:0});
+}
+JOBS.forEach(j=>{
+let attrVal=p[j.reqAttr]||0;
+evs.push({id:'job_'+j.id,title:'打工: '+j.name,desc:j.desc+' (奖励'+j.reward+'风金)',diceTarget:j.diceTarget,attrName:j.reqAttr,jobData:j,scene:j.scene});
+});
+if(p.clubs.length>0){
+let cid=p.clubs[0];
+let c=CLUBS_DATA[cid];
+if(c)evs.push({id:'club_act',title:'社团活动: '+c.name,desc:c.desc+' (学分+'+c.credits+')',diceTarget:0});
+}
+evs.push({id:'frost_tree',title:'霜余树下',desc:'在霜余树下静坐，大幅降低压力',diceTarget:0,scene:'guifeng_slope'});
+// Canteen visit - new!
+evs.push({id:'canteen_visit',title:'去食堂',desc:'在食堂用餐，根据今日天气提供不同食物',diceTarget:0,scene:'canteen'});
+return evs;
+}
+
+function findEventById(id){
+let evs=getAvailableEvents();
+return evs.find(e=>e.id===id)||JOBS.find(j=>'job_'+j.id===id)?{id:id,title:id}:null;
+}
+
+// ===== HOVER SCENE PREVIEW =====
+function showHoverScene(sceneId){
+let img=SCENE_IMG[sceneId];
+if(!img)return;
+let layer=document.getElementById('scene-preview');
+if(!layer)return;
+layer.style.backgroundImage='url("'+img+'")';
+layer.classList.add('show');
+}
+function hideHoverScene(){
+let layer=document.getElementById('scene-preview');
+if(!layer)return;
+layer.classList.remove('show');
+}
+
+// ===== SOCIAL RENDERER =====
+function renderSocial(){
+let p=G.player,h='<div class="event-card"><div class="event-title">🤝 人脉关系</div>';
+let met=Object.keys(G.npcs).filter(id=>G.npcs[id].met);
+if(met.length===0)h+='<div style="text-align:center;color:var(--txt3);padding:20px">你还没有认识任何人。去"随便逛逛"试试吧。</div>';
+else met.forEach(id=>{
+let _ni=G.npcs[id];
+if(_ni.affinity>=30&&!_ni.recruited){
+_ni.recruited=true;
+log(NPCS[id].name+'的好感达到30，已加入手牌！','good');
+}
+let n=NPCS[id],ni=G.npcs[id],c=COLLEGES[n.college]||{color:'#888',badge:'badge-gold',name:'无灵者'};
+let loveIcon=ni.romanceBroken?'💔':(ni.romanceLevel>0?'❤️':'');
+h+='<div style="display:flex;align-items:center;padding:8px;background:var(--bg3);border-radius:6px;margin-bottom:6px;cursor:pointer" onclick="interactNpc(\''+id+'\')">'+
+'<div style="margin-right:10px">'+getNpcPortraitImg(id,40)+'</div>'+
+'<div style="flex:1"><div style="font-size:13px;color:var(--txt)">'+n.name+' '+loveIcon+' <span class="badge '+c.badge+'">'+c.name+'</span></div>'+
+'<div style="font-size:11px;color:var(--txt3)">'+n.desc+'</div>'+
+'<div class="bar" style="margin-top:3px"><div class="bar-fill '+(ni.romanceLevel>0?'bar-love':'bar-aff')+'" style="width:'+ni.affinity+'%"></div></div>'+
+'<div style="font-size:10px;color:var(--txt3)">好感: '+ni.affinity+(ni.recruited?' · 已招募':'')+(ni.romanceLevel>0?' · 恋人':'')+(ni.romanceBroken?' · 断裂':'')+'</div></div></div>';
+});
+h+='</div>';
+return h;
+}
+
+// ===== MARKET RENDERER =====
+function renderMarket(){
+let p=G.player;
+let mi=MONTHS[p.month-1];
+let h='<div class="event-card"><div class="event-title">🏪 风痕市集 <span style="font-size:12px;color:var(--gold)">风金: '+p.windGold+'</span></div>';
+setScene('market');
+// Food shop (seasonal!)
+h+='<div style="margin-bottom:10px"><div class="lp-title">🍞 面包铺 (当前季节: '+mi.icon+mi.name+')</div>';
+FOODS.forEach(f=>{
+// Check seasonal availability
+if(f.seasons&&f.seasons.indexOf(mi.season)===-1)return;
+let ca=p.windGold>=f.price;
+let effStr=Object.entries(f.effect).map(([k,v])=>k+'+'+v).join(',');
+h+='<div class="shop-item"><div><div class="shop-item-name">'+f.name+'</div><div class="shop-item-desc">'+f.desc+' ('+effStr+')</div></div><button class="btn '+(ca?'btn-gold':'btn-disabled')+'" '+(ca?'onclick="buyFood(\''+f.name+'\','+f.price+','+JSON.stringify(f.effect).replace(/"/g,'&quot;')+')"':'')+'>'+f.price+'金</button></div>';
+});
+h+='</div>';
+// Medicine shop
+h+='<div style="margin-bottom:10px"><div class="lp-title">💊 药材铺</div>';
+MEDICINES.forEach(m=>{
+let ca=p.windGold>=m.price;
+let effStr=Object.entries(m.effect).map(([k,v])=>k+'+'+v).join(',');
+h+='<div class="shop-item"><div><div class="shop-item-name">'+m.name+'</div><div class="shop-item-desc">'+m.desc+' ('+effStr+')</div></div><button class="btn '+(ca?'btn-gold':'btn-disabled')+'" '+(ca?'onclick="buyMedicine(\''+m.name+'\','+m.price+','+JSON.stringify(m.effect).replace(/"/g,'&quot;')+')"':'')+'>'+m.price+'金</button></div>';
+});
+h+='</div>';
+// Pen shop
+h+='<div style="margin-bottom:10px"><div class="lp-title">✒️ 陆记风痕笔铺</div>';
+h+='<div class="shop-item"><div><div class="shop-item-name">基础风痕笔</div><div class="shop-item-desc">做作业消耗品 (当前'+p.windPens+'支)</div></div><button class="btn '+(p.windGold>=8?'btn-gold':'btn-disabled')+'" '+(p.windGold>=8?'onclick="buyPen(8,1)"':'')+'>8金/支</button></div>';
+h+='<div class="shop-item"><div><div class="shop-item-name">精工风痕笔(3支装)</div><div class="shop-item-desc">品质更好，3支装</div></div><button class="btn '+(p.windGold>=20?'btn-gold':'btn-disabled')+'" '+(p.windGold>=20?'onclick="buyPen(20,3)"':'')+'>20金/3支</button></div>';
+h+='</div>';
+// Gift shop
+h+='<div style="margin-bottom:10px"><div class="lp-title">🎁 杂货铺 (礼物)</div>';
+GIFTS.forEach(g=>{
+let ca=p.windGold>=g.price;
+let boostStr='';
+for(let nid in g.npcBoost){if(G.npcs[nid]&&G.npcs[nid].met)boostStr+=NPCS[nid].name+'+'+g.npcBoost[nid]+' ';}
+h+='<div class="shop-item"><div><div class="shop-item-name">'+g.name+'</div><div class="shop-item-desc">'+g.desc+(boostStr?' | '+boostStr:'')+'</div></div><button class="btn '+(ca?'btn-gold':'btn-disabled')+'" '+(ca?'onclick="buyGift(\''+g.name+'\','+g.price+','+JSON.stringify(g.npcBoost).replace(/"/g,'&quot;')+')"':'')+'>'+g.price+'金</button></div>';
+});
+h+='</div>';
+// Spirit shop
+h+='<div style="margin-bottom:10px"><div class="lp-title">🕊️ 风精坊</div>';
+for(let sid in SPIRITS){
+let s=SPIRITS[sid],ca=p.windGold>=s.price;
+h+='<div class="shop-item"><div><div class="shop-item-name">'+s.icon+' '+s.name+'</div><div class="shop-item-desc">'+s.desc+' | 能力: '+s.ability+' | '+s.rarity+'</div></div><button class="btn '+(ca?'btn-gold':'btn-disabled')+'" '+(ca?'onclick="buySpirit(\''+sid+'\','+s.price+')"':'')+'>'+s.price+'金</button></div>';
+}
+h+='</div>';
+// Clothing shop - basic outfits
+h+='<div style="margin-bottom:10px"><div class="lp-title">👔 游衣裁缝铺</div>';
+let outfits=[{id:'wind',name:'驰风袍',price:30},{id:'cloud',name:'栖云衫',price:30},{id:'thunder',name:'鸣雷铠',price:30},{id:'rain',name:'沉雨衣',price:30},{id:'casual',name:'便装',price:15}];
+outfits.forEach(o=>{
+let ca=p.windGold>=o.price;
+h+='<div class="shop-item"><div><div class="shop-item-name">'+o.name+'</div><div class="shop-item-desc">更换基础服装</div></div><button class="btn '+(ca?'btn-gold':'btn-disabled')+'" '+(ca?'onclick="buyOutfit(\''+o.id+'\','+o.price+')"':'')+'>'+o.price+'金</button></div>';
+});
+h+='</div>';
+// Costume portrait shop - special portraits!
+h+='<div style="margin-bottom:10px"><div class="lp-title">🎨 立绘坊（购买专属立绘）</div>';
+h+='<div style="font-size:11px;color:var(--txt3);margin-bottom:8px">按学期解锁，部分款式需与特定角色好感度达标</div>';
+// 分三档渲染
+let costumeTiers=[
+{title:'基础款（第1学期开放）',minSem:1},
+{title:'进阶款（第2学期开放，需好感度达标）',minSem:2},
+{title:'豪华款（第3学期开放，需好感度达标）',minSem:3}
+];
+costumeTiers.forEach(tier=>{
+let tierItems=COSTUME_PORTRAITS.filter(cp=>cp.semester===tier.minSem);
+if(tierItems.length===0)return;
+let tierLocked=p.semester<tier.minSem;
+h+='<div style="margin-top:8px;margin-bottom:6px;font-size:12px;color:'+(tierLocked?'var(--txt3)':'var(--gold)')+';border-bottom:1px solid rgba(255,255,255,0.08);padding-bottom:3px">'+tier.title+(tierLocked?' <span style="color:var(--red)">['+tier.minSem+'学期后解锁]</span>':'')+'</div>';
+tierItems.forEach(cp=>{
+let owned=p.ownedCostumes&&p.ownedCostumes.includes(cp.id);
+let genderMatch=cp.gender==='any'||cp.gender===p.gender;
+let genderLabel=cp.gender==='female'?'(女)':cp.gender==='male'?'(男)':'';
+// 解锁条件判断
+let semUnlocked=p.semester>=cp.semester;
+let affUnlocked=true,npcName='',curAff=0;
+if(cp.affinityReq){
+npcName=NPCS[cp.affinityReq.npc]?NPCS[cp.affinityReq.npc].name:'';
+curAff=G.npcs[cp.affinityReq.npc]?G.npcs[cp.affinityReq.npc].affinity:0;
+affUnlocked=curAff>=cp.affinityReq.val;
+}
+let canBuy=p.windGold>=cp.price&&semUnlocked&&affUnlocked&&!owned&&genderMatch;
+let lockReason='';
+if(tierLocked)lockReason='需第'+cp.semester+'学期';
+else if(!affUnlocked)lockReason='需'+npcName+'好感'+cp.affinityReq.val+'(当前'+curAff+')';
+else if(!genderMatch)lockReason='不适用';
+h+='<div class="shop-item" style="flex-direction:column;align-items:stretch">'+
+'<div style="display:flex;justify-content:space-between;align-items:center">'+
+'<div><div class="shop-item-name">'+cp.name+' '+genderLabel+'</div><div class="shop-item-desc">'+cp.desc+'</div>'+
+(cp.affinityReq?'<div style="font-size:10px;color:'+(affUnlocked?'var(--green)':'var(--red)')+';margin-top:2px">前置: '+npcName+'好感'+cp.affinityReq.val+' (当前'+curAff+')</div>':'')+
+'</div>'+
+'<div style="text-align:right">'+
+(owned?'<span class="badge badge-green" style="margin-right:4px">已拥有</span>':'')+
+'<button class="btn '+(canBuy?'btn-gold':'btn-disabled')+'" '+(canBuy?'onclick="buyCostume(\''+cp.id+'\','+cp.price+')"':'')+'>'
++(owned?'已拥有':!genderMatch?'不适用':lockReason?lockReason:cp.price+'金')+'</button></div>'+
+'</div></div>';
+});
+});
+h+='</div>';
+h+='</div>';
+return h;
+}
+
+// ===== CLUBS RENDERER =====
+function renderClubs(){
+let p=G.player,h='<div class="event-card"><div class="event-title">🎪 社团 <span style="font-size:12px;color:var(--txt2)">已加入: '+p.clubs.length+' | 学分: '+p.credits+'/'+p.creditsNeeded+'</span></div>';
+if(p.clubs.length>0){
+h+='<div style="margin-bottom:12px"><div class="lp-title">已加入社团 (每学期学分重置)</div>';
+p.clubs.forEach(cid=>{
+let c=CLUBS_DATA[cid];if(!c)return;
+let pn=c.president?NPCS[c.president].name:'无',vn=c.vice?NPCS[c.vice].name:'无';
+let mp=p.clubPositions[cid]||'成员',cc=COLLEGES[c.college]||{badge:'badge-gold',name:'跨院',color:'#d4af37'};
+h+='<div class="club-detail"><div class="club-detail-header"><div class="club-detail-name">'+c.name+'</div><span class="badge '+cc.badge+'">'+cc.name+'</span></div>'+
+'<div class="club-detail-info">难度: '+c.difficulty+' | 人数: '+c.members+' | 社长: '+pn+' | 副社长: '+vn+'</div>'+
+'<div class="club-detail-desc">'+c.desc+'</div>'+
+'<div class="club-detail-stats"><span>每次: '+c.apCost+'AP</span><span>学分: +'+c.credits+'</span><span>职位: '+mp+'</span></div>'+
+(p.year>=2&&mp==='成员'?'<button class="btn" style="margin-top:8px" onclick="campaignClub(\''+cid+'\',\'vice\')">竞选副社长</button>':'')+
+(p.year>=3&&mp==='副社长'?'<button class="btn" style="margin-top:8px" onclick="campaignClub(\''+cid+'\',\'president\')">竞选社长</button>':'')+
+'</div>';
+});
+h+='</div>';
+}
+h+='<div class="lp-title">可加入社团</div>';
+for(let cid in CLUBS_DATA){
+if(p.clubs.includes(cid))continue;
+let c=CLUBS_DATA[cid],canJoin=true,rn='';
+if(c.restrict==='cloud_only'){canJoin=p.college==='cloud';rn='仅栖云院';}
+else if(c.restrict==='rain_only'){canJoin=p.college==='rain';rn='仅沉雨院';}
+else if(c.restrict==='thunder_only'){canJoin=p.college==='thunder';rn='仅鸣雷院';}
+else if(c.restrict==='wind_only'){canJoin=p.college==='wind';rn='仅驰风院';}
+let pn=c.president?NPCS[c.president].name:'无';
+let cc=COLLEGES[c.college]||{badge:'badge-gold',name:'跨院'};
+h+='<div class="club-detail"><div class="club-detail-header"><div class="club-detail-name">'+c.name+'</div><span class="badge '+cc.badge+'">'+cc.name+'</span></div>'+
+'<div class="club-detail-info">难度: '+c.difficulty+' | 人数: '+c.members+' | 社长: '+pn+' | '+(rn||'无限制')+'</div>'+
+'<div class="club-detail-desc">'+c.desc+'</div>'+
+'<button class="btn '+(canJoin?'btn-gold':'btn-disabled')+'" '+(canJoin?'onclick="joinClub(\''+cid+'\')"':'')+' style="margin-top:8px">'+(canJoin?'加入社团':'不可加入')+'</button></div>';
+}
+h+='</div></div>';
+return h;
+}
+
+// ===== COMPETE RENDERER =====
+function renderCompete(){
+let p=G.player,h='<div class="event-card"><div class="event-title">🏆 比赛系统</div>';
+h+='<div style="color:var(--txt2);font-size:13px;margin-bottom:12px">不同比赛考验不同能力。每学期每类比赛只能参加一次。</div>';
+COMPETITIONS.forEach(comp=>{
+let isEven=p.semester%2===0;
+let canJoin=comp.semester==='every'||(comp.semester==='even'&&isEven)||(comp.semester==='odd'&&!isEven);
+let alreadyDone=p.compHistory.find(c=>c.id===comp.id&&c.semester===p.semester);
+h+='<div class="club-detail"><div class="club-detail-header"><div class="club-detail-name">'+comp.name+'</div>'+(alreadyDone?'<span class="badge badge-green">已参加</span>':'')+'</div>'+
+'<div class="club-detail-desc">'+comp.desc+'</div>';
+if(canJoin&&!alreadyDone){
+h+='<button class="btn btn-gold" style="margin-top:8px" onclick="startCompetition(\''+comp.id+'\')">参加比赛</button>';
+}else if(!canJoin){
+h+='<div style="font-size:11px;color:var(--txt3);margin-top:4px">本学期不举办</div>';
+}
+h+='</div>';
+});
+if(p.compHistory.length>0){
+h+='<div class="lp-title" style="margin-top:12px">历届成绩</div>';
+p.compHistory.forEach(r=>{
+let pc=r.position===1?'gold':r.position===2?'silver':r.position===3?'bronze':'other';
+h+='<div class="race-result"><div class="race-pos '+pc+'">第'+r.position+'名</div><div style="font-size:11px;color:var(--txt3);text-align:center">'+r.name+' · 第'+r.semester+'学期</div></div>';
+});
+}
+h+='</div>';
+return h;
+}
+
+// ===== THESIS RENDERER =====
+function renderThesis(){
+let p=G.player,h='<div class="event-card"><div class="event-title">📝 毕业论文</div>';
+if(p.semester<6){
+h+='<div style="color:var(--txt2);text-align:center;padding:20px">毕业论文系统在大三第六学期末开启。</div></div>';
+return h;
+}
+let stages=[
+{num:1,title:'第一步 · 选题方向',desc:'大三第六学期末提交。需写明选题方向、初步构思、预期效果。不交=自动退学。',status:p.thesisStage>=1},
+{num:2,title:'第二步 · 反复修改',desc:'大四第一学期。提交完整方案，导师+评审团评估（创新性、可行性、安全性）。驳回后继续修改。',status:p.thesisStage>=2},
+{num:3,title:'第三步 · 执行',desc:'大四第二学期末。方案通过后获得执行许可，前往地球执行论文。',status:p.thesisStage>=3}
+];
+stages.forEach(s=>{
+h+='<div class="thesis-stage"><div class="thesis-stage-title">'+(s.status?'✅ ':'⬜ ')+s.title+'</div><div style="font-size:12px;color:var(--txt2)">'+s.desc+'</div></div>';
+});
+if(p.semester===6&&p.thesisStage<1){
+h+='<div class="thesis-stage"><div class="thesis-stage-title">提交选题方向</div>';
+h+='<div style="font-size:12px;color:var(--txt2);margin-bottom:8px">请输入你的毕业论文选题方向：</div>';
+h+='<textarea class="thesis-input" id="thesis-topic-input" placeholder="例如：创造一种在特定地形上形成持续微风的气象系统..."></textarea>';
+h+='<button class="btn btn-gold" style="margin-top:8px;width:100%" onclick="submitThesisTopic()">提交选题</button>';
+h+='</div>';
+}
+if(p.thesisStage>=1&&p.thesisStage<3){
+h+='<div class="thesis-stage"><div class="thesis-stage-title">当前选题</div>';
+h+='<div style="font-size:13px;color:var(--txt);margin-bottom:8px">'+p.thesisTopic+'</div>';
+h+='<div style="font-size:12px;color:var(--gold)">修改次数: '+p.thesisRevisions+'</div>';
+h+='</div>';
+if(p.thesisFeedback){
+h+='<div class="thesis-review"><b>评审意见：</b><br>'+p.thesisFeedback+'</div>';
+}
+if(!p.thesisApproved){
+h+='<div class="thesis-stage"><div class="thesis-stage-title">修改并重新提交</div>';
+h+='<textarea class="thesis-input" id="thesis-revise-input" placeholder="根据评审意见修改你的方案...">'+p.thesisTopic+'</textarea>';
+h+='<button class="btn btn-gold" style="margin-top:8px;width:100%" onclick="submitThesisRevision()">提交修改</button>';
+h+='</div>';
+}
+}
+if(p.thesisApproved&&!p.thesisExecuted){
+h+='<div class="thesis-approved"><b>✅ 方案已通过！</b><br>你已获得执行许可。选择合适时间前往地球执行毕业论文。</div>';
+h+='<button class="btn btn-gold" style="width:100%;padding:10px" onclick="executeThesis()">执行毕业论文</button>';
+}
+if(p.thesisExecuted){
+h+='<div class="thesis-approved"><b>✅ 论文已执行</b><br>你的气核能量在执行过程中耗尽。你完成了毕业论文。</div>';
+}
+h+='</div>';
+return h;
+}
+
+// ===== ENDING RENDERER =====
+function renderEnding(){
+let e=determineEnding();
+return'<div class="ending-screen"><div class="end-title">'+e.title+'</div><div class="end-desc">'+e.desc+'</div><div class="end-quote">'+e.quote+'</div><button class="btn btn-gold" style="margin-top:20px;padding:10px 28px;font-size:14px" onclick="confirmRestart()">重新开始</button></div>';
+}
+
+// ===== BOTTOM BAR (Character cards) =====
+function renderBottomBar(){
+let p=G.player,h='';
+let acted=G.charActions&&G.charActions['player'];
+let pPortrait=getPlayerPortraitImg(p,85);
+h+='<div class="char-card char-card-player'+(acted?' locked':'')+'" draggable="'+(acted?'false':'true')+'" '+(acted?'':'ondragstart="onDragStart(event,\'player\')"')+' onclick="showPlayerInfo()"><div class="char-card-badge">你</div><div class="char-card-portrait">'+pPortrait+'</div><div class="char-card-info"><div class="char-card-name">'+p.name+'</div><div class="char-card-sub">'+(COLLEGES[p.college]||{name:'无'}).name+(acted?' · 已行动':'')+'</div></div></div>';
+let met=Object.keys(G.npcs).filter(id=>G.npcs[id].met);
+// Only show NPCs in hand: met AND (recruited OR affinity>=30)
+let handNpcs=met.filter(id=>G.npcs[id].recruited||G.npcs[id].affinity>=30);
+handNpcs.forEach(id=>{
+let n=NPCS[id],ni=G.npcs[id];
+let nPortrait=getNpcPortraitImg(id,85);
+let nc=COLLEGES[n.college]||{color:'#888',badge:'badge-gold',name:'无灵者'};
+let rgb=n.college==='wind'?'93,212,212':n.college==='cloud'?'176,196,222':n.college==='thunder'?'199,125,255':n.college==='rain'?'91,141,239':'136,136,136';
+let npcActed=G.charActions&&G.charActions[id];
+let loveIcon=ni.romanceBroken?'💔':(ni.romanceLevel>0?'❤️':'');
+h+='<div class="char-card'+(npcActed?' locked':'')+'" draggable="'+(npcActed?'false':'true')+'" '+(npcActed?'':'ondragstart="onDragStart(event,\''+id+'\')"')+' onclick="interactNpc(\''+id+'\')"><div class="char-card-badge" style="background:rgba('+rgb+',.3);color:'+nc.color+'">'+nc.name+'</div><div class="char-card-portrait">'+nPortrait+'</div>'+(ni.romanceLevel>0?'<div class="cc-love"><div class="cc-love-fill" style="width:'+ni.affinity+'%"></div></div>':'<div class="cc-aff"><div class="cc-aff-fill" style="width:'+ni.affinity+'%"></div></div>')+'<div class="char-card-info"><div class="char-card-name">'+n.name+loveIcon+'</div><div class="char-card-sub">'+(ni.recruited?'已招募':'好感'+ni.affinity)+(npcActed?' · 已行动':'')+'</div></div></div>';
+});
+document.getElementById('bottom-bar').innerHTML=h;
+}
+
+function setTab(tab){
+G.currentTab=tab;
+let scenes={events:'campus',social:'campus',market:'market',clubs:'campus',compete:'race_track',thesis:'book_shop'};
+if(G.currentTab==='clubs'){
+let cl=COLLEGES[G.player.college];
+if(cl)setScene(cl.scene);
+}else{
+setScene(scenes[tab]||'campus');
+}
+renderAll();
+}
+
+// ===== DRAG & DROP (Multi-character system) =====
+function onDragStart(event,npcId){
+// Check if this character already acted today
+if(G.charActions&&G.charActions[npcId]){
+showModal('已行动','该角色今天已经安排了行动，结束今日后才能再次安排。',[{text:'返回',onClick:hideModal}]);
+return;
+}
+G.draggedNpc=npcId;
+event.dataTransfer.effectAllowed='move';
+event.dataTransfer.setData('text/plain',npcId);
+event.currentTarget.classList.add('dragging');
+}
+function onDragOver(event){event.preventDefault();event.dataTransfer.dropEffect='move';event.currentTarget.classList.add('drag-over');}
+function onDragLeave(event){event.currentTarget.classList.remove('drag-over');}
+function onDrop(event,eventId){
+event.preventDefault();event.currentTarget.classList.remove('drag-over');
+let npcId=G.draggedNpc;if(!npcId)return;
+// Check if character already acted
+if(G.charActions&&G.charActions[npcId]){
+showModal('已行动','该角色今天已经安排了行动。',[{text:'返回',onClick:hideModal}]);
+return;
+}
+G.draggedNpc=null;
+document.querySelectorAll('.char-card.dragging').forEach(e=>e.classList.remove('dragging'));
+confirmEvent(eventId,npcId);
+}
+
+function confirmEvent(eventId,npcId){
+let evs=getAvailableEvents();
+let evt=evs.find(e=>e.id===eventId);
+if(!evt)return;
+let npcName=npcId==='player'?'你':NPCS[npcId].name;
+showModal('确认事件','<div style="color:var(--gold);margin-bottom:8px">'+evt.title+'</div><div style="color:var(--txt2);margin-bottom:8px">执行者: '+npcName+'</div>'+(evt.diceTarget?'<div style="color:var(--txt3);font-size:12px">将投掷双骰+'+evt.attrName+'，需要达到'+evt.diceTarget+'才算成功</div>':''),[
+{text:'确认执行',onClick:()=>{hideModal();executeEvent(eventId,npcId,evt);}},
+{text:'取消',onClick:hideModal}
+]);
+}
+
+// ===== EXECUTE EVENT (stores action for later resolution) =====
+function executeEvent(eventId,npcId,evt){
+if(!G.charActions)G.charActions={};
+G.charActions[npcId]=eventId;
+if(evt.scene)setScene(evt.scene);
+let p=G.player;
+let isPlayer=npcId==='player';
+let n=isPlayer?null:NPCS[npcId];
+let npcName=isPlayer?'你':n.name;
+log(npcName+' 安排了: '+evt.title,'event');
+renderAll();
+showModal('行动已安排','<div style="color:var(--gold);margin-bottom:8px">'+npcName+' → '+evt.title+'</div><div style="color:var(--txt2)">该行动将在"结束今日"时结算。你可以继续安排其他角色行动。</div>',[{text:'继续安排',onClick:()=>{hideModal();renderAll();}}]);
+}
+
+// ===== RESOLVE ALL ACTIONS (called on endDay) =====
+function resolveAllActions(){
+let p=G.player;
+let results=[];
+if(!G.charActions||Object.keys(G.charActions).length===0)return results;
+for(let npcId in G.charActions){
+let eventId=G.charActions[npcId];
+let isPlayer=npcId==='player';
+let n=isPlayer?null:NPCS[npcId];
+let ni=isPlayer?null:G.npcs[npcId];
+let npcName=isPlayer?'你':n.name;
+let result={npcId,npcName,eventId,success:true,msg:'',effects:{}};
+if(eventId==='class'){
+let course=COURSES[Math.floor(Math.random()*Math.min(COURSES.length,3+p.semester))];
+let gain=course.knowledgeGain;
+if(!isPlayer)gain=Math.floor(gain*0.6);
+p.knowledge+=gain;p.windOrderExp+=rand(5,10);p.stress+=3;
+let hw={subject:course.name,type:course.homeworkType,done:false,days:p.day};
+p.homework.push(hw);p.classCount++;
+result.msg=npcName+'上了'+course.name+'，知识+'+gain;
+result.effects={knowledge:gain};
+}
+else if(eventId==='train'){
+let gain=rand(2,5);if(!isPlayer)gain=Math.floor(gain*0.6);
+p.combat+=gain;p.stamina-=rand(2,4);p.stress+=5;p.windOrderExp+=rand(3,8);
+result.msg=npcName+'训练，战力+'+gain;result.effects={combat:gain};
+}
+else if(eventId==='meditate'){
+let gain=rand(2,5);if(!isPlayer)gain=Math.floor(gain*0.6);
+p.perception+=gain;p.stress-=rand(10,15);p.windOrderExp+=rand(2,5);
+result.msg=npcName+'冥想，感知+'+gain;result.effects={perception:gain};
+}
+else if(eventId==='lounge'){
+let hpGain=rand(15,25),stressGain=rand(-20,-10),stamGain=rand(3,5);
+p.hp=clamp(p.hp+hpGain,0,p.maxHp);p.stress=clamp(p.stress+stressGain,0,100);p.stamina+=stamGain;
+result.msg=npcName+'在休息室休息，生命+'+hpGain;result.effects={hp:hpGain};
+}
+else if(eventId==='stroll'){
+let unmet=Object.keys(G.npcs).filter(id=>!G.npcs[id].met);
+if(unmet.length>0&&Math.random()<0.5){
+let id=pick(unmet);
+G.npcs[id].met=true;
+G.npcs[id].affinity+=5;
+result.msg=npcName+'闲逛时认识了'+NPCS[id].name;
+result.effects={meetNpc:id};
+}else{
+let g=rand(2,4);p.charisma+=g;p.stress-=3;
+result.msg=npcName+'闲逛，魅力+'+g;result.effects={charisma:g};
+}
+}
+else if(eventId==='library'){
+let gain=rand(5,12);if(!isPlayer)gain=Math.floor(gain*0.6);
+p.windOrderExp+=gain;p.knowledge+=rand(2,4);
+result.msg=npcName+'在图书馆研究，修为+'+gain;result.effects={knowledge:rand(2,4)};
+if(p.perception>=15&&Math.random()<0.3&&!p.truthFragments.find(t=>t.id===1)){
+discoverTruth(1);
+}
+}
+else if(eventId==='homework'){
+if(p.windPens>=1){
+p.windPens--;p.homework=[];p.homeworkDone++;
+result.msg=npcName+'完成了作业';result.effects={homework:1};
+}else{
+result.msg=npcName+'想做作业但风痕笔不够！';result.success=false;
+}
+}
+else if(eventId==='club_act'){
+if(p.clubs.length>0){
+let cid=p.clubs[0];let c=CLUBS_DATA[cid];
+if(c){
+p.credits+=c.effects.credits||0;
+for(let k in c.effects){if(k!=='credits'&&k!=='stress')p[k]=(p[k]||0)+c.effects[k];}
+if(c.effects.stress)p.stress+=c.effects.stress;
+result.msg=npcName+'参加'+c.name+'，学分+'+(c.effects.credits||0);
+}
+}
+}
+else if(eventId==='frost_tree'){
+p.stress=clamp(p.stress-rand(15,25),0,100);p.perception+=1;
+result.msg=npcName+'在霜余树下静坐，压力降低';
+}
+else if(eventId==='canteen_visit'){
+// Canteen: weather-based menu
+let mi=MONTHS[p.month-1];
+let menu=CANTEEN_MENU[mi.season]||CANTEEN_MENU.wind;
+let item=pick(menu);
+if(p.windGold>=item.price){
+p.windGold-=item.price;
+for(let k in item.effect){
+if(k==='stress')p.stress=clamp(p.stress+item.effect[k],0,100);
+else if(k==='hp')p.hp=clamp(p.hp+item.effect[k],0,p.maxHp);
+else p[k]=(p[k]||0)+item.effect[k];
+}
+result.msg=npcName+'在食堂吃了'+item.name+'（'+mi.icon+mi.name+'天气菜单）';
+result.effects=item.effect;
+}else{
+result.msg=npcName+'去了食堂但钱不够！';
+result.success=false;
+}
+}
+else if(eventId.startsWith('job_')){
+let jobData=JOBS.find(j=>'job_'+j.id===eventId);
+if(jobData){
+let attrVal=isPlayer?(p[jobData.reqAttr]||0):5;
+let bonus=Math.floor(attrVal/3);
+let d1=rand(1,6),d2=rand(1,6);
+let total=d1+d2+bonus;
+let success=total>=jobData.diceTarget;
+let reward=success?jobData.reward:Math.floor(jobData.reward/2);
+p.windGold+=reward;
+let attrGain=success?2:1;
+p[jobData.reqAttr]=(p[jobData.reqAttr]||0)+attrGain;
+p.stress+=rand(3,6);p.stamina-=rand(2,4);
+result.msg=npcName+'打工'+(success?'成功':'失败')+' (骰子:'+d1+'+'+d2+'+'+bonus+'='+total+'/'+jobData.diceTarget+')，获得'+reward+'风金';
+result.success=success;result.dice={d1,d2,bonus,total,target:jobData.diceTarget};
+}
+}
+results.push(result);
+// NPC affinity gain for helping
+if(!isPlayer&&ni){ni.affinity=clamp(ni.affinity+rand(2,5),0,100);}
+// Check love events
+if(!isPlayer&&ni&&ni.affinity>0){
+checkLoveEvent(npcId);
+}
+}
+// Cleanup
+p.stress=clamp(p.stress,0,100);p.hp=clamp(p.hp,0,p.maxHp);
+if(p.stress>=100){p.hp-=10;p.stress=80;log('压力过大！生命-10','danger');}
+// Wind order breakthrough
+if(p.windOrderExp>=100&&p.windOrder<9){
+p.windOrder++;p.windOrderExp=0;p.maxHp+=20;p.hp=p.maxHp;
+showModal('修为突破！','气核深处共鸣震荡——<br><br><b style="color:var(--gold);font-size:16px">'+WIND_ORDERS[p.windOrder-1].name+'</b><br><br><span style="color:var(--txt2)">'+WIND_ORDERS[p.windOrder-1].desc+'</span>',[{text:'继续',onClick:()=>{hideModal();renderAll();}}]);
+}
+return results;
+}
+
+// ===== SHOW YESTERDAY RESULTS (with dice animation) =====
+function showYesterdayResults(results){
+if(!results||results.length===0)return;
+let html='<div style="max-height:400px;overflow-y:auto">';
+results.forEach((r,idx)=>{
+let color=r.success?'var(--green)':'var(--red)';
+let diceInfo=r.dice?'<div style="font-size:16px;color:var(--gold);margin:4px 0">🎲 '+r.dice.d1+' + '+r.dice.d2+' + '+r.dice.bonus+' = '+r.dice.total+' (目标: '+r.dice.target+')</div>':'';
+html+='<div class="yesterday-entry '+(r.success?'success':'fail')+'">'+
+'<div class="event-name">'+r.npcName+' → '+(r.success?'✅':'❌')+'</div>'+
+'<div class="result" style="color:'+color+'">'+r.msg+'</div>'+
+diceInfo+
+'</div>';
+});
+html+='</div>';
+let panel=document.getElementById('yesterday-content');
+if(panel){
+panel.innerHTML=html;
+document.getElementById('yesterday-overlay').classList.add('show');
+}else{
+// Fallback to modal
+showModal('📋 昨日结算',html,[{text:'继续',onClick:()=>{hideModal();renderAll();}}]);
+}
+}
+
+function closeYesterday(){
+document.getElementById('yesterday-overlay').classList.remove('show');
+renderAll();
+}
+
+// ===== NPC INTERACTION =====
+function interactNpc(id){
+let n=NPCS[id],ni=G.npcs[id];
+if(!ni.met)return;
+let c=COLLEGES[n.college]||{color:'#888',badge:'badge-gold',name:'无灵者'};
+let svg=getNpcPortraitImg(id,80);
+let loveIcon=ni.romanceBroken?'💔 恋人线已断裂':(ni.romanceLevel>0?'❤️ 恋人':'');
+let opts=[
+{text:'聊天 (+好感)',onClick:()=>{let g=rand(3,8);ni.affinity=clamp(ni.affinity+g,0,100);log('与'+n.name+'聊天，好感+'+g,'event');hideModal();checkLoveEvent(id);renderAll();}},
+{text:'切磋 (+好感/战力)',onClick:()=>{let g=rand(2,5);ni.affinity=clamp(ni.affinity+g,0,100);G.player.combat+=1;log('与'+n.name+'切磋，好感+'+g+'，战力+1','event');hideModal();renderAll();}},
+{text:'送礼物',onClick:()=>{showGiftList(id);}}
+];
+if(ni.affinity>=30&&!ni.recruited)opts.push({text:'招募加入阵营 (好感'+ni.affinity+'/30)',onClick:()=>tryRecruit(id)});
+if(ni.affinity>=40&&n.subj!=='无'){
+opts.push({text:'学习技能: '+n.subj+' (好感40+)',onClick:()=>learnSkill(id)});
+}
+if(ni.affinity>=20&&!ni.romanceBroken&&ni.romanceLevel===0){
+opts.push({text:'❤️ 表达心意 (好感20+)',onClick:()=>expressFeelings(id),styleClass:' love'});
+}
+if(ni.affinity>=50){
+if(id==='fang_yan'&&!G.player.truthFragments.find(t=>t.id===1))opts.push({text:'询问关于论文的事',onClick:()=>{discoverTruth(1);hideModal();renderAll();}});
+if(id==='qi_yuan'&&!G.player.faction)opts.push({text:'与校长深谈',onClick:()=>triggerFactionEvent('guifeng')});
+if(id==='zhuo_yun'&&!G.player.faction)opts.push({text:'请求加入守密人',onClick:()=>triggerFactionEvent('shoumi')});
+if(id==='lu_ji'&&!G.player.truthFragments.find(t=>t.id===2))opts.push({text:'请他演奏雨铃',onClick:()=>{discoverTruth(2);hideModal();renderAll();}});
+}
+if(G.player.spirits.length>0){
+opts.push({text:'🕊️ 用风精传信',onClick:()=>sendSpiritMessage(id)});
+}
+showModal(n.name+' '+loveIcon,
+'<div style="text-align:center;margin-bottom:8px">'+svg+'</div>'+
+'<div style="text-align:center;margin-bottom:8px"><span class="badge '+c.badge+'">'+c.name+'</span></div>'+
+'<div style="color:var(--txt2);margin-bottom:8px">'+n.desc+'</div>'+
+'<div>位置: '+n.baseLocation+'</div>'+
+'<div>好感度: '+ni.affinity+'/100 '+(ni.recruited?'· 已招募':'')+'</div>'+
+'<div class="bar" style="margin-top:4px"><div class="bar-fill '+(ni.romanceLevel>0?'bar-love':'bar-aff')+'" style="width:'+ni.affinity+'%"></div></div>',
+opts);
+}
+
+function showGiftList(npcId){
+let p=G.player;
+let n=NPCS[npcId];
+let owned=G.player.giftsOwned||{};
+let h='<div style="color:var(--txt2);margin-bottom:8px">选择要送给'+n.name+'的礼物：</div>';
+GIFTS.forEach(g=>{
+let boost=g.npcBoost[npcId]||0;
+if(boost>0){
+let count=owned[g.name]||0;
+if(count>0){
+h+='<div class="choice-btn" onclick="giveGift(\''+npcId+'\',\''+g.name+'\','+boost+')">'+g.name+' x'+count+' (好感+'+boost+')</div>';
+}
+}
+});
+if(!h.includes('choice-btn'))h+='<div style="color:var(--txt3);text-align:center;padding:12px">你还没有可赠送的礼物。去市集杂货铺购买！</div>';
+showModal('送礼物',h,[{text:'返回',onClick:()=>{hideModal();interactNpc(npcId);}}]);
+}
+
+function giveGift(npcId,giftName,boost){
+let ni=G.npcs[npcId];
+let oldAff=ni.affinity;
+ni.affinity=clamp(ni.affinity+boost,0,100);
+ni.giftCount=(ni.giftCount||0)+1;
+let owned=G.player.giftsOwned||(G.player.giftsOwned={});
+owned[giftName]--;
+log('送给'+NPCS[npcId].name+'一个'+giftName+'，好感+'+boost,'event');
+hideModal();
+// Check love events immediately - with popup!
+checkLoveEvent(npcId);
+renderAll();
+}
+
+function expressFeelings(id){
+let ni=G.npcs[id];
+if(ni.romanceBroken){showModal('无法表达心意','恋人线已断裂，你们只能做朋友。',[{text:'返回',onClick:hideModal}]);return;}
+if(G.player.charisma<8){showModal('魅力不足','你的魅力不够，表达心意可能被拒绝。需要魅力8+。',[{text:'返回',onClick:hideModal}]);return;}
+ni.romanceLevel=1;
+ni.affinity=clamp(ni.affinity+10,0,100);
+log('向'+NPCS[id].name+'表达了心意，成为恋人！','festival');
+showModal('❤️ 表白成功','<div style="text-align:center;color:var(--pink);font-size:18px;margin-bottom:12px">'+NPCS[id].name+' 接受了你的心意！</div><div style="color:var(--txt);text-align:center">你们现在是恋人关系了。</div>',[{text:'继续',onClick:()=>{hideModal();renderAll();}}]);
+}
+
+// ===== LOVE EVENT CHECK (with immediate popup) =====
+function checkLoveEvent(npcId){
+let ni=G.npcs[npcId];
+if(!ni)return;
+if(ni.romanceBroken)return;
+if(ni.romanceLevel===0&&ni.affinity<10)return;
+// Check all thresholds
+for(let i=LOVE_THRESHOLDS.length-1;i>=0;i--){
+let threshold=LOVE_THRESHOLDS[i];
+if(ni.affinity>=threshold&&!ni['loveEventDone_'+threshold]){
+ni['loveEventDone_'+threshold]=true;
+let ev=LOVE_EVENTS[threshold];
+if(!ev)continue;
+let desc=ev.desc.replace(/{name}/g,NPCS[npcId].name);
+let choices=ev.choices.map((c,idx)=>{
+let styleClass=c.style==='love'?' love':c.style==='danger'?' danger':'';
+return{text:c.text,onClick:()=>{
+if(c.effects.breakRomance){
+ni.romanceBroken=true;ni.romanceLevel=0;
+log('与'+NPCS[npcId].name+'的恋人线断裂！','danger');
+}
+if(c.effects.becomesLovers){
+ni.romanceLevel=2;ni.affinity=clamp(ni.affinity+10,0,100);
+}
+if(c.effects.married){
+G.player.married=npcId;ni.romanceLevel=3;
+log('与'+NPCS[npcId].name+'结为伴侣！','festival');
+}
+if(c.effects.aff){
+ni.affinity=clamp(ni.affinity+c.effects.aff,0,100);
+}
+if(c.effects.romanceUp&&ni.romanceLevel===0){
+ni.romanceLevel=1;
+}
+hideModal();renderAll();
+},styleClass:styleClass};
+});
+// IMMEDIATE popup!
+showModal('❤️ '+ev.title+' ('+NPCS[npcId].name+'好感'+threshold+')',desc,choices);
+return;
+}
+}
+}
+
+function learnSkill(id){
+let n=NPCS[id];
+let skills={wind:'疾风斩',cloud:'云盾术',thunder:'雷击术',rain:'雨幕壁',none:'气旋冲撞'};
+let skill=skills[n.college]||'气旋冲撞';
+G.player.combat+=3;
+log('从'+n.name+'处习得'+skill+'！战力+3','good');
+showModal('习得技能','<div style="color:var(--gold);font-size:16px;margin-bottom:8px">'+skill+'</div><div style="color:var(--txt)">从'+n.name+'处习得了新技能。战力+3。</div>',[{text:'继续',onClick:()=>{hideModal();renderAll();}}]);
+}
+
+function sendSpiritMessage(npcId){
+let p=G.player;
+if(p.spirits.length===0)return;
+let windSpirit=p.spirits.find(s=>s.type==='wind');
+if(!windSpirit){showModal('需要风精灵','只有风精灵可以送信。去风精坊购买！',[{text:'返回',onClick:hideModal}]);return;}
+let n=NPCS[npcId],ni=G.npcs[npcId];
+let replies=['收到你的信了。今天天气不错。','信已阅。有空来找我。','风精灵送来的信，我读了三遍。','谢谢你传来的消息。一切安好。','信已收到。近日可好？'];
+let reply=pick(replies);
+ni.affinity=clamp(ni.affinity+rand(3,6),0,100);
+log('用风精给'+n.name+'传信，好感+3','event');
+showModal('🕊️ 风精传信','<div style="color:var(--txt2);margin-bottom:8px">你的风精灵带着信飞向'+n.name+'...</div><div style="color:var(--gold);margin-bottom:8px">回复:</div><div style="color:var(--txt);font-style:italic">"'+reply+'"</div>',[{text:'继续',onClick:()=>{hideModal();checkLoveEvent(npcId);renderAll();}}]);
+}
+
+function showPlayerInfo(){
+let p=G.player;
+showModal(p.name,'<div style="text-align:center;margin-bottom:8px">'+getPlayerPortraitImg(p,80)+'</div><div style="color:var(--txt2)">学院: '+(COLLEGES[p.college]||{name:'无'}).name+'</div><div style="color:var(--txt2)">风序: '+WIND_ORDERS[p.windOrder-1].name+'</div>',[{text:'关闭',onClick:hideModal}]);
+}
+
+function meetNpc(id){
+let n=NPCS[id];G.npcs[id].met=true;
+let c=COLLEGES[n.college]||{color:'#888',badge:'badge-gold',name:'无灵者'};
+let svg=getNpcPortraitImg(id,80);
+showModal('相遇','<div style="text-align:center;margin-bottom:12px">'+svg+'</div><div style="text-align:center"><b style="color:var(--gold);font-size:16px">'+n.name+'</b> <span class="badge '+c.badge+'">'+c.name+'</span></div><br><div style="color:var(--txt2)">'+n.desc+'</div><br><div style="font-size:12px;color:var(--txt3)">位置: '+n.baseLocation+'</div>',
+[{text:'打招呼',onClick:()=>{G.npcs[id].affinity+=5;log('认识了'+n.name+'，好感+5','event');hideModal();renderAll();}},
+{text:'点头示意',onClick:()=>{G.npcs[id].affinity+=2;log('与'+n.name+'点头示意','event');hideModal();renderAll();}}]);
+}
+
+function tryRecruit(id){
+let n=NPCS[id],ni=G.npcs[id];
+if(ni.affinity<30){showModal('招募失败',n.name+'对你的好感还不够。',[{text:'返回',onClick:hideModal}]);return;}
+ni.recruited=true;log('成功招募'+n.name+'！','good');
+showModal('招募成功！','<b style="color:var(--green)">'+n.name+'</b> 已加入你的阵营！',[{text:'继续',onClick:()=>{hideModal();renderAll();}}]);
+}
+
+function discoverTruth(fragId){
+let frag=TRUTH_FRAGMENTS.find(f=>f.id===fragId);
+if(!frag||G.player.truthFragments.find(t=>t.id===fragId))return;
+G.player.truthFragments.push(frag);
+log('发现真相碎片：'+frag.title+'！','festival');
+showModal('🔮 真相碎片','<div style="color:var(--gold);font-size:16px;margin-bottom:12px">'+frag.title+'</div><div style="color:var(--txt);line-height:1.8">'+frag.desc+'</div><br><div style="color:var(--txt3);font-size:12px">已发现: '+G.player.truthFragments.length+'/7</div>',[{text:'继续',onClick:hideModal}]);
+}
+
+function triggerFactionEvent(fid){
+let f=FACTIONS[fid];
+showModal('阵营邀请','<div style="color:'+f.color+';font-size:16px;margin-bottom:8px">'+f.name+'</div><div style="font-style:italic;color:var(--txt2);margin-bottom:12px">"'+f.motto+'"</div><div style="color:var(--txt)">'+f.desc+'</div>',
+[{text:'加入'+f.name,onClick:()=>joinFaction(fid)},{text:'再考虑考虑',onClick:hideModal}]);
+}
+
+function joinFaction(fid){
+G.player.faction=fid;G.player.factionRank=1;
+log('加入阵营：'+FACTIONS[fid].name+'！','festival');
+showModal('阵营加入','你已成为<b style="color:'+FACTIONS[fid].color+'">'+FACTIONS[fid].name+'</b>的一员。',[{text:'继续',onClick:()=>{hideModal();renderAll();}}]);
+}
+
+function joinClub(cid){
+let c=CLUBS_DATA[cid],p=G.player;
+if(p.clubs.length>=4){showModal('无法加入','你已加入4个社团，达上限。',[{text:'返回',onClick:hideModal}]);return;}
+p.clubs.push(cid);p.clubPositions[cid]='成员';
+log('加入社团：'+c.name,'event');
+showModal('加入成功','你已加入<b style="color:var(--gold)">'+c.name+'</b>。<br><br><span style="color:var(--txt2)">'+c.desc+'</span>',[{text:'继续',onClick:()=>{hideModal();renderAll();}}]);
+}
+
+function campaignClub(cid,position){
+let p=G.player,c=CLUBS_DATA[cid],cr=position==='vice'?20:40;
+if(p.charisma<cr){showModal('竞选失败','你的魅力不足('+p.charisma+'/'+cr+')。',[{text:'返回',onClick:hideModal}]);return;}
+let roll=rand(1,100)+p.charisma,th=position==='vice'?50:70;
+if(roll>=th){
+p.clubPositions[cid]=position==='vice'?'副社长':'社长';
+log('成功当选'+c.name+(position==='vice'?'副社长':'社长')+'！','good');
+showModal('竞选成功！','你成功当选<b style="color:var(--green)">'+c.name+(position==='vice'?'副社长':'社长')+'</b>！',[{text:'继续',onClick:()=>{hideModal();renderAll();}}]);
+}else{
+log(c.name+'竞选失败','warning');
+showModal('竞选失败','差一点就成功了...再接再厉。',[{text:'继续',onClick:hideModal}]);
+}
+}
+
+// ===== SHOP FUNCTIONS =====
+function buyFood(name,price,effect){
+let p=G.player;if(p.windGold<price)return;
+p.windGold-=price;
+for(let k in effect){
+if(k==='stress')p.stress=clamp(p.stress+effect[k],0,100);
+else if(k==='hp')p.hp=clamp(p.hp+effect[k],0,p.maxHp);
+else p[k]=(p[k]||0)+effect[k];
+}
+let effName=Object.entries(effect).map(([k,v])=>k+'+'+v).join(',');
+p.foodEffect=name;p.foodEffectDays=2;
+log('购买'+name+'，获得食物效果','event');
+renderAll();
+}
+
+function buyMedicine(name,price,effect){
+let p=G.player;if(p.windGold<price)return;
+p.windGold-=price;
+for(let k in effect){
+if(k==='windPen')p.windPens+=effect[k];
+else if(k==='stress')p.stress=clamp(p.stress+effect[k],0,100);
+else if(k==='hp')p.hp=clamp(p.hp+effect[k],0,p.maxHp);
+else p[k]=(p[k]||0)+effect[k];
+}
+if(effect.hp){
+let healEl=MEDICINES.find(m=>m.name===name);
+if(healEl&&healEl.healsElement){
+p.injuries=p.injuries.filter(i=>i.element!==healEl.healsElement);
+}
+}
+log('购买'+name+'，花费'+price+'风金','event');
+renderAll();
+}
+
+function buyPen(price,count){
+let p=G.player;if(p.windGold<price)return;
+p.windGold-=price;p.windPens+=count;
+log('购买'+count+'支风痕笔','event');
+renderAll();
+}
+
+function buyGift(name,price,npcBoost){
+let p=G.player;if(p.windGold<price)return;
+p.windGold-=price;
+if(!p.giftsOwned)p.giftsOwned={};
+p.giftsOwned[name]=(p.giftsOwned[name]||0)+1;
+log('购买'+name+'作为礼物','event');
+renderAll();
+}
+
+function buySpirit(sid,price){
+let p=G.player;if(p.windGold<price)return;
+p.windGold-=price;
+if(!p.spirits.find(s=>s.type===sid)){
+p.spirits.push({type:sid,trained:false});
+let sp=SPIRITS[sid];
+log('驯服了一只'+sp.name+'！','good');
+showModal('精灵驯服！','<div style="text-align:center;font-size:32px;margin-bottom:8px">'+sp.icon+'</div><div style="color:var(--gold);font-size:16px;text-align:center;margin-bottom:8px">'+sp.name+'</div><div style="color:var(--txt2)">'+sp.desc+'</div><div style="color:var(--txt3);font-size:12px;margin-top:8px">能力: '+sp.ability+' | '+sp.rarity+'</div>',[{text:'继续',onClick:hideModal}]);
+}else{
+showModal('已有该精灵','你已经拥有'+SPIRITS[sid].name+'了。',[{text:'返回',onClick:hideModal}]);
+}
+renderAll();
+}
+
+function buyOutfit(outfitId,price){
+let p=G.player;if(p.windGold<price)return;
+p.windGold-=price;
+p.appearance.outfit=outfitId;
+log('更换服装为'+OUTFIT_NAMES[outfitId],'event');
+renderAll();
+}
+
+function buyCostume(costumeId,price){
+let p=G.player;
+let cp=COSTUME_PORTRAITS.find(c=>c.id===costumeId);
+if(!cp)return;
+// 校验学期解锁
+if(p.semester<cp.semester){
+showModal('未解锁','<div style="color:var(--red);text-align:center">'+cp.name+'需第'+cp.semester+'学期后开放</div>',[{text:'知道了',onClick:hideModal}]);
+return;
+}
+// 校验好感度解锁
+if(cp.affinityReq){
+let curAff=G.npcs[cp.affinityReq.npc]?G.npcs[cp.affinityReq.npc].affinity:0;
+if(curAff<cp.affinityReq.val){
+let npcName=NPCS[cp.affinityReq.npc]?NPCS[cp.affinityReq.npc].name:'';
+showModal('未解锁','<div style="color:var(--red);text-align:center">'+cp.name+'需'+npcName+'好感度达'+cp.affinityReq.val+'（当前'+curAff+'）</div>',[{text:'知道了',onClick:hideModal}]);
+return;
+}
+}
+// 校验性别
+if(cp.gender!=='any'&&cp.gender!==p.gender){
+showModal('不适用','<div style="color:var(--red);text-align:center">此立绘不适用于你的性别</div>',[{text:'知道了',onClick:hideModal}]);
+return;
+}
+// 校验金币
+if(p.windGold<price){
+showModal('风金不足','<div style="color:var(--red);text-align:center">需要'+price+'风金，当前'+p.windGold+'风金</div>',[{text:'知道了',onClick:hideModal}]);
+return;
+}
+// 校验是否已拥有
+if(p.ownedCostumes&&p.ownedCostumes.includes(costumeId)){
+showModal('已拥有','<div style="color:var(--txt2);text-align:center">你已经拥有'+cp.name+'了</div>',[{text:'知道了',onClick:hideModal}]);
+return;
+}
+p.windGold-=price;
+if(!p.ownedCostumes)p.ownedCostumes=[];
+p.ownedCostumes.push(costumeId);
+p.portraitId=costumeId;
+log('购买立绘: '+cp.name+'！（-'+price+'风金）','good');
+showModal('🎨 立绘已更换','<div style="text-align:center;margin-bottom:12px"><img src="'+cp.img+'" style="width:120px;height:140px;object-fit:cover;border-radius:8px;border:2px solid var(--gold)" /></div><div style="color:var(--gold);text-align:center;font-size:16px;margin-bottom:8px">'+cp.name+'</div><div style="color:var(--txt2);text-align:center">'+cp.desc+'</div><div style="color:var(--green);text-align:center;margin-top:8px">已设为当前立绘</div>',[{text:'继续',onClick:()=>{hideModal();renderAll();}}]);
+}
+
+// ===== 换装系统（换装功能） =====
+function showWardrobe(){
+let p=G.player;
+let h='';
+// 默认服装
+h+='<div style="margin-bottom:12px"><div style="font-size:14px;color:var(--gold);margin-bottom:8px">默认服装</div>';
+h+='<div class="wardrobe-grid">';
+// 原始学院制服
+let defaultOutfit=p.appearance&&p.appearance.outfit?p.appearance.outfit:p.college||'casual';
+let defaultName=OUTFIT_NAMES[defaultOutfit]||'学院制服';
+let isActive=!p.portraitId;
+h+='<div class="wardrobe-item '+(isActive?'active':'')+'" onclick="changeCostume(null)">';
+h+='<div style="width:80px;height:100px;margin:0 auto;display:flex;align-items:center;justify-content:center">'+getPlayerPortraitImg({...p,portraitId:null},80)+'</div>';
+h+='<div class="wardrobe-item-name">'+defaultName+' (默认)</div>';
+h+='</div>';
+h+='</div></div>';
+// 已购服装
+if(p.ownedCostumes&&p.ownedCostumes.length>0){
+h+='<div style="margin-bottom:12px"><div style="font-size:14px;color:var(--gold);margin-bottom:8px">已购服装</div>';
+h+='<div class="wardrobe-grid">';
+p.ownedCostumes.forEach(cid=>{
+let cp=COSTUME_PORTRAITS.find(c=>c.id===cid);
+if(!cp)return;
+let isActive2=p.portraitId===cid;
+h+='<div class="wardrobe-item '+(isActive2?'active':'')+'" onclick="changeCostume(\''+cid+'\')">';
+h+='<img src="'+cp.img+'" alt="'+cp.name+'" />';
+h+='<div class="wardrobe-item-name">'+cp.name+(isActive2?' ✓':'')+'</div>';
+h+='</div>';
+});
+h+='</div></div>';
+}else{
+h+='<div style="text-align:center;color:var(--txt3);padding:20px">还没有购买任何服装。去市集的立绘坊看看吧！</div>';
+}
+document.getElementById('wardrobe-content').innerHTML=h;
+document.getElementById('wardrobe-overlay').classList.add('show');
+}
+function changeCostume(costumeId){
+let p=G.player;
+if(costumeId===null){
+// 换回默认服装（学院制服）
+p.portraitId=null;
+let defaultOutfit=p.college||'casual';
+p.appearance.outfit=defaultOutfit;
+log('换回了默认服装','event');
+}else{
+let cp=COSTUME_PORTRAITS.find(c=>c.id===costumeId);
+if(!cp)return;
+p.portraitId=costumeId;
+log('换上了 '+cp.name,'event');
+}
+closeWardrobe();
+renderAll();
+}
+function closeWardrobe(){
+document.getElementById('wardrobe-overlay').classList.remove('show');
+}
+
+// ===== 事件详情弹窗（点击事件查看+选角色） =====
+let currentEventDetailId=null;
+let selectedEventCharId=null;
+
+function openEventDetail(eventId){
+currentEventDetailId=eventId;
+selectedEventCharId=null;
+let evs=getAvailableEvents();
+let evt=evs.find(e=>e.id===eventId);
+if(!evt)return;
+// 设置背景图
+let sceneId=evt.scene||HOVER_SCENES[eventId]||'campus';
+let img=SCENE_IMG[sceneId];
+let bgEl=document.getElementById('event-detail-bg');
+if(bgEl&&img)bgEl.style.backgroundImage='url("'+img+'")';
+// 标题和描述
+document.getElementById('event-detail-title').textContent=evt.title;
+let descHtml='<div style="font-size:14px;line-height:1.8">'+evt.desc+'</div>';
+if(evt.diceTarget){
+descHtml+='<div style="margin-top:8px;color:var(--txt3)">判定: 双骰+'+evt.attrName+' 对比 '+evt.diceTarget+'</div>';
+}
+// 检查是否已分配
+let assignedChar=Object.keys(G.charActions||{}).find(k=>G.charActions[k]===eventId);
+let withdrawBtn=document.getElementById('event-detail-withdraw');
+if(assignedChar){
+withdrawBtn.style.display='inline-block';
+let nn=assignedChar==='player'?'你':NPCS[assignedChar].name;
+descHtml+='<div style="margin-top:8px;color:var(--green)">✓ 已派遣: '+nn+'</div>';
+}else{
+withdrawBtn.style.display='none';
+}
+document.getElementById('event-detail-desc').innerHTML=descHtml;
+// 角色选择
+let charHtml='';
+let p=G.player;
+// 玩家
+let pActed=G.charActions&&G.charActions['player'];
+if(!pActed||assignedChar==='player'){
+charHtml+='<button class="event-detail-char-btn '+(selectedEventCharId==='player'?'selected':'')+'" onclick="selectEventChar(\'player\',event)">你 '+(COLLEGES[p.college]||{name:''}).name+'</button>';
+}
+// NPC
+let met=Object.keys(G.npcs).filter(id=>G.npcs[id].met);
+let handNpcs=met.filter(id=>G.npcs[id].recruited||G.npcs[id].affinity>=30);
+handNpcs.forEach(id=>{
+let n=NPCS[id];
+let npcActed=G.charActions&&G.charActions[id];
+if(!npcActed||assignedChar===id){
+charHtml+='<button class="event-detail-char-btn '+(selectedEventCharId===id?'selected':'')+'" onclick="selectEventChar(\''+id+'\',event)">'+n.name+'</button>';
+}
+});
+if(charHtml==='')charHtml='<div style="color:var(--txt3);font-size:12px">没有可用角色（都已安排行动）</div>';
+document.getElementById('event-detail-chars').innerHTML=charHtml;
+// 显示弹窗
+document.getElementById('event-detail-overlay').classList.add('show');
+}
+function selectEventChar(npcId,ev){
+selectedEventCharId=npcId;
+let btns=document.querySelectorAll('.event-detail-char-btn');
+btns.forEach(btn=>btn.classList.remove('selected'));
+if(ev&&ev.currentTarget)ev.currentTarget.classList.add('selected');
+}
+function confirmEventDetail(){
+if(!selectedEventCharId||!currentEventDetailId){
+showModal('提示','请先选择一个角色！',[{text:'知道了',onClick:hideModal}]);
+return;
+}
+// 检查是否已行动
+if(G.charActions&&G.charActions[selectedEventCharId]){
+showModal('已行动','该角色今天已经安排了行动。',[{text:'返回',onClick:hideModal}]);
+return;
+}
+let evs=getAvailableEvents();
+let evt=evs.find(e=>e.id===currentEventDetailId);
+if(!evt)return;
+document.getElementById('event-detail-overlay').classList.remove('show');
+executeEvent(currentEventDetailId,selectedEventCharId,evt);
+}
+function withdrawFromEvent(){
+if(!currentEventDetailId)return;
+let assignedChar=Object.keys(G.charActions||{}).find(k=>G.charActions[k]===currentEventDetailId);
+if(assignedChar){
+delete G.charActions[assignedChar];
+let nn=assignedChar==='player'?'你':NPCS[assignedChar].name;
+let ev=findEventById(currentEventDetailId);
+log('撤回 '+nn+' 的 '+(ev?ev.title:currentEventDetailId)+' 行动','event');
+document.getElementById('event-detail-overlay').classList.remove('show');
+renderAll();
+}
+}
+function closeEventDetail(){
+document.getElementById('event-detail-overlay').classList.remove('show');
+currentEventDetailId=null;
+selectedEventCharId=null;
+}
+
+// ===== 撤回功能 =====
+function undoAction(npcId){
+if(!G.charActions||!G.charActions[npcId])return;
+let evId=G.charActions[npcId];
+let ev=findEventById(evId);
+let nn=npcId==='player'?'你':NPCS[npcId].name;
+delete G.charActions[npcId];
+log('撤回 '+nn+' 的 '+(ev?ev.title:evId)+' 行动','event');
+renderAll();
+}
+
+// ===== BGM音乐系统 =====
+const BGM_TRACKS={
+calm:'https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3',
+battle:'https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c90f7e66.mp3',
+joy:'https://cdn.pixabay.com/download/audio/2022/11/22/audio_febc508520.mp3'
+};
+let bgmAudio=null;
+let bgmEnabled=false;
+let currentBgmType='calm';
+
+function initBGM(){
+if(!bgmAudio){
+bgmAudio=new Audio();
+bgmAudio.loop=true;
+bgmAudio.volume=0.3;
+}
+}
+function playBGM(type){
+if(!bgmEnabled)return;
+initBGM();
+if(currentBgmType===type&&bgmAudio.paused===false)return;
+currentBgmType=type;
+bgmAudio.src=BGM_TRACKS[type]||BGM_TRACKS.calm;
+bgmAudio.play().catch(function(e){});
+updateBGMControl();
+}
+function toggleBGM(){
+bgmEnabled=!bgmEnabled;
+if(bgmEnabled){
+playBGM(currentBgmType);
+}else{
+if(bgmAudio)bgmAudio.pause();
+}
+updateBGMControl();
+}
+function updateBGMControl(){
+let el=document.getElementById('bgm-control');
+if(el){
+el.textContent='♪ 音乐: '+(bgmEnabled?'开('+getBgmTypeName(currentBgmType)+')':'关');
+}
+}
+function getBgmTypeName(type){
+let names={calm:'平静',battle:'战斗',joy:'欢乐'};
+return names[type]||'平静';
+}
+function switchBGMByScene(sceneType){
+if(!sceneType)return;
+let map={
+campus:'calm',market:'joy',combat:'battle',
+wind_college:'calm',cloud_college:'calm',thunder_college:'battle',rain_college:'calm',
+race_track:'joy',book_shop:'calm',bread_shop:'joy'
+};
+let newType=map[sceneType]||'calm';
+if(bgmEnabled)playBGM(newType);
+else currentBgmType=newType;
+}
+
+function buyHair(hairStyle){
+let p=G.player;if(p.windGold<10)return;
+p.windGold-=10;
+p.appearance.hair=hairStyle;
+log('更换发型','event');
+renderAll();
+}
+
+// ===== COMBAT =====
+function startCombat(opponentId){
+let p=G.player;
+let n=NPCS[opponentId]||{name:'对手',combat:10,element:'wind'};
+let pElement=p.element;
+let oElement=n.element||n.college||'wind';
+let pPower=p.combat*2+p.windOrder*3+rand(1,20);
+let oPower=(n.combat||10)*2+rand(1,20);
+let pAdv=ELEMENTS[pElement]&&ELEMENTS[pElement].strongVs===oElement;
+let oAdv=ELEMENTS[oElement]&&ELEMENTS[oElement].strongVs===pElement;
+if(pAdv)pPower*=1.3;
+if(oAdv)oPower*=1.3;
+let win=pPower>=oPower;
+let injuryChance=win?0.2:0.6;
+let injuryElement=oElement;
+let dmg=win?rand(5,15):rand(15,30);
+p.hp=clamp(p.hp-dmg,0,p.maxHp);
+if(Math.random()<injuryChance){
+p.injuries.push({element:injuryElement,days:3});
+log('战斗中受到了'+ELEMENTS[injuryElement].name+'系伤害！','danger');
+}
+let reward=win?rand(10,20):0;
+p.windGold+=reward;
+log((win?'战胜':'战败于')+n.name+'！'+(win?'获得'+reward+'风金':'生命-'+dmg),win?'good':'danger');
+showModal('⚔️ 战斗结果',
+'<div style="text-align:center;font-size:20px;margin-bottom:12px;color:'+(win?'var(--green)':'var(--red)')+'">'+(win?'胜利！':'败北...')+'</div>'+
+'<div style="color:var(--txt2);margin-bottom:8px">你的元素: '+ELEMENTS[pElement].icon+ELEMENTS[pElement].name+(pAdv?' (克制)':'')+'</div>'+
+'<div style="color:var(--txt2);margin-bottom:8px">对手元素: '+ELEMENTS[oElement].icon+ELEMENTS[oElement].name+(oAdv?' (克制你)':'')+'</div>'+
+'<div style="color:var(--txt)">伤害: '+dmg+(win?' | 奖励: '+reward+'风金':'')+'</div>'+
+(p.injuries.length>0?'<div style="color:var(--red);margin-top:8px">受到'+ELEMENTS[injuryElement].name+'系伤害，需要对应药品治疗！</div>':''),
+[{text:'继续',onClick:()=>{hideModal();renderAll();}}]);
+}
+
+// ===== COMPETITIONS =====
+function startCompetition(compId){
+let p=G.player;
+let comp=COMPETITIONS.find(c=>c.id===compId);
+if(!comp)return;
+if(comp.scene)setScene(comp.scene);
+let myPower=comp.calc(p);
+let opponents=[];
+for(let i=0;i<5;i++){
+let npcNames=Object.keys(NPCS).filter(id=>G.npcs[id].met);
+let nid=npcNames[i]||Object.keys(NPCS)[i];
+let n=NPCS[nid];
+opponents.push({name:n?n.name:'对手'+(i+1),power:comp.calc({combat:n?n.combat||10:10,perception:n?5:5,charisma:n?5:5,knowledge:n?5:5,stamina:n?5:5,windOrder:rand(1,5)})});
+}
+opponents.push({name:'你',power:myPower});
+opponents.sort((a,b)=>b.power-a.power);
+let pos=opponents.findIndex(o=>o.name==='你')+1;
+let rewards={1:{gold:100,credits:3},2:{gold:50,credits:2},3:{gold:30,credits:1}};
+let rw=rewards[pos]||{gold:10,credits:0};
+p.windGold+=rw.gold;p.credits+=rw.credits;
+p.compHistory.push({id:compId,name:comp.name,semester:p.semester,position:pos});
+log(comp.name+': 第'+pos+'名！'+(rw.gold>0?rw.gold+'风金':''),pos<=3?'festival':'event');
+let pc=pos===1?'gold':pos===2?'silver':pos===3?'bronze':'other';
+showModal('🏆 '+comp.name,
+'<div class="race-pos '+pc+'" style="font-size:24px;font-weight:bold;text-align:center;margin-bottom:12px">第'+pos+'名</div>'+
+'<div style="text-align:center;color:var(--txt)">你的成绩: '+myPower+'</div>'+
+'<div style="color:var(--txt2);margin-top:8px;font-size:12px">奖励: '+rw.gold+'风金'+(rw.credits>0?' +'+rw.credits+'学分':'')+'</div>',
+[{text:'继续',onClick:()=>{hideModal();renderAll();}}]);
+}
+
+// ===== THESIS =====
+function submitThesisTopic(){
+let input=document.getElementById('thesis-topic-input');
+let topic=input.value.trim();
+if(topic.length<10){showModal('字数不足','选题方向至少需要10个字。请详细描述你的毕业论文方向。',[{text:'返回',onClick:hideModal}]);return;}
+G.player.thesisStage=1;G.player.thesisTopic=topic;
+log('提交了毕业论文选题方向','event');
+showModal('选题已提交','<div style="color:var(--green);margin-bottom:8px">选题方向已备案。</div><div style="color:var(--txt2);font-size:12px">你的选题: '+topic.substring(0,50)+'...</div><div style="color:var(--txt3);margin-top:8px">下一步: 大四第一学期提交完整方案，反复修改。</div>',[{text:'继续',onClick:()=>{hideModal();renderAll();}}]);
+}
+
+function submitThesisRevision(){
+let p=G.player;
+let input=document.getElementById('thesis-revise-input');
+if(input){
+let revised=input.value.trim();
+if(revised.length<10){showModal('字数不足','方案至少需要10个字。',[{text:'返回',onClick:hideModal}]);return;}
+p.thesisTopic=revised;
+}
+p.thesisRevisions++;
+let score=p.knowledge+p.perception*2+p.charisma+p.windOrder*10;
+let threshold=200+p.thesisRevisions*5;
+let styleBonus=p.college==='wind'?10:p.college==='cloud'?15:p.college==='thunder'?5:p.college==='rain'?10:0;
+score+=styleBonus;
+if(score>=threshold){
+p.thesisApproved=true;p.thesisStage=3;
+p.thesisFeedback='方案通过！创新性、可行性、安全性均达标。获得执行许可。';
+log('毕业论文方案通过审核！修改了'+p.thesisRevisions+'次','good');
+showModal('✅ 方案通过！','<div style="color:var(--green);font-size:16px;margin-bottom:8px">恭喜！你的毕业论文方案已通过审核！</div><div style="color:var(--txt)">修改次数: '+p.thesisRevisions+'</div><div style="color:var(--txt2);margin-top:8px">你已获得执行许可。前往论文页面执行毕业论文。</div>',[{text:'继续',onClick:()=>{hideModal();renderAll();}}]);
+}else{
+let reasons=['创新性不足："这个方案与已有论文结构过于相似"','可行性存疑："气旋的维持时间不足以支撑论文落地"','安全性风险："论文执行可能对下界造成不可控影响"','理论不够充分："核心机制的推导过程存在逻辑断层"','能量预算超标："方案预估消耗的气核能量超出安全阈值"'];
+let reason=pick(reasons);
+p.thesisFeedback=reason;
+log('论文被驳回（第'+p.thesisRevisions+'次）','warning');
+showModal('❌ 方案被驳回','<div style="color:var(--red);margin-bottom:8px">评审意见: '+reason+'</div><div style="color:var(--txt2)">修改次数: '+p.thesisRevisions+'</div>'+(p.thesisRevisions>=50?'<div style="color:var(--orange);margin-top:8px">"我快不认识自己的论文了..."</div>':''),[{text:'继续修改',onClick:()=>{hideModal();renderAll();}}]);
+}
+}
+
+function executeThesis(){
+let p=G.player;
+if(!p.thesisApproved)return;
+showModal('执行毕业论文','<div style="color:var(--gold);margin-bottom:12px">你即将前往地球执行毕业论文。</div><div style="color:var(--txt2);margin-bottom:12px">执行后，你的气核能量将耗尽，意识消散。这就是"消散"。</div><div style="color:var(--txt3)">你的论文: '+p.thesisTopic.substring(0,50)+'...</div>',
+[{text:'执行',onClick:()=>{
+p.thesisExecuted=true;p.thesisStage=4;
+log('毕业论文已执行！','festival');
+hideModal();triggerEnding('graduation');
+}},
+{text:'再等等',onClick:hideModal}]);
+}
+
+// ===== RANDOM EVENTS =====
+function triggerRandomEvent(){
+let ev=pick(RANDOM_EVENTS);
+let box=document.getElementById('rand-event-box');
+box.className='rand-event-box '+ev.type;
+document.getElementById('rand-event-title').textContent=ev.title;
+document.getElementById('rand-event-desc').textContent=ev.desc;
+let ch='';
+ev.choices.forEach((c,i)=>{
+let styleClass=c.style==='love'?' love':c.style==='danger'?' danger':'';
+ch+='<button class="choice-btn'+styleClass+'" onclick="resolveRandEvent('+i+')">'+c.text+'</button>';
+});
+document.getElementById('rand-event-choices').innerHTML=ch;
+document.getElementById('rand-event-overlay').classList.add('show');
+}
+
+function resolveRandEvent(idx){
+let ev=RANDOM_EVENTS.find(e=>e.title===document.getElementById('rand-event-title').textContent);
+if(!ev){document.getElementById('rand-event-overlay').classList.remove('show');return;}
+let choice=ev.choices[idx];
+let p=G.player;
+for(let k in choice.effects){
+if(k==='spirit'){
+if(!p.spirits.find(s=>s.type===choice.effects[k]))p.spirits.push({type:choice.effects[k],trained:false});
+}else if(k==='windGold'){
+p.windGold=clamp(p.windGold+choice.effects[k],0,9999);
+}else if(k==='stress'){
+p.stress=clamp(p.stress+choice.effects[k],0,100);
+}else if(k==='hp'){
+p.hp=clamp(p.hp+choice.effects[k],0,p.maxHp);
+}else{
+p[k]=(p[k]||0)+choice.effects[k];
+}
+}
+log('随机事件: '+ev.title,'event');
+document.getElementById('rand-event-overlay').classList.remove('show');
+renderAll();
+}
+
+// ===== SEASONAL EFFECTS =====
+function updateSeasonalEffect(){
+let p=G.player,mi=MONTHS[p.month-1];
+let overlay=document.getElementById('seasonal-overlay');
+let pt=mi.particle,count=30;
+if(pt==='snow')count=50;if(pt==='rain')count=60;if(pt==='spark')count=15;
+let parts='';
+for(let i=0;i<count;i++){
+let left=Math.random()*100,delay=Math.random()*5,dur=3+Math.random()*4,drift=(Math.random()-.5)*100,size=2+Math.random()*4,op=.3+Math.random()*.4,color='#fff';
+if(pt==='snow'){color='#a0d8ef';size=6+Math.random()*6;parts+='<div class="particle" style="left:'+left+'%;font-size:'+size+'px;color:'+color+';opacity:'+op+';animation-delay:'+delay+'s;animation-duration:'+dur*2+'s;--drift:'+drift*2+'px">❄</div>';continue;}
+if(pt==='rain'){color='#5b8def';parts+='<div class="particle" style="left:'+left+'%;width:1px;height:15px;background:'+color+';opacity:'+op+';animation-delay:'+delay+'s;animation-duration:'+dur+'s;--drift:'+drift+'px"></div>';continue;}
+if(pt==='spark'||pt==='light'){color=pt==='light'?'#ffd700':'#c77dff';size=1+Math.random()*3;parts+='<div class="particle" style="left:'+left+'%;width:'+size+'px;height:'+size+'px;background:'+color+';border-radius:50%;box-shadow:0 0 '+size*2+'px '+color+';opacity:'+op+';animation-delay:'+delay+'s;animation-duration:'+dur+'s;--drift:'+drift+'px"></div>';continue;}
+if(pt==='cloud'){color='#b0c4de';size=8+Math.random()*8;op=.1;parts+='<div class="particle" style="left:'+left+'%;width:'+size+'px;height:'+size*.6+'px;background:'+color+';border-radius:50%;opacity:'+op+';animation-delay:'+delay+'s;animation-duration:'+dur*3+'s;--drift:'+drift*.5+'px"></div>';continue;}
+color=pt==='leaf'?'#52d869':pt==='petal'?'#ffb6c1':pt==='dust'?'#d4af37':pt==='frost'?'#a0d8ef':pt==='ash'?'#888':'#fff';
+parts+='<div class="particle" style="left:'+left+'%;width:'+size+'px;height:'+size+'px;background:'+color+';border-radius:50%;opacity:'+op+';animation-delay:'+delay+'s;animation-duration:'+dur+'s;--drift:'+drift+'px"></div>';
+}
+overlay.innerHTML=parts;
+}
+
+// ===== DAY / SEMESTER (with yesterday results popup) =====
+function endDay(){
+let p=G.player;
+// Resolve all actions and collect results
+let results=resolveAllActions();
+// Show yesterday results popup (if any actions were taken)
+if(results.length>0){
+// Show results with dice info
+setTimeout(()=>{
+showYesterdayResults(results);
+// Also log results
+results.forEach(r=>{log(r.msg,r.success?'event':'danger');});
+},300);
+}
+// Reset daily limits
+G.charActions={};
+G.todayEventId=null;G.todayEventNpc=null;
+G.todayInteractNpc=null;G.todayInteractCount=0;
+for(let id in G.npcs)G.npcs[id].interactedToday=0;
+// Advance day
+p.day++;
+p.hp=clamp(p.hp+5,0,p.maxHp);
+p.stress=clamp(p.stress-3,0,100);
+// Food effect countdown
+if(p.foodEffect){
+p.foodEffectDays--;
+if(p.foodEffectDays<=0){p.foodEffect=null;}
+}
+// Injury healing
+p.injuries=p.injuries.filter(i=>{i.days--;return i.days>0;});
+G.dayPhase=(G.dayPhase+1)%4;
+if(p.hp<=0){triggerEnding('death');return;}
+if(p.day>G.semesterDays){
+if(!G.excursionDone){triggerExcursion();return;}
+triggerExam();return;
+}
+if(p.day%2===0)p.month=(p.month%12)+1;
+// Festival check
+if(p.day===15){
+let f=FESTIVALS.find(f=>f.month===p.month);
+if(f&&!G.flags['fest_'+f.name+'_'+p.month]){
+G.flags['fest_'+f.name+'_'+p.month]=true;
+triggerFestival(f);return;
+}
+}
+log('新的一天开始了','');
+renderAll();
+// Random event (30% chance)
+if(Math.random()<0.3){
+setTimeout(()=>triggerRandomEvent(),800);
+}
+}
+
+function triggerFestival(f){
+let p=G.player;
+if(f.scene)setScene(f.scene);
+for(let k in f.effects)p[k]=(p[k]||0)+f.effects[k];
+p.stress=clamp(p.stress,0,100);
+log('节日：'+f.name+'！','festival');
+let acts=f.activities||['参加活动'];
+let choices=acts.map(a=>({text:a,onClick:()=>{
+if(a.includes('恋人')||a.includes('虹桥')){
+let lover=Object.keys(G.npcs).find(id=>G.npcs[id].romanceLevel>=2);
+if(lover){
+G.npcs[lover].affinity=clamp(G.npcs[lover].affinity+10,0,100);
+log('和'+NPCS[lover].name+'一起参加了'+f.name,'festival');
+showModal('节日时光','<div style="color:var(--pink);text-align:center">你和'+NPCS[lover].name+'一起度过了美好的'+f.name+'。</div><div style="color:var(--txt2);margin-top:8px">好感+10</div>',[{text:'继续',onClick:()=>{hideModal();renderAll();}}]);
+}else{
+showModal('没有恋人','你现在没有恋人关系的NPC。先找个对象吧！',[{text:'继续',onClick:()=>{hideModal();renderAll();}}]);
+}
+}else{
+p.stress=clamp(p.stress-5,0,100);
+renderAll();
+hideModal();
+}
+}}));
+showModal('🎉 '+f.name,'<div style="color:var(--txt)">'+f.desc+'</div><div style="color:var(--txt2);margin-top:8px">选择你的活动：</div>',choices.length>0?choices:[{text:'继续',onClick:()=>{hideModal();renderAll();}}]);
+}
+
+function triggerExcursion(){
+let ex=EXCURSIONS.find(e=>e.semester===G.player.semester);
+if(!ex){G.excursionDone=true;triggerExam();return;}
+if(ex.scene)setScene(ex.scene);
+showModal('🗺️ 远足','<div style="color:var(--gold);font-size:16px;margin-bottom:8px">第'+G.player.semester+'学期远足：'+ex.name+'</div><div style="color:var(--txt2);margin-bottom:12px">'+ex.desc+'</div><div style="color:var(--txt3);font-size:12px">奖励: '+Object.entries(ex.effects).map(([k,v])=>k+'+'+v).join('，')+'</div>',
+[{text:'出发',onClick:()=>{
+let p=G.player;for(let k in ex.effects)p[k]=(p[k]||0)+ex.effects[k];
+p.stress=clamp(p.stress,0,100);
+log('远足完成：'+ex.name+'！','festival');
+if(p.semester===5&&!p.truthFragments.find(t=>t.id===3))discoverTruth(3);
+if(p.semester===4&&p.perception>=15&&!p.truthFragments.find(t=>t.id===1))discoverTruth(1);
+G.excursionDone=true;
+if(Math.random()<.3){
+let st=pick(['wind','cloud','rain','thunder','frost','fog']);
+if(!p.spirits.find(s=>s.type===st)){
+p.spirits.push({type:st,trained:false});
+let sp=SPIRITS[st];
+showModal('精灵驯服！','远足途中遇到了<b style="color:'+sp.color+'">'+sp.name+'</b>！<br><br>'+sp.desc+'<br><br>能力: '+sp.ability,[{text:'收下',onClick:hideModal}]);
+log('驯服了一只'+sp.name+'！','good');
+}
+}
+hideModal();triggerExam();
+}},{text:'准备一下',onClick:hideModal}]);
+}
+
+function triggerExam(){
+let p=G.player,exam=EXAM_REQS.find(e=>e.semester===p.semester);
+if(!exam){advanceSemester();return;}
+let passed=p.knowledge>=exam.minKnowledge&&p.credits>=exam.minCredits&&p.homeworkDone>=exam.minHomework&&p.classCount>=exam.minClass;
+let wo=true;
+if(p.semester>=4&&p.windOrder<3)wo=false;
+if(p.semester>=6&&p.windOrder<4)wo=false;
+if(p.semester>=7&&p.windOrder<5)wo=false;
+if(p.semester===6&&p.thesisStage<1){passed=false;}
+passed=passed&&wo;
+if(passed){
+log('考试通过！'+exam.name,'good');
+showModal('✅ 考试通过','<div style="color:var(--green);font-size:16px;margin-bottom:12px">'+exam.name+' - 通过</div><div>知识: '+p.knowledge+'/'+exam.minKnowledge+' ✓</div><div>学分: '+p.credits+'/'+exam.minCredits+' ✓</div><div>作业: '+p.homeworkDone+'/'+exam.minHomework+' ✓</div><div>上课: '+p.classCount+'/'+exam.minClass+' ✓</div><div>风序: '+p.windOrder+' ✓</div>',
+[{text:'进入下一学期',onClick:()=>{hideModal();advanceSemester();}}]);
+}else{
+let reasons=[];
+if(p.knowledge<exam.minKnowledge)reasons.push('知识不足('+p.knowledge+'/'+exam.minKnowledge+')');
+if(p.credits<exam.minCredits)reasons.push('学分不足('+p.credits+'/'+exam.minCredits+')');
+if(p.homeworkDone<exam.minHomework)reasons.push('作业不足('+p.homeworkDone+'/'+exam.minHomework+')');
+if(p.classCount<exam.minClass)reasons.push('上课不足('+p.classCount+'/'+exam.minClass+')');
+if(!wo)reasons.push('风序未达标');
+if(p.semester===6&&p.thesisStage<1)reasons.push('未提交论文选题');
+log('考试未通过：'+reasons.join('，'),'danger');
+showModal('❌ 考试未通过','<div style="color:var(--red);font-size:16px;margin-bottom:12px">'+exam.name+' - 未通过</div><div style="color:var(--red)">原因: '+reasons.join('，')+'</div><br><div style="color:var(--orange)">你被淘汰退学了。</div>',
+[{text:'结束',onClick:()=>{hideModal();triggerEnding('eliminated');}}]);
+}
+}
+
+function advanceSemester(){
+let p=G.player;
+G.excursionDone=false;p.semester++;
+if(p.semester>8){triggerEnding('graduation');return;}
+p.year=Math.ceil(p.semester/2);p.day=1;
+p.credits=0;
+p.creditsNeeded=[2,3,3,4,4,4,3,2][p.semester-1]||3;
+p.homeworkDone=0;p.classCount=0;p.homework=[];
+p.knowledge=Math.floor(p.knowledge*.75);
+let at=TRUTH_FRAGMENTS.find(t=>t.triggerSemester===p.semester&&!p.truthFragments.find(f=>f.id===t.id));
+if(at&&p.perception>=10)discoverTruth(at.id);
+if(p.semester>=3&&!p.faction&&p.truthFragments.length>=2){
+showModal('阵营选择','你已发现足够多的真相碎片。<br><br>选择你的道路：',
+[{text:'加入归风者',onClick:()=>{joinFaction('guifeng');advanceSemester2();}},
+{text:'加入守密人',onClick:()=>{joinFaction('shoumi');advanceSemester2();}},
+{text:'加入信物守护者',onClick:()=>{joinFaction('xinwu');advanceSemester2();}},
+{text:'不加入',onClick:()=>{log('你选择不加入任何阵营','event');advanceSemester2();}}]);
+return;
+}
+advanceSemester2();
+}
+
+function advanceSemester2(){
+let p=G.player;
+let exam=EXAM_REQS.find(e=>e.semester===p.semester);
+log('进入第'+p.semester+'学期','event');
+let extraMsg='';
+if(p.semester===6)extraMsg='<div style="color:var(--red);margin-top:8px">⚠️ 本学期末需提交毕业论文选题方向！</div>';
+showModal('新学期','<div style="color:var(--gold);font-size:16px;margin-bottom:8px">大'+['一','二','三','四'][p.year-1]+' · 第'+p.semester+'学期</div>'+
+'<div>学期天数: '+G.semesterDays+'天</div>'+
+'<div>学分要求: '+p.creditsNeeded+'</div>'+
+'<div>知识及格线: '+(exam?exam.minKnowledge:0)+'</div>'+
+'<div>作业要求: '+(exam?exam.minHomework:0)+'份</div>'+
+'<div>上课要求: '+(exam?exam.minClass:0)+'次</div>'+
+extraMsg,
+[{text:'开始',onClick:()=>{hideModal();renderAll();}}]);
+}
+
+// ===== ENDINGS =====
+function determineEnding(){
+let p=G.player;
+if(!p.alive)return{title:'消散',desc:'你的气核在战斗中碎裂，意识如风中残烛般熄灭。没有人记得你的名字。',quote:'"所有没有被记住名字的人，都走过同一条走廊，推开过同一扇门。"'};
+if(p.graduated){
+if(p.married){
+let n=NPCS[p.married];
+return{title:'伴侣结局：风与爱同在',desc:'你从穹霄圣所毕业了，与'+n.name+'携手走过穹门。你的论文留在了地球上，而你们的记忆留在了彼此心中。',quote:'"不管风把吹到哪里，我想和你在一起。"'};
+}
+if(p.faction==='guifeng'&&p.truthFragments.length>=5)return{title:'归风者结局：风从地球吹回来',desc:'你在最终答辩中公开了论文制度的真相——毕业论文就是往地球送天象，消散就是献祭。变革开始了。风，终于从地球那边吹了回来。',quote:'"我们不是叛逆者。我们只是记住了——风从哪里来。"'};
+if(p.faction==='shoumi'&&p.truthFragments.length>=5)return{title:'守密人结局：被遗忘的守护',desc:'你选择守护秘密。你用余生确保没有人再发现真相。你自己的名字，也终将被遗忘。',quote:'"不是所有真相都该被知道。"'};
+if(p.faction==='xinwu'&&p.windOrder>=7)return{title:'信物守护者结局：与信物共生',desc:'你成为了四神信物的守护者。金色风船选择了你。你与信物建立了深度共鸣，用余生守护着四神留下的记忆。',quote:'"信物不是工具。信物是记忆。"'};
+if(p.faction===null&&p.truthFragments.length>=6&&p.windOrder>=8)return{title:'破壁者结局：九序归真',desc:'你不属于任何阵营。你理解了完整的能量循环。你的气核与天地循环完全融合——你成为了五千年来第二个达到九序的人。',quote:'"风起初不在高处——它只是最早睁开眼睛的那一个。"'};
+return{title:'毕业结局：风不停，路不止',desc:'你从穹霄圣所毕业了。你走过了穹门，执行了你的毕业论文。你消散了，但你的天气留了下来。',quote:'"他们最后都会变成天气，只是变成的天气不一样。"'};
+}
+return{title:'退学结局',desc:'你被穹霄圣所淘汰了。你离开了圣所，在风痕市集最远的陆块边缘开了一间很小的铺子。门口只挂一块旧木牌——"改到能过"。',quote:'"风不停，路不止。但不是每阵风都要走同一条路。"'};
+}
+
+function triggerEnding(type){
+if(G.endingTriggered)return;G.endingTriggered=true;
+if(type==='death'){G.player.alive=false;log('你倒下了...','danger');}
+if(type==='eliminated')log('你被淘汰退学了...','danger');
+if(type==='graduation'){G.player.graduated=true;log('你毕业了！','good');}
+G.currentTab='events';renderAll();
+}
+
+// ===== MODAL & UTILS =====
+function showModal(title,body,choices){
+document.getElementById('modal-title').innerHTML=title;
+document.getElementById('modal-body').innerHTML=body;
+let ch='';
+if(choices&&choices.length>0)choices.forEach((c,i)=>{
+let cls='choice-btn';
+if(c.styleClass)cls+=c.styleClass;
+ch+='<button class="'+cls+'" onclick="modalChoice('+i+')">'+c.text+'</button>';
+});
+else ch='<button class="choice-btn" onclick="hideModal()">继续</button>';
+document.getElementById('modal-choices').innerHTML=ch;
+document.getElementById('modal-overlay').classList.add('show');
+window._modalChoices=choices||[];
+}
+function modalChoice(i){
+let c=window._modalChoices[i];
+if(c&&c.onClick)c.onClick();
+else hideModal();
+}
+function hideModal(){
+document.getElementById('modal-overlay').classList.remove('show');
+window._modalChoices=[];
+}
+function log(msg,type=''){
+let d='大'+['一','二','三','四'][G.player.year-1]+'·'+G.player.semester+'学期·'+G.player.day+'天';
+G.eventLog.push({day:d,msg,type});
+}
+function clamp(v,min,max){return Math.max(min,Math.min(max,v));}
+function rand(min,max){return Math.floor(Math.random()*(max-min+1))+min;}
+function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
+function saveGame(){
+try{
+let save=JSON.parse(JSON.stringify(G));
+localStorage.setItem('qiongxiao_v3_save',JSON.stringify(save));
+showModal('存档成功','进度已保存。',[{text:'继续',onClick:hideModal}]);
+}catch(e){showModal('存档失败','无法保存: '+e.message,[{text:'继续',onClick:hideModal}]);}
+}
+function loadGame(){
+try{
+let s=localStorage.getItem('qiongxiao_v3_save');
+if(s){
+G=JSON.parse(s);
+document.getElementById('cc-screen').style.display='none';
+document.getElementById('wi-screen').style.display='none';
+document.getElementById('app').style.display='flex';
+renderAll();
+showModal('读档成功','进度已恢复。',[{text:'继续',onClick:hideModal}]);
+}else showModal('无存档','没有找到存档。',[{text:'继续',onClick:hideModal}]);
+}catch(e){showModal('读档失败','存档损坏: '+e.message,[{text:'继续',onClick:hideModal}]);}
+}
+function confirmRestart(){
+showModal('重新开始','确定要重新开始吗？当前进度将丢失。',[{text:'确定',onClick:()=>{hideModal();location.reload();}},{text:'取消',onClick:hideModal}]);
+}
+
+// ===== INIT =====
+window.addEventListener('dragend',function(e){document.querySelectorAll('.char-card.dragging').forEach(el=>el.classList.remove('dragging'));});
+setInterval(function(){if(G.player&&!G.endingTriggered){G.dayPhase=(G.dayPhase+1)%4;updateSeasonalEffect();updateDayNight();renderTopBar();}},60000);
+
+// Set world intro background
+document.getElementById('wi-bg').style.backgroundImage='url("'+SCENE_IMG.world+'")';
+initState();
+</script>
+</body>
+</html>
