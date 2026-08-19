@@ -926,46 +926,45 @@ button{font-family:inherit;cursor:pointer;border:none;outline:none;transition:al
 
 <script>
 // ===== SCENE IMAGES =====
-const IMG='';
 const SCENE_IMG={
-world:IMG+'image(1).png',campus:IMG+'image(2).png',
-wind_college:IMG+'image(3).png',wind_lounge:IMG+'image(4).png',
-cloud_college:IMG+'image(5).png',cloud_lounge:IMG+'image(6).png',
-thunder_college:IMG+'image(7).png',thunder_lounge:IMG+'image(8).png',
-rain_college:IMG+'image(9).png',rain_lounge:IMG+'image(10).png',
-race_track:IMG+'image(11).png',market:IMG+'image(12).png',
-spirit_shop:IMG+'image(13).png',stamp_shop:IMG+'image(14).png',
-pen_shop:IMG+'image(15).png',clothing_shop:IMG+'image(16).png',
-race_shop:IMG+'image(17).png',medicine_shop:IMG+'image(18).png',
-sound_shop:IMG+'image(19).png',book_shop:IMG+'image(20).png',
-grocery_shop:IMG+'image(21).png',bread_shop:IMG+'image(22).png',
-tea_stall:IMG+'image(23).png',guifeng_slope:IMG+'image(24).png',
-fest_wind:IMG+'image(25).png',fest_thunder:IMG+'image(26).png',
-fest_rain:IMG+'image(27).png',fest_music:IMG+'image(28).png',
-fest_fourgod:IMG+'image(29).png',fest_rainbow:IMG+'image(30).png',
-fest_cloudopen:IMG+'image(31).png',fest_gate:IMG+'image(32).png',
-fest_stillwind:IMG+'image(33).png',fest_snow:IMG+'image(34).png',
-exc_1a:IMG+'image(35).png',exc_1s:IMG+'image(36).png',
-exc_2a:IMG+'image(37).png',exc_2s:IMG+'image(38).png',
-exc_3a:IMG+'image(39).png',exc_3s:IMG+'image(40).png',
-exc_4a:IMG+'image(41).png',exc_4s:IMG+'image(42).png',
-item_copycore:IMG+'image(43).png',item_silentpen:IMG+'image(44).png',
-uniform_wind:IMG+'image(45).png',uniform_cloud:IMG+'image(46).png',
-uniform_thunder:IMG+'image(47).png',uniform_rain:IMG+'image(48).png',
-canteen:IMG+'image(48).png'
+world:'images/world/image(1).png',campus:'images/campus/image(2).png',
+wind_college:'images/campus/image(3).png',wind_lounge:'images/campus/image(4).png',
+cloud_college:'images/campus/image(5).png',cloud_lounge:'images/campus/image(6).png',
+thunder_college:'images/campus/image(7).png',thunder_lounge:'images/campus/image(8).png',
+rain_college:'images/campus/image(9).png',rain_lounge:'images/campus/image(10).png',
+race_track:'images/market/image(11).png',market:'images/market/image(12).png',
+spirit_shop:'images/market/image(13).png',stamp_shop:'images/market/image(14).png',
+pen_shop:'images/market/image(15).png',clothing_shop:'images/market/image(16).png',
+race_shop:'images/market/image(17).png',medicine_shop:'images/market/image(18).png',
+sound_shop:'images/market/image(19).png',book_shop:'images/market/image(20).png',
+grocery_shop:'images/market/image(21).png',bread_shop:'images/market/image(22).png',
+tea_stall:'images/market/image(23).png',guifeng_slope:'images/market/image(24).png',
+fest_wind:'images/festivals/image(25).png',fest_thunder:'images/festivals/image(26).png',
+fest_rain:'images/festivals/image(27).png',fest_music:'images/festivals/image(28).png',
+fest_fourgod:'images/festivals/image(29).png',fest_rainbow:'images/festivals/image(30).png',
+fest_cloudopen:'images/festivals/image(31).png',fest_gate:'images/festivals/image(32).png',
+fest_stillwind:'images/festivals/image(33).png',fest_snow:'images/festivals/image(34).png',
+exc_1a:'images/excursions/image(35).png',exc_1s:'images/excursions/image(36).png',
+exc_2a:'images/excursions/image(37).png',exc_2s:'images/excursions/image(38).png',
+exc_3a:'images/excursions/image(39).png',exc_3s:'images/excursions/image(40).png',
+exc_4a:'images/excursions/image(41).png',exc_4s:'images/excursions/image(42).png',
+item_copycore:'images/items/image(43).png',item_silentpen:'images/items/image(44).png',
+uniform_wind:'images/uniforms/image(45).png',uniform_cloud:'images/uniforms/image(46).png',
+uniform_thunder:'images/uniforms/image(47).png',uniform_rain:'images/uniforms/image(48).png',
+canteen:'images/campus/canteen.png'
 };
 
 // ===== MAP IMAGES =====
 const MAP_IMG={
-overview:'map-school-overview.png',
-layers:'map-school-layers.png',
-layer1:'layer-01-sanctum-hall.png',
-layer2:'layer-02-teaching-zone.png',
-layer3:'layer-03-four-academies.png',
-layer4:'layer-04-training-grounds.png',
-layer5:'layer-05-windmark-market.png',
-layer6:'layer-06-outer-defense.png',
-layer7:'layer-07-dome-gate.png'
+overview:'images/maps/map-school-overview.png',
+layers:'images/maps/map-school-layers.png',
+layer1:'images/maps/layer-01-sanctum-hall.png',
+layer2:'images/maps/layer-02-teaching-zone.png',
+layer3:'images/maps/layer-03-four-academies.png',
+layer4:'images/maps/layer-04-training-grounds.png',
+layer5:'images/maps/layer-05-windmark-market.png',
+layer6:'images/maps/layer-06-outer-defense.png',
+layer7:'images/maps/layer-07-dome-gate.png'
 };
 
 // ===== MAP LAYER DATA (hotspots per layer) =====
@@ -1067,46 +1066,46 @@ job_grocery_help:'grocery_shop',canteen_visit:'canteen'
 
 // ===== NPC PORTRAIT IMAGES =====
 const NPC_PORTRAITS={
-zhou_zhi:'npc-zhuozhi-20260819031000.png',
-lu_ji:'npc-luji-20260819031001.png',
-he_shi:'npc-heshi-20260819031002.png',
-shen_lan:'npc-shenlanyan-20260819031003.png',
-lu_wanju:'npc-luwanju-20260819031004.png',
-gu_chang:'npc-guchangfeng-v2-20260819033500.png',
-pei_chang:'npc-peichangqing-20260819031006.png',
-fang_yan:'npc-fangyan-20260819031007.png',
-zhuo_yun:'npc-zhuoyun-20260819031008.png',
-qi_yuan:'npc-qiyuan-20260819031009.png'
+zhou_zhi:'images/npc/npc-zhuozhi-20260819031000.png',
+lu_ji:'images/npc/npc-luji-20260819031001.png',
+he_shi:'images/npc/npc-heshi-20260819031002.png',
+shen_lan:'images/npc/npc-shenlanyan-20260819031003.png',
+lu_wanju:'images/npc/npc-luwanju-20260819031004.png',
+gu_chang:'images/npc/npc-guchangfeng-v2-20260819033500.png',
+pei_chang:'images/npc/npc-peichangqing-20260819031006.png',
+fang_yan:'images/npc/npc-fangyan-20260819031007.png',
+zhuo_yun:'images/npc/npc-zhuoyun-20260819031008.png',
+qi_yuan:'images/npc/npc-qiyuan-20260819031009.png'
 };
 
 // ===== PLAYER PORTRAITS (4 colleges x 2 genders = 8) =====
 const PLAYER_PORTRAITS={
-wind:{male:'player-wind-male-20260819033505.png',female:'player-wind-female-20260819033506.png'},
-cloud:{male:'player-cloud-male-20260819033507.png',female:'player-cloud-female-20260819033508.png'},
-thunder:{male:'player-thunder-male-20260819033501.png',female:'player-thunder-female-20260819033502.png'},
-rain:{male:'player-rain-male-20260819033503.png',female:'player-rain-female-20260819033504.png'}
+wind:{male:'images/player/player-wind-male-20260819033505.png',female:'images/player/player-wind-female-20260819033506.png'},
+cloud:{male:'images/player/player-cloud-male-20260819033507.png',female:'images/player/player-cloud-female-20260819033508.png'},
+thunder:{male:'images/player/player-thunder-male-20260819033501.png',female:'images/player/player-thunder-female-20260819033502.png'},
+rain:{male:'images/player/player-rain-male-20260819033503.png',female:'images/player/player-rain-female-20260819033504.png'}
 };
 
 // ===== COSTUME PORTRAITS (purchasable in clothing shop) =====
 const COSTUME_PORTRAITS=[
 // 第一档：第1学期开放，无好感度要求
-{id:'crimson_phoenix',name:'凤舞烈焰',desc:'红金色华服，如凤凰涅槃',price:30,img:'costume-crimson-phoenix-20260819033509.png',gender:'any',semester:1,affinityReq:null},
-{id:'moonlit_silver',name:'月华银辉',desc:'黑银配色，月光般清冷',price:32,img:'costume-moonlit-silver-20260819033510.png',gender:'any',semester:1,affinityReq:null},
-{id:'jade_bamboo',name:'翠竹清韵',desc:'绿金配色，竹影婆娑',price:30,img:'costume-jade-bamboo-20260819033511.png',gender:'any',semester:1,affinityReq:null},
-{id:'frost_winter',name:'凝霜傲雪',desc:'白蓝配色，冰清玉洁',price:35,img:'costume-frost-winter-20260819033512.png',gender:'any',semester:1,affinityReq:null},
-{id:'golden_sunset',name:'金霞落日',desc:'金橙配色，晚霞流光',price:30,img:'costume-golden-sunset-20260819033513.png',gender:'any',semester:1,affinityReq:null},
+{id:'crimson_phoenix',name:'凤舞烈焰',desc:'红金色华服，如凤凰涅槃',price:30,img:'images/costumes/costume-crimson-phoenix-20260819033509.png',gender:'any',semester:1,affinityReq:null},
+{id:'moonlit_silver',name:'月华银辉',desc:'黑银配色，月光般清冷',price:32,img:'images/costumes/costume-moonlit-silver-20260819033510.png',gender:'any',semester:1,affinityReq:null},
+{id:'jade_bamboo',name:'翠竹清韵',desc:'绿金配色，竹影婆娑',price:30,img:'images/costumes/costume-jade-bamboo-20260819033511.png',gender:'any',semester:1,affinityReq:null},
+{id:'frost_winter',name:'凝霜傲雪',desc:'白蓝配色，冰清玉洁',price:35,img:'images/costumes/costume-frost-winter-20260819033512.png',gender:'any',semester:1,affinityReq:null},
+{id:'golden_sunset',name:'金霞落日',desc:'金橙配色，晚霞流光',price:30,img:'images/costumes/costume-golden-sunset-20260819033513.png',gender:'any',semester:1,affinityReq:null},
 // 第二档：第2学期开放，需指定NPC好感度>=20
-{id:'tang_imperial',name:'唐宫华裳',desc:'唐制宫廷风，红金雍容',price:50,img:'costume-tang-imperial-female-20260819034500.png',gender:'female',semester:2,affinityReq:{npc:'shen_lan',val:20}},
-{id:'heian_japanese',name:'平安十二单',desc:'日本平安时代，粉樱层叠',price:55,img:'costume-japanese-heian-female-20260819034501.png',gender:'female',semester:2,affinityReq:{npc:'pei_chang',val:20}},
-{id:'korean_hanbok',name:'韩制韩服',desc:'青绿米白，朝鲜风情',price:50,img:'costume-korean-hanbok-female-20260819034502.png',gender:'female',semester:2,affinityReq:{npc:'he_shi',val:20}},
-{id:'vietnamese_aodai',name:'越制奥黛',desc:'蓝银凤纹，越南韵味',price:55,img:'costume-vietnamese-aodai-female-20260819034503.png',gender:'female',semester:2,affinityReq:{npc:'lu_ji',val:20}},
-{id:'ming_porcelain',name:'明制青花',desc:'白蓝相映，青花瓷纹',price:60,img:'costume-ming-porcelain-female-20260819034504.png',gender:'female',semester:2,affinityReq:{npc:'lu_wanju',val:20}},
+{id:'tang_imperial',name:'唐宫华裳',desc:'唐制宫廷风，红金雍容',price:50,img:'images/costumes/costume-tang-imperial-female-20260819034500.png',gender:'female',semester:2,affinityReq:{npc:'shen_lan',val:20}},
+{id:'heian_japanese',name:'平安十二单',desc:'日本平安时代，粉樱层叠',price:55,img:'images/costumes/costume-japanese-heian-female-20260819034501.png',gender:'female',semester:2,affinityReq:{npc:'pei_chang',val:20}},
+{id:'korean_hanbok',name:'韩制韩服',desc:'青绿米白，朝鲜风情',price:50,img:'images/costumes/costume-korean-hanbok-female-20260819034502.png',gender:'female',semester:2,affinityReq:{npc:'he_shi',val:20}},
+{id:'vietnamese_aodai',name:'越制奥黛',desc:'蓝银凤纹，越南韵味',price:55,img:'images/costumes/costume-vietnamese-aodai-female-20260819034503.png',gender:'female',semester:2,affinityReq:{npc:'lu_ji',val:20}},
+{id:'ming_porcelain',name:'明制青花',desc:'白蓝相映，青花瓷纹',price:60,img:'images/costumes/costume-ming-porcelain-female-20260819034504.png',gender:'female',semester:2,affinityReq:{npc:'lu_wanju',val:20}},
 // 第三档：第3学期开放，需指定NPC好感度>=40
-{id:'song_ruqun',name:'宋制襦裙',desc:'粉米色系，水墨山水',price:70,img:'costume-song-ruqun-female-20260819034505.png',gender:'female',semester:3,affinityReq:{npc:'shen_lan',val:40}},
-{id:'tibetan',name:'藏式盛装',desc:'松石珊瑚，高原风情',price:75,img:'costume-tibetan-female-20260819034506.png',gender:'female',semester:3,affinityReq:{npc:'qi_yuan',val:40}},
-{id:'weijin_fairy',name:'魏晋风骨',desc:'薰衣草白，仙气飘逸',price:80,img:'costume-weijin-fairy-female-20260819034507.png',gender:'female',semester:3,affinityReq:{npc:'zhuo_yun',val:40}},
-{id:'qinhan_warrior',name:'秦汉武甲',desc:'黑红战甲，将军气概',price:75,img:'costume-qinhan-warrior-male-20260819034508.png',gender:'male',semester:3,affinityReq:{npc:'zhou_zhi',val:40}},
-{id:'tang_warrior_f',name:'唐制女甲',desc:'红金女将甲，双剑英姿',price:80,img:'costume-tang-warrior-female-20260819034509.png',gender:'female',semester:3,affinityReq:{npc:'gu_chang',val:40}}
+{id:'song_ruqun',name:'宋制襦裙',desc:'粉米色系，水墨山水',price:70,img:'images/costumes/costume-song-ruqun-female-20260819034505.png',gender:'female',semester:3,affinityReq:{npc:'shen_lan',val:40}},
+{id:'tibetan',name:'藏式盛装',desc:'松石珊瑚，高原风情',price:75,img:'images/costumes/costume-tibetan-female-20260819034506.png',gender:'female',semester:3,affinityReq:{npc:'qi_yuan',val:40}},
+{id:'weijin_fairy',name:'魏晋风骨',desc:'薰衣草白，仙气飘逸',price:80,img:'images/costumes/costume-weijin-fairy-female-20260819034507.png',gender:'female',semester:3,affinityReq:{npc:'zhuo_yun',val:40}},
+{id:'qinhan_warrior',name:'秦汉武甲',desc:'黑红战甲，将军气概',price:75,img:'images/costumes/costume-qinhan-warrior-male-20260819034508.png',gender:'male',semester:3,affinityReq:{npc:'zhou_zhi',val:40}},
+{id:'tang_warrior_f',name:'唐制女甲',desc:'红金女将甲，双剑英姿',price:80,img:'images/costumes/costume-tang-warrior-female-20260819034509.png',gender:'female',semester:3,affinityReq:{npc:'gu_chang',val:40}}
 ];
 
 // Helper: get NPC portrait image HTML
