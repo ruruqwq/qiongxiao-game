@@ -425,6 +425,7 @@ button{font-family:inherit;cursor:pointer;border:none;outline:none;transition:al
 
 /* v3.0: Mobile Settings Button */
 #mobile-settings-btn{display:none;padding:4px 8px;font-size:18px;background:none;border:none;color:var(--gold);cursor:pointer}
+#mobile-menu-btn{display:none;padding:4px 8px;font-size:20px;background:none;border:none;color:var(--gold);cursor:pointer;margin-right:8px}
 
 /* v3.0: Settings Panel */
 #settings-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:6000;backdrop-filter:blur(4px)}
@@ -524,15 +525,92 @@ button{font-family:inherit;cursor:pointer;border:none;outline:none;transition:al
   .tb-btn{padding:3px 8px;font-size:11px}
   .desktop-only{display:none!important}
   #mobile-settings-btn{display:inline-block}
-  #left-panel{width:100%;position:fixed;bottom:170px;left:0;right:0;z-index:50;max-height:200px;border-right:none;border-top:1px solid var(--border);display:none;overflow-y:auto}
-  #left-panel.mobile-show{display:block}
+  #mobile-menu-btn{display:inline-block}
+  /* 移动端左侧功能面板改为侧滑抽屉 */
+  #left-panel{width:70%;max-width:280px;position:fixed;top:0;left:0;bottom:0;z-index:100;border-right:1px solid var(--border);background:rgba(10,14,20,0.95);transform:translateX(-100%);transition:transform 0.3s ease;display:block!important;max-height:none;overflow-y:auto}
+  #left-panel.mobile-show{transform:translateX(0)}
+  #left-panel-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);z-index:99;display:none}
+  #left-panel-overlay.show{display:block}
+  .lp-btn-list{flex-direction:column;gap:6px;padding:12px}
+  .lp-btn-item{text-align:left;padding:12px 14px;font-size:13px}
+  .lp-btn-item .lp-btn-icon{display:inline-block;margin-right:8px;margin-bottom:0;font-size:16px}
   #mid-area{flex-direction:column}
-  #bottom-bar{height:140px}
-  .char-card{width:85px;height:125px}
-  .char-card-portrait{height:75px}
-  .lp-btn-list{flex-direction:row;flex-wrap:wrap;gap:4px;padding:6px}
-  .lp-btn-item{flex:1;min-width:60px;text-align:center;padding:8px 4px;font-size:11px}
-  .lp-btn-item .lp-btn-icon{display:block;margin-bottom:2px;margin-right:0}
+  #center-panel{width:100%;flex:1}
+  #event-area{padding:10px}
+  #bottom-bar{height:120px;padding:0 8px;gap:6px}
+  .char-card{width:75px;height:110px;flex-shrink:0}
+  .char-card-portrait{height:60px}
+  .char-card-portrait img,.char-card-portrait svg{width:55px;height:60px}
+  .char-card-name{font-size:10px}
+  /* Tab栏移动端水平滚动 */
+  .tabs{flex-wrap:nowrap;overflow-x:auto;white-space:nowrap;-webkit-overflow-scrolling:touch;gap:0;padding-bottom:4px}
+  .tab{flex-shrink:0;padding:7px 10px;font-size:12px;white-space:nowrap}
+  /* BGM控制移动端位置调整 */
+  #bgm-control{bottom:130px;right:8px;font-size:10px;padding:3px 8px}
+  /* 面板移动端适配 */
+  .modal{max-width:95%!important;padding:20px!important}
+  .settings-panel{max-width:95%!important}
+  .wardrobe-panel{max-width:95%!important}
+  .exam-panel{max-width:95%!important;padding:20px!important}
+  .spirit-panel{max-width:95%!important}
+  .homework-panel{max-width:95%!important}
+  .yesterday-panel{max-width:95%!important;padding:16px!important}
+  .jealousy-panel{max-width:95%!important;padding:20px!important}
+  .copyhw-panel{max-width:95%!important;padding:20px!important}
+  .spriteking-panel{max-width:95%!important;padding:20px!important}
+  .clubtask-panel{max-width:95%!important}
+  .shop-panel{max-width:95%!important;padding:16px!important}
+  .event-detail-box{width:95%!important}
+  .event-detail-content{padding:16px!important}
+  /* 地图移动端适配 */
+  .map-container{width:100%!important;height:100vh!important;border-radius:0!important}
+  .map-stage{border-radius:0!important}
+  .map-hotspot{min-width:44px;min-height:44px}
+  .map-hotspot-icon{font-size:20px}
+  .map-hotspot-label{font-size:10px;padding:1px 4px}
+  .map-title{font-size:14px}
+  .map-back-btn{padding:5px 10px;font-size:11px}
+  .map-layer-btn{padding:5px 8px;font-size:10px}
+  .map-info-box{max-width:90%;padding:10px 14px}
+  .map-info-title{font-size:13px}
+  .map-info-desc{font-size:11px}
+  .map-close-btn{width:32px;height:32px;font-size:16px;top:8px;right:8px}
+  .map-layer-list{left:6px;gap:3px}
+  /* 场景弹窗移动端适配 */
+  .scene-popup-box{width:95%!important;max-height:95vh}
+  .scene-popup-img{max-height:220px}
+  .scene-popup-body{padding:14px}
+  .scene-popup-title{font-size:16px}
+  .scene-popup-desc{font-size:13px}
+  .scene-popup-event-btn{padding:8px 12px;font-size:12px}
+  /* 节日弹窗移动端适配 */
+  .festival-popup-img{max-height:280px}
+  /* 角色创建移动端适配 */
+  .cc-gender-opt{padding:14px 18px}
+  .cc-gender-opt .g-icon{font-size:24px}
+  .cc-appearance{grid-template-columns:repeat(2,1fr)!important}
+  #cc-screen h1{font-size:24px;letter-spacing:3px}
+  .wi-title{font-size:24px;letter-spacing:4px}
+  /* 随机事件弹窗移动端适配 */
+  .rand-event-box{width:92%!important;padding:16px!important}
+  .rand-event-title{font-size:15px}
+  .rand-event-desc{font-size:12px}
+  /* 事件卡片移动端间距 */
+  .event-card{padding:12px;margin-bottom:8px}
+  .event-title{font-size:14px}
+  .event-desc{font-size:12px}
+  .event-slot{min-height:48px;font-size:11px}
+  .event-actions{gap:6px}
+  .btn{padding:6px 12px;font-size:12px}
+  .log-entry{font-size:11px}
+  /* 模态对话框移动端 */
+  .modal{width:92%!important}
+  .choice-btn{padding:8px 12px;font-size:12px}
+  /* 顶部栏移动端 */
+  .tb-season,.tb-semester{font-size:10px}
+  .tb-time{font-size:11px}
+  /* 教程气泡移动端 */
+  .tut-bubble{max-width:90%!important;min-width:auto!important;font-size:12px;padding:14px 16px}
 }
 @media(max-width:1000px) and (min-width:769px){
   #left-panel{width:190px}
@@ -626,21 +704,22 @@ button{font-family:inherit;cursor:pointer;border:none;outline:none;transition:al
 <button class="btn tb-btn desktop-only" onclick="loadGame()">读档</button>
 <button class="btn tb-btn desktop-only" onclick="showWardrobe()">换装</button>
 <button class="btn tb-btn desktop-only" onclick="confirmRestart()">重开</button>
-<button id="mobile-settings-btn" onclick="showSettings()">⚙</button>
+<button id="mobile-menu-btn" onclick="toggleMobileMenu()">☰</button><button id="mobile-settings-btn" onclick="showSettings()">⚙</button>
 </div>
+<div id="left-panel-overlay" onclick="toggleMobileMenu()"></div>
 <div id="mid-area">
 <div id="left-panel">
 <div class="lp-btn-list">
-  <div class="lp-btn-item" onclick="showSettings()"><span class="lp-btn-icon">⚙</span>设置</div>
-  <div class="lp-btn-item" onclick="showPlayerPanel()"><span class="lp-btn-icon">👤</span>角色</div>
-  <div class="lp-btn-item" onclick="showStatsPanel()"><span class="lp-btn-icon">📊</span>属性</div>
-  <div class="lp-btn-item" onclick="showInventoryPanel()"><span class="lp-btn-icon">🎒</span>物品<span class="lp-btn-badge" id="inv-badge"></span></div>
-  <div class="lp-btn-item" onclick="showSpiritPanel()"><span class="lp-btn-icon">🕊</span>精灵<span class="lp-btn-badge" id="spirit-badge"></span></div>
-  <div class="lp-btn-item" onclick="showTruthPanel()"><span class="lp-btn-icon">🔮</span>真相碎片<span class="lp-btn-badge" id="truth-badge"></span></div>
-  <div class="lp-btn-item" onclick="showFactionPanel()"><span class="lp-btn-icon">🏛</span>阵营</div>
-  <div class="lp-btn-item" onclick="showElimPanel()"><span class="lp-btn-icon">⚠</span>淘汰进度<span class="lp-btn-badge" id="elim-badge">!</span></div>
-  <div class="lp-btn-item" onclick="showHomeworkPanel()"><span class="lp-btn-icon">📚</span>作业<span class="lp-btn-badge" id="hw-badge"></span></div>
-  <div class="lp-btn-item" onclick="showMap()"><span class="lp-btn-icon">🗺</span>地图</div>
+  <div class="lp-btn-item" onclick="hideMobileMenu();showSettings()"><span class="lp-btn-icon">⚙</span>设置</div>
+  <div class="lp-btn-item" onclick="hideMobileMenu();showPlayerPanel()"><span class="lp-btn-icon">👤</span>角色</div>
+  <div class="lp-btn-item" onclick="hideMobileMenu();showStatsPanel()"><span class="lp-btn-icon">📊</span>属性</div>
+  <div class="lp-btn-item" onclick="hideMobileMenu();showInventoryPanel()"><span class="lp-btn-icon">🎒</span>物品<span class="lp-btn-badge" id="inv-badge"></span></div>
+  <div class="lp-btn-item" onclick="hideMobileMenu();showSpiritPanel()"><span class="lp-btn-icon">🕊</span>精灵<span class="lp-btn-badge" id="spirit-badge"></span></div>
+  <div class="lp-btn-item" onclick="hideMobileMenu();showTruthPanel()"><span class="lp-btn-icon">🔮</span>真相碎片<span class="lp-btn-badge" id="truth-badge"></span></div>
+  <div class="lp-btn-item" onclick="hideMobileMenu();showFactionPanel()"><span class="lp-btn-icon">🏛</span>阵营</div>
+  <div class="lp-btn-item" onclick="hideMobileMenu();showElimPanel()"><span class="lp-btn-icon">⚠</span>淘汰进度<span class="lp-btn-badge" id="elim-badge">!</span></div>
+  <div class="lp-btn-item" onclick="hideMobileMenu();showHomeworkPanel()"><span class="lp-btn-icon">📚</span>作业<span class="lp-btn-badge" id="hw-badge"></span></div>
+  <div class="lp-btn-item" onclick="hideMobileMenu();showMap()"><span class="lp-btn-icon">🗺</span>地图</div>
 </div>
 </div>
 <div id="center-panel">
@@ -1659,15 +1738,27 @@ document.getElementById('tut-title').textContent=step.title;
 document.getElementById('tut-text').textContent=step.text;
 document.getElementById('tutorial-overlay').classList.add('show');
 let bubble=document.getElementById('tut-bubble');
+// 移动端：如果目标在left-panel中，自动打开侧滑菜单
+let isMobile=window.innerWidth<=768;
+if(isMobile&&step.target&&(step.target==='lp-stats'||step.target==='lp-elim')){
+  toggleMobileMenu();
+}
 if(step.target){
 let el=document.getElementById(step.target);
 if(el){
 let r=el.getBoundingClientRect();
-let bx=r.right+20,by=r.top+r.height/2-60;
-if(bx+440>window.innerWidth)bx=Math.max(20,r.left-440);
-if(by<10)by=10;
-if(by+200>window.innerHeight)by=window.innerHeight-220;
-bubble.style.left=bx+'px';bubble.style.top=by+'px';
+if(isMobile){
+  // 移动端：气泡居中显示
+  bubble.style.left='10px';
+  bubble.style.top='60px';
+  bubble.style.maxWidth=(window.innerWidth-20)+'px';
+}else{
+  let bx=r.right+20,by=r.top+r.height/2-60;
+  if(bx+440>window.innerWidth)bx=Math.max(20,r.left-440);
+  if(by<10)by=10;
+  if(by+200>window.innerHeight)by=window.innerHeight-220;
+  bubble.style.left=bx+'px';bubble.style.top=by+'px';
+}
 }else{
 bubble.style.left=(window.innerWidth/2-200)+'px';
 bubble.style.top=(window.innerHeight/2-100)+'px';
@@ -1692,6 +1783,22 @@ G.currentScene=sceneId;
 let img=SCENE_IMG[sceneId];
 if(img){document.getElementById('scene-bg').style.backgroundImage='url("'+img+'")';}
 switchBGMByScene(sceneId);
+}
+
+function toggleMobileMenu(){
+let lp=document.getElementById('left-panel');
+let ov=document.getElementById('left-panel-overlay');
+if(lp.classList.contains('mobile-show')){
+lp.classList.remove('mobile-show');
+ov.classList.remove('show');
+}else{
+lp.classList.add('mobile-show');
+ov.classList.add('show');
+}
+}
+function hideMobileMenu(){
+document.getElementById('left-panel').classList.remove('mobile-show');
+document.getElementById('left-panel-overlay').classList.remove('show');
 }
 
 // ===== MAP NAVIGATION SYSTEM =====
