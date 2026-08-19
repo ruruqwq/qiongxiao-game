@@ -419,13 +419,70 @@ button{font-family:inherit;cursor:pointer;border:none;outline:none;transition:al
 /* ===== 节日弹窗（图片居中+文字）===== */
 .festival-popup-img{width:100%;max-height:400px;object-fit:cover;border-radius:10px 10px 0 0;display:block}
 
-/* BGM控制 */
+/* 战斗系统 */
+#combat-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;z-index:5600;backdrop-filter:blur(8px)}
+#combat-overlay.show{display:flex}
+.combat-panel{background:rgba(17,24,32,0.9);border:2px solid var(--gold);border-radius:12px;max-width:600px;width:92%;max-height:90vh;overflow-y:auto;padding:24px;animation:modalIn .4s ease;backdrop-filter:blur(12px)}
+.combat-title{font-size:20px;color:var(--gold);text-align:center;margin-bottom:16px}
+.combat-scene{display:flex;align-items:center;justify-content:space-between;padding:12px;background:rgba(26,35,48,0.5);border-radius:8px;margin-bottom:16px}
+.combat-side{flex:1;text-align:center}
+.combat-vs{font-size:28px;color:var(--gold);font-weight:bold;padding:0 12px}
+.combat-avatar{width:70px;height:70px;margin:0 auto 8px;border-radius:8px;object-fit:cover;border:2px solid var(--border)}
+.combat-name{font-size:14px;color:var(--txt);margin-bottom:4px}
+.combat-hp-bar{height:8px;background:rgba(0,0,0,.5);border-radius:4px;overflow:hidden;margin:0 auto;max-width:120px}
+.combat-hp-fill{height:100%;border-radius:4px;transition:width .3s}
+.combat-hp-text{font-size:11px;color:var(--txt2);margin-top:2px}
+.combat-log{background:rgba(26,35,48,0.6);border:1px solid var(--border2);border-radius:6px;padding:10px;height:140px;overflow-y:auto;margin-bottom:16px;font-size:12px;line-height:1.8}
+.combat-log-entry{padding:2px 0;border-bottom:1px solid rgba(42,58,74,.2)}
+.combat-log-entry:last-child{border-bottom:none}
+.combat-log-player{color:var(--wind)}
+.combat-log-npc{color:var(--thunder)}
+.combat-log-damage{color:var(--red)}
+.combat-log-heal{color:var(--green)}
+.combat-actions{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.combat-actions-title{width:100%;text-align:center;font-size:13px;color:var(--txt2);margin-bottom:8px}
+.combat-element-btn{padding:8px 14px;background:rgba(26,35,48,0.6);border:1px solid var(--border2);border-radius:6px;color:var(--txt);font-size:13px;cursor:pointer;transition:all .15s}
+.combat-element-btn:hover{border-color:var(--gold)}
+.combat-element-btn.wind{border-color:var(--wind);color:var(--wind)}
+.combat-element-btn.cloud{border-color:var(--cloud);color:var(--cloud)}
+.combat-element-btn.thunder{border-color:var(--thunder);color:var(--thunder)}
+.combat-element-btn.rain{border-color:var(--rain);color:var(--rain)}
+.combat-element-btn:disabled{opacity:.3;cursor:not-allowed}
+.combat-result{text-align:center;font-size:18px;margin-bottom:12px}
+.combat-result.win{color:var(--green)}
+.combat-result.lose{color:var(--red)}
+.combat-result.draw{color:var(--gold)}
+
+/* 训练场熟练度面板 */
+.practice-panel{background:rgba(26,35,48,0.5);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px}
+.practice-title{font-size:14px;color:var(--gold);margin-bottom:8px}
+.practice-skill{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(42,58,74,.3)}
+.practice-skill:last-child{border-bottom:none}
+.practice-skill-name{font-size:12px;color:var(--txt)}
+.practice-skill-lvl{font-size:11px;color:var(--txt2)}
+.practice-skill-bar{height:6px;background:rgba(0,0,0,.4);border-radius:3px;width:120px;overflow:hidden}
+.practice-skill-fill{height:100%;border-radius:3px;transition:width .3s}
+
+/* 随便逛逛弹窗 */
+.stroll-result-img{width:100%;max-height:300px;object-fit:cover;border-radius:8px;margin-bottom:12px}
+  .stroll-result-text{color:var(--txt);line-height:1.8;margin-bottom:12px;font-size:14px}
+  /* 战斗系统移动端适配 */
+  .combat-panel{max-width:95%!important;padding:16px!important}
+  .combat-scene{flex-direction:column;gap:8px}
+  .combat-vs{font-size:20px}
+  .combat-avatar{width:50px;height:50px}
+  .combat-name{font-size:12px}
+  .combat-log{height:100px;font-size:11px}
+  .combat-element-btn{padding:6px 10px;font-size:11px}
+  .map-hotspot.stroll-btn{left:75%!important;top:3%!important;width:22%!important;height:10%!important}
 #bgm-control{position:fixed;bottom:180px;right:12px;z-index:100;background:rgba(17,24,32,0.7);border:1px solid var(--border);border-radius:20px;padding:4px 10px;font-size:11px;color:var(--txt3);cursor:pointer;backdrop-filter:blur(4px)}
 #bgm-control:hover{color:var(--gold)}
 
 /* v3.0: Mobile Settings Button */
 #mobile-settings-btn{display:none;padding:4px 8px;font-size:18px;background:none;border:none;color:var(--gold);cursor:pointer}
 #mobile-menu-btn{display:none;padding:4px 8px;font-size:20px;background:none;border:none;color:var(--gold);cursor:pointer;margin-right:8px}
+#end-day-btn{display:none;padding:5px 12px;font-size:12px;background:linear-gradient(135deg,rgba(138,109,26,0.85),rgba(212,175,55,0.85));color:#1a1a1a;font-weight:bold;border:1px solid var(--gold);border-radius:4px;cursor:pointer;margin-right:6px}
+#end-day-btn:hover{background:linear-gradient(135deg,rgba(170,141,42,0.9),rgba(244,208,63,0.9))}
 
 /* v3.0: Settings Panel */
 #settings-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:6000;backdrop-filter:blur(4px)}
@@ -526,6 +583,7 @@ button{font-family:inherit;cursor:pointer;border:none;outline:none;transition:al
   .desktop-only{display:none!important}
   #mobile-settings-btn{display:inline-block}
   #mobile-menu-btn{display:inline-block}
+  #end-day-btn{display:inline-block;padding:5px 10px;font-size:11px}
   /* 移动端左侧功能面板改为侧滑抽屉 */
   #left-panel{width:70%;max-width:280px;position:fixed;top:0;left:0;bottom:0;z-index:100;border-right:1px solid var(--border);background:rgba(10,14,20,0.95);transform:translateX(-100%);transition:transform 0.3s ease;display:block!important;max-height:none;overflow-y:auto}
   #left-panel.mobile-show{transform:translateX(0)}
@@ -647,15 +705,15 @@ button{font-family:inherit;cursor:pointer;border:none;outline:none;transition:al
 <div class="wi-quote">"风起初不在高处——它只是最早睁开眼睛的那一个。"</div>
 <h3>穹霄圣所</h3>
 <p>穹霄圣所是长风界唯一的学府，悬浮在苍瞳核心区。四大学院分别继承四神之力：驰风院（自由不羁）、栖云院（中庸包容）、鸣雷院（骄傲炽烈）、沉雨院（沉静坚韧）。</p>
-<p>学生在这里度过四年八个学期，学习控制气核、创造天气。最终的考核——毕业论文——要求学生亲自前往地球，执行一次完整的天气创造。</p>
-<div class="wi-quote">"他们最后都会变成天气，只是变成的天气不一样。"</div>
-<h3>毕业论文与消散</h3>
-<p>毕业论文不是学术研究，而是往地球送天象。每一次毕业论文执行，地球上就会多出一种非自然天气。执行完毕后，学生的气核能量耗尽，意识消散——这就是"消散"。</p>
-<p>消散的毕业生不会回到长风界。他们的名字可能被编入教材，也可能被遗忘。但从穹门走出来的那一刻，没有人会问"你改了几版"。</p>
+<p>学生在这里度过四年八个学期，学习控制气核、创造天气。最终的考核——毕业论文——是每一位学生必须完成的毕业试炼。至于它究竟意味着什么，没有人会直说。</p>
+<div class="wi-quote">"他们最后都去了同一个地方。但那个地方——没有人能说清它在哪里。"</div>
+<h3>消散</h3>
+<p>每一届毕业生在完成毕业论文后，都会"消散"。校方说这是气核能量耗尽的自然结果。但如果你仔细听——老教师们从不正面谈论这件事，他们只会说"到时候你就懂了"。</p>
+<p>消散的毕业生不会回到长风界。他们的名字被刻在风碑上，然后——没有人再提起他们。仿佛他们从未存在过。但他们去了哪里？没有人愿意回答这个问题。</p>
 <div class="wi-quote">"那些改了几百次的人，后来在风痕市集最远的那块陆块边缘开了一间很小的铺子，门口只挂一块旧木牌——'改到能过'。"</div>
 <h3>穹门历</h3>
-<p>穹门历元年为公元前3000年——那是穹门第一次被打开的年份。当前是穹门历5026年，对应地球的2026年。</p>
-<p>地球与长风界通过穹门相连。穹门一侧是长风界的苍瞳核心区，另一侧是地球的大气层。毕业论文的能量通过穹门传输到地球，化为天气。</p>
+<p>穹门历元年为公元前3000年——那一年，穹门第一次被打开。当前是穹门历5026年。但穹门的那一端究竟通向何处，教科书上只写着四个字："不可窥探。"</p>
+<p>穹门悬浮在圣所最高处，终年散发着幽蓝的光。有人说它连接着另一个世界，有人说它只是一面镜子。校长曾在开学典礼上说："穹门是圣所的根，也是圣所的锁。记住这两个字就够了。"</p>
 </div>
 </div>
 </div>
@@ -704,7 +762,7 @@ button{font-family:inherit;cursor:pointer;border:none;outline:none;transition:al
 <button class="btn tb-btn desktop-only" onclick="loadGame()">读档</button>
 <button class="btn tb-btn desktop-only" onclick="showWardrobe()">换装</button>
 <button class="btn tb-btn desktop-only" onclick="confirmRestart()">重开</button>
-<button id="mobile-menu-btn" onclick="toggleMobileMenu()">☰</button><button id="mobile-settings-btn" onclick="showSettings()">⚙</button>
+<button id="end-day-btn" onclick="endDay()">📅 结束今日</button><button id="mobile-menu-btn" onclick="toggleMobileMenu()">☰</button><button id="mobile-settings-btn" onclick="showSettings()">⚙</button>
 </div>
 <div id="left-panel-overlay" onclick="toggleMobileMenu()"></div>
 <div id="mid-area">
@@ -715,7 +773,7 @@ button{font-family:inherit;cursor:pointer;border:none;outline:none;transition:al
   <div class="lp-btn-item" onclick="hideMobileMenu();showStatsPanel()"><span class="lp-btn-icon">📊</span>属性</div>
   <div class="lp-btn-item" onclick="hideMobileMenu();showInventoryPanel()"><span class="lp-btn-icon">🎒</span>物品<span class="lp-btn-badge" id="inv-badge"></span></div>
   <div class="lp-btn-item" onclick="hideMobileMenu();showSpiritPanel()"><span class="lp-btn-icon">🕊</span>精灵<span class="lp-btn-badge" id="spirit-badge"></span></div>
-  <div class="lp-btn-item" onclick="hideMobileMenu();showTruthPanel()"><span class="lp-btn-icon">🔮</span>真相碎片<span class="lp-btn-badge" id="truth-badge"></span></div>
+  <div class="lp-btn-item" onclick="hideMobileMenu();showTruthPanel()"><span class="lp-btn-icon">🧩</span>碎片<span class="lp-btn-badge" id="truth-badge"></span></div>
   <div class="lp-btn-item" onclick="hideMobileMenu();showFactionPanel()"><span class="lp-btn-icon">🏛</span>阵营</div>
   <div class="lp-btn-item" onclick="hideMobileMenu();showElimPanel()"><span class="lp-btn-icon">⚠</span>淘汰进度<span class="lp-btn-badge" id="elim-badge">!</span></div>
   <div class="lp-btn-item" onclick="hideMobileMenu();showHomeworkPanel()"><span class="lp-btn-icon">📚</span>作业<span class="lp-btn-badge" id="hw-badge"></span></div>
@@ -787,7 +845,7 @@ button{font-family:inherit;cursor:pointer;border:none;outline:none;transition:al
 <!-- Truth Panel -->
 <div id="truth-overlay" onclick="if(event.target===this)hideTruthPanel()">
 <div class="modal" style="max-width:500px">
-<div class="modal-title">真相碎片</div>
+<div class="modal-title">碎片</div>
 <div id="truth-panel-body" class="modal-body"></div>
 <div class="modal-choices"><button class="choice-btn" onclick="hideTruthPanel()">关闭</button></div>
 </div>
@@ -1000,6 +1058,20 @@ button{font-family:inherit;cursor:pointer;border:none;outline:none;transition:al
   </div>
 </div>
 
+<!-- 战斗系统弹窗 -->
+<div id="combat-overlay" onclick="if(event.target===this)closeCombat()">
+  <div class="combat-panel">
+    <div class="combat-title" id="combat-title">⚔ 切磋</div>
+    <div class="combat-scene" id="combat-scene">
+      <div class="combat-side" id="combat-player-side"></div>
+      <div class="combat-vs">VS</div>
+      <div class="combat-side" id="combat-npc-side"></div>
+    </div>
+    <div class="combat-log" id="combat-log"></div>
+    <div class="combat-actions" id="combat-actions"></div>
+  </div>
+</div>
+
 <!-- BGM控制 -->
 <div id="bgm-control" onclick="toggleBGM()">♪ 音乐: 关</div>
 
@@ -1091,7 +1163,7 @@ desc:'实战训练与竞技区域',
 hotspots:[
 {x:12,y:28,w:20,h:26,name:'试炼穹顶',scene:'campus',action:'doMapAction("train")',icon:'⚔'},
 {x:35,y:22,w:20,h:28,name:'气旋靶场',scene:'race_track',action:'doMapAction("train")',icon:'🎯'},
-{x:58,y:28,w:18,h:26,name:'对抗场',scene:'campus',action:'doMapAction("train")',icon:'🥊'},
+    {x:58,y:28,w:18,h:26,name:'对抗场',scene:'campus',action:'openCombatSelector()',icon:'🥊'},
 {x:78,y:30,w:18,h:24,name:'霜余树下',scene:'guifeng_slope',action:'doMapAction("frost_tree")',icon:'🌲'}
 ]
 },
@@ -1123,12 +1195,12 @@ hotspots:[
 },
 {
 id:7,name:'第七层 · 穹门大厅',img:'layer7',
-areas:['穹门通道','风碑','毕业执行区'],
-desc:'穹门所在之处，毕业论文执行地',
+areas:['穹门通道','风碑','毕业穹厅'],
+desc:'穹门所在之处，圣所最高层',
 hotspots:[
-{x:18,y:30,w:22,h:28,name:'穹门通道',scene:'campus',action:'showMapScenePopup("campus","穹门通道","连接长风界与地球的通道。穹门在此处发出幽蓝的光芒，空气中弥漫着一种说不清的气息。")',icon:'🌀'},
-{x:45,y:25,w:20,h:30,name:'风碑',scene:'campus',action:'showMapScenePopup("campus","风碑","记录着所有毕业执行者名字的石碑。有些名字已经被风化得看不清了。")',icon:'🗿'},
-{x:68,y:30,w:22,h:28,name:'毕业执行区',scene:'campus',action:'showMapScenePopup("campus","毕业执行区","毕业论文执行的最终场所。每一届毕业生都在这里完成他们最后的使命——化为天气，送往地球。")',icon:'🎓'}
+{x:18,y:30,w:22,h:28,name:'穹门通道',scene:'campus',action:'showMapScenePopup("campus","穹门通道","穹门在此处发出幽蓝的光芒，空气中弥漫着一种说不清的气息。它似乎在呼吸——有节律地微微收缩。靠近时，你会感到自己的气核也在跟着震颤。")',icon:'🌀'},
+{x:45,y:25,w:20,h:30,name:'风碑',scene:'campus',action:'showMapScenePopup("campus","风碑","记录着所有毕业生名字的石碑。有些名字已经被风化得看不清了——但奇怪的是，最近三届的名字和五千年前的名字，风化程度一模一样。")',icon:'🗿'},
+{x:68,y:30,w:22,h:28,name:'毕业穹厅',scene:'campus',action:'showMapScenePopup("campus","毕业穹厅","毕业论文执行的最终场所。穹厅中央有一道光柱，直通穹门。站在光柱旁，你会感到一种奇异的牵引——仿佛有什么东西在从另一端拉你。校长说过：不到时候，不要站进去。")',icon:'🎓'}
 ]
 }
 ];
@@ -1220,10 +1292,10 @@ rain:{name:'沉雨院',color:'#5b8def',badge:'badge-rain',motto:'深水无波，
 };
 
 const ELEMENTS={
-wind:{name:'风',icon:'气',color:'#5dd4d4',counter:'云',strongVs:'云'},
-cloud:{name:'云',icon:'云',color:'#b0c4de',counter:'雷',strongVs:'雷'},
-thunder:{name:'雷',icon:'雷',color:'#c77dff',counter:'雨',strongVs:'雨'},
-rain:{name:'雨',icon:'雨',color:'#5b8def',counter:'风',strongVs:'风'}
+wind:{name:'风',icon:'气',color:'#5dd4d4',strong:'cloud',weak:'thunder'},
+cloud:{name:'云',icon:'云',color:'#b0c4de',strong:'rain',weak:'wind'},
+thunder:{name:'雷',icon:'雷',color:'#c77dff',strong:'wind',weak:'rain'},
+rain:{name:'雨',icon:'雨',color:'#5b8def',strong:'thunder',weak:'cloud'}
 };
 
 const WIND_ORDERS=[
@@ -1346,19 +1418,19 @@ const EXAM_REQS=[
 ];
 
 const FACTIONS={
-guifeng:{name:'归风者',motto:'我们不是叛逆者。我们只是记住了——风从哪里来。',desc:'知晓地球真相的地下组织，目标是公开真相。',color:'#5dd4d4'},
-shoumi:{name:'守密人',motto:'不是所有真相都该被知道。',desc:'替议会抹消不该被知道的信息。',color:'#c77dff'},
-xinwu:{name:'信物守护者',motto:'信物不是工具。信物是记忆。',desc:'四院院长单线指定的秘密守护者。',color:'#d4af37'}
+guifeng:{name:'归风者',motto:'我们不是叛逆者。我们只是记住了——风从哪里来。',desc:'一个隐秘的组织。他们似乎知道某些被禁止的事情。没有人知道他们的真正目的。',color:'#5dd4d4'},
+shoumi:{name:'守密人',motto:'不是所有真相都该被知道。',desc:'替议会处理"不该被知道的信息"的人。他们的存在本身就是一种警告。',color:'#c77dff'},
+xinwu:{name:'信物守护者',motto:'信物不是工具。信物是记忆。',desc:'四院院长单线指定的秘密守护者。他们守护什么，连他们自己都说不清楚。',color:'#d4af37'}
 };
 
 const TRUTH_FRAGMENTS=[
-{id:1,title:'论文的本质',desc:'毕业论文不是学术研究，是往地球送天象。每一次毕业论文执行，地球上就会多出一种非自然天气。',triggerSemester:2},
-{id:2,title:'消散的真相',desc:'毕业生执行论文后不会回到长风界。他们的气核能量在执行过程中耗尽，意识消散。这就是消散。',triggerSemester:3},
-{id:3,title:'地球的反制',desc:'地球并非被动承受。大气抗体、人类技术干扰、共鸣反噬——三层反制体系正在侵蚀穹门的连接。',triggerSemester:4},
-{id:4,title:'风金萎缩',desc:'风金矿脉的分布正在萎缩。这与气核消散导致长风界总能量减少有关。',triggerSemester:5},
-{id:5,title:'苍瞳护盾',desc:'苍瞳核心区的稳定靠毕业生消散时释放的能量形成的防护场。',triggerSemester:6},
-{id:6,title:'穹门密约',desc:'上古失衡战争后签订《穹门密约》，永久限制论文规模。',triggerSemester:7},
-{id:7,title:'四神预言',desc:'四神隐退前留下预言——一个来自穹门另一侧的人将打破循环，让风从地球那边吹回来。',triggerSemester:7}
+{id:1,title:'论文的影子',desc:'方岩曾低声说过一句："你以为论文写完就结束了？论文写完的那一刻，才是开始。"他拒绝再说更多。你注意到，每一届毕业生执行论文时，穹门都会亮起来。',triggerSemester:2},
+{id:2,title:'消失的人',desc:'陆霁的雨铃从不弹奏一首完整的曲子。某天深夜，你听到他弹了一段——那旋律和风碑上某个名字的笔画数完全吻合。他发现你在听，只说了一句："有些名字不该被念出来。"',triggerSemester:3},
+{id:3,title:'穹门的呼吸',desc:'你半夜路过穹门大厅，发现穹门在"呼吸"——它有节律地收缩和膨胀，仿佛某种活物。守夜的老校工看到你的表情，只说："它一直在动。你只是第一次停下来看。"',triggerSemester:4},
+{id:4,title:'风金的来历',desc:'方岩喝醉后说漏了嘴："风金不是石头。你以为矿脉在萎缩？矿脉从来不是矿脉。"他第二天否认自己说过这话。但你开始注意到——风金在手中握久了，会有微弱的温度。',triggerSemester:5},
+{id:5,title:'风碑的秘密',desc:'你在风碑前站了很久，发现一件奇怪的事：最近三届毕业生的名字刻痕是新的，但石碑表面的风化程度——和五千年前的名字一模一样。仿佛它们是同一时刻被刻上去的。',triggerSemester:6},
+{id:6,title:'校长的沉默',desc:'你偶然在档案室找到一份被封存的记录。上面只有一行字："密约续签——第47次。"校长出现在你身后，拿走了记录。她说："有些门，推开了就关不上。你现在还不需要知道。"',triggerSemester:7},
+{id:7,title:'四神的低语',desc:'梦中，你听到四个声音在争吵。一个说"该停了"，一个说"不能停"，一个说"他们还不配知道"，最后一个什么都没说——只是叹了口气。你醒来时，手心多了一粒不知道从哪来的金色沙尘。',triggerSemester:7}
 ];
 
 const COURSES=[
@@ -1379,10 +1451,10 @@ const COURSES=[
 {q:'高阶感知者能做什么？',opts:['感知一米风向','感知气压变化','"听见"风的语言','感知湿度梯度'],ans:2},
 {q:'进阶感知者能感知什么？',opts:['风的语言','气压变化和湿度梯度','三米内的风向','天气创造'],ans:1}
 ]},
-{id:'weather_creation',name:'天气创造原理',desc:'学习如何从气核中提取能量创造天气现象',knowledgeGain:7,homeworkType:'essay',content:'今日讲授：天气的本质——天气不是自然现象，是被创造出来的。每一次天气创造都需要消耗气核能量。这就是为什么毕业论文执行后学生会消散——他们的气核被完全消耗了。',examQuestions:[
+{id:'weather_creation',name:'天气创造原理',desc:'学习如何从气核中提取能量创造天气现象',knowledgeGain:7,homeworkType:'essay',content:'今日讲授：天气的本质——天气不是自然现象，是被创造出来的。每一次天气创造都需要消耗气核能量。至于消耗的气核最终流向了哪里……教授说到这里停住了，看了看窗外，然后说："这个问题，等你们到四年级再说。"',examQuestions:[
 {q:'天气的本质是什么？',opts:['自然现象','被创造出来的','地球本有的','随机产生的'],ans:1},
-{q:'毕业论文执行后学生为什么会消散？',opts:['体力耗尽','气核被完全消耗','压力过大','年龄到了'],ans:1},
-{q:'每一次天气创造需要消耗什么？',opts:['体力','气核能量','风痕笔','金钱'],ans:1}
+{q:'每一次天气创造需要消耗什么？',opts:['体力','气核能量','风痕笔','金钱'],ans:1},
+{q:'教授为什么不愿说气核能量流向哪里？',opts:['他自己也不知道','"等你们到四年级再说"','这是禁止讨论的','教材没写'],ans:1}
 ]},
 {id:'combat_theory',name:'气象格斗',desc:'四系元素克制关系、战斗技巧、气旋攻防',knowledgeGain:6,homeworkType:'combat',content:'今日讲授：四系克制——风克云（风吹散云）、云克雷（云层阻隔雷电）、雷克雨（雷电蒸发雨水）、雨克风（雨水压制风力）。战斗时选择克制对手的元素是制胜关键。受伤后需要对应元素的治疗药剂。',examQuestions:[
 {q:'风克什么元素？',opts:['雷','云','雨','风'],ans:1},
@@ -1395,26 +1467,25 @@ const COURSES=[
 {q:'复合天象消耗的能量是单元素的几倍？',opts:['1-2倍','3-5倍','10倍','相同'],ans:1},
 {q:'风+雷等于什么？',opts:['暴风雨','雷暴雨','雷暴','彩虹'],ans:2}
 ]},
-{id:'thesis_prep',name:'论文导论',desc:'毕业论文制度详解、选题方法、安全规范',knowledgeGain:8,homeworkType:'essay',content:'今日讲授：论文制度——毕业论文不是学术研究，是往地球送天象。选题方向必须包含：创造什么气象、初步构思、预期效果。方案需要通过审核（创新性、可行性、安全性）。被驳回是常态，有人改了三百多次。',examQuestions:[
-{q:'毕业论文的本质是什么？',opts:['学术研究','往地球送天象','天气预测','气核修炼'],ans:1},
+{id:'thesis_prep',name:'论文导论',desc:'毕业论文制度详解、选题方法、安全规范',knowledgeGain:8,homeworkType:'essay',content:'今日讲授：论文制度——毕业论文是每位学生必须完成的最终考核。选题方向必须包含：创造什么气象、初步构思、预期效果。方案需要通过审核（创新性、可行性、安全性）。被驳回是常态，有人改了三百多次。至于论文执行后究竟会发生什么……教授只说："你们到时候自然会知道。"',examQuestions:[
 {q:'论文选题方向必须包含什么？',opts:['创造什么气象、初步构思、预期效果','实验数据','参考文献','导师推荐'],ans:0},
-{q:'有人论文方案被驳回了多少次？',opts:['十几次','五十多次','一百多次','三百多次'],ans:3}
+{q:'有人论文方案被驳回了多少次？',opts:['十几次','五十多次','一百多次','三百多次'],ans:3},
+{q:'教授对"论文执行后会发生什么"的回答是？',opts:['"你们到时候自然会知道"','"你们会去地球"','"气核会耗尽"','"意识会消散"'],ans:0}
 ]},
 {id:'advanced_cyclone',name:'高阶气旋',desc:'风眼构造、气旋维持、能量效率优化',knowledgeGain:7,homeworkType:'practice',content:'今日讲授：风眼成型——五序烈风境的标志是独立制造气旋核心。风眼是气旋的中心，它必须是静止的——越是外围狂暴，中心越要平静。这就是"风眼"的哲学。',examQuestions:[
 {q:'五序劲风境的标志是什么？',opts:['掌心产风','气旋离体','独立制造气旋核心','创造天气'],ans:2},
 {q:'风眼的特点是什么？',opts:['必须狂暴','必须静止','必须旋转','必须消失'],ans:1},
 {q:'风眼的哲学是什么？',opts:['外围越狂暴，中心越平静','风力越大越好','气核越大越好','速度越快越好'],ans:0}
 ]},
-{id:'earth_connection',name:'穹门学',desc:'穹门结构、地球关联、能量传输原理',knowledgeGain:10,homeworkType:'essay',content:'今日讲授：穹门——穹门是连接长风界与地球的通道。穹门历元年为公元前3000年。能量通过穹门传输到地球，化为天气。穹门正在衰弱——裂纹越来越多，这可能与地球的反制体系有关。',examQuestions:[
+{id:'earth_connection',name:'穹门学',desc:'穹门结构、能量传输原理',knowledgeGain:10,homeworkType:'essay',content:'今日讲授：穹门——穹门悬浮在圣所最高处，穹门历元年为公元前3000年。穹门终年散发幽蓝光芒，有节律地微微收缩。教科书写着"穹门是圣所的根"，但有人在页边空白处用铅笔写了一行小字："也是锁。"穹门正在衰弱——裂纹越来越多，没有人知道原因。',examQuestions:[
 {q:'穹门历元年约相当于地球的什么时间？',opts:['公元2024年','公元前3000年','公元1000年','公元前500年'],ans:1},
-{q:'穹门是连接什么的通道？',opts:['长风界与地球','四神与人类','过去与未来','风与云'],ans:0},
-{q:'长风界对地球的态度是什么理论？',opts:['地球毁灭论','虚拟世界论','平行宇宙论','时间旅行论'],ans:1},
-{q:'地球的天气本质是什么？',opts:['自然现象','历代毕业生论文的叠加总和','四神的力量','气核的辐射'],ans:1}
+{q:'教科书写穹门是什么？',opts:['圣所的根','圣所的锁','通往地球的门','四神的遗物'],ans:0},
+{q:'穹门正在发生什么变化？',opts:['越来越亮','裂纹越来越多','正在缩小','颜色在变'],ans:1}
 ]},
-{id:'thesis_seminar',name:'论文研讨',desc:'分析历史毕业论文案例、评审标准、创新方向',knowledgeGain:10,homeworkType:'essay',content:'今日讲授：案例分析——彩虹谷是"彩"的彩虹论文留下的。铁棘峡谷是铁棘的冰雹论文留下的。每一个远足地点都是一篇被执行的毕业论文的痕迹。你的论文也会留下痕迹。',examQuestions:[
-{q:'彩虹谷是谁的论文留下的？',opts:['铁棘','"彩"','驰','栖'],ans:1},
+{id:'thesis_seminar',name:'论文研讨',desc:'分析历史毕业论文案例、评审标准、创新方向',knowledgeGain:10,homeworkType:'essay',content:'今日讲授：案例分析——彩虹谷据说和某位毕业生的论文有关。铁棘峡谷也是。每一个远足地点，都对应着一段"被完成的历史"。但教授回避了关键问题：那些毕业生后来去了哪里？他只说："痕迹留下了，人——不重要。"',examQuestions:[
+{q:'彩虹谷和谁的论文有关？',opts:['铁棘','"彩"','驰','栖'],ans:1},
 {q:'铁棘峡谷是什么论文留下的？',opts:['彩虹论文','冰雹论文','暴风论文','雷雨论文'],ans:1},
-{q:'每一个远足地点本质上是什么？',opts:['自然景观','一篇被执行的毕业论文的痕迹','四神的遗迹','气核的聚集地'],ans:1}
+{q:'教授对"那些毕业生后来去了哪里"的回答？',opts:['"去了地球"','"不重要"','"消散了"','"不知道"'],ans:1}
 ]}
 ];
 
@@ -1837,17 +1908,15 @@ document.getElementById('map-back-btn').style.display='none';
 document.getElementById('map-layer-list').style.display='none';
 hideMapInfo();
 // Three major zones as hotspots
-let hs=document.getElementById('map-hotspots');
-hs.innerHTML='';
-// Zone: Academy (center)
-hs.innerHTML+='<div class="map-hotspot" style="left:25%;top:30%;width:25%;height:35%" onclick=\'enterLayerView()\'>'+
+hs.innerHTML+='<div class="map-hotspot" style="left:25%;top:30%;width:25%;height:35%" onclick="enterLayerView()">'+
 '<div class="map-hotspot-icon">🏛</div><div class="map-hotspot-label">学院</div></div>';
-// Zone: Market (right)
-hs.innerHTML+='<div class="map-hotspot" style="left:55%;top:45%;width:20%;height:25%" onclick=\'enterLayerView(5)\'>'+
+hs.innerHTML+='<div class="map-hotspot" style="left:55%;top:45%;width:20%;height:25%" onclick="enterLayerView(5)">'+
 '<div class="map-hotspot-icon">🏪</div><div class="map-hotspot-label">集市</div></div>';
-// Zone: Outside Academy (bottom)
-hs.innerHTML+='<div class="map-hotspot" style="left:35%;top:70%;width:25%;height:20%" onclick=\'enterLayerView(6)\'>'+
+hs.innerHTML+='<div class="map-hotspot" style="left:35%;top:70%;width:25%;height:20%" onclick="enterLayerView(6)">'+
 '<div class="map-hotspot-icon">🌍</div><div class="map-hotspot-label">学院外</div></div>';
+// Stroll button (random exploration)
+hs.innerHTML+='<div class="map-hotspot stroll-btn" style="left:80%;top:5%;width:18%;height:12%" onclick="randomStroll()">'+
+'<div class="map-hotspot-icon">🎲</div><div class="map-hotspot-label">随便逛逛</div></div>';
 }
 
 function enterLayerView(layerId){
@@ -2010,7 +2079,7 @@ showScenePopup(sceneKey,title,desc,null,null);
 function doMapAction(actionId){
 let sceneMap={
 class:{scene:'campus',title:'教室 · 上课',desc:'穹霄圣所的教室。每天的课程涵盖风痕史、气旋原理、感知训练等。上课可以获得知识，但也会产生作业。'},
-train:{scene:'race_track',title:'训练场 · 气旋操控',desc:'训练场区。在这里练习气旋操控、试炼穹顶和对抗场。训练可以提升战力，但消耗体力和精力。'},
+train:{scene:'race_track',title:'训练场 · 气旋操控',desc:'训练场区。在这里可以练习气旋操控提升战力，也可以练习已习得的元素技巧提升熟练度。训练消耗体力和精力。'},
 meditate:{scene:'rain_college',title:'雨歇厅 · 冥想',desc:'沉雨院的冥想池。静坐冥想可以提升感知，同时大幅降低压力。'},
 library:{scene:'book_shop',title:'图书馆 · 研究',desc:'图书馆藏有穹霄圣所建校以来的所有书籍和旧笔记。翻阅旧书可以获得知识和修为。'},
 canteen_visit:{scene:'canteen',title:'食堂 · 用餐',desc:'穹霄圣所的食堂。根据今日天气和季节提供不同的食物。用餐可以恢复体力和生命。'},
@@ -2029,11 +2098,72 @@ return;
 let evs=getAvailableEvents();
 let matchedEvents=evs.filter(e=>e.id===actionId);
 if(actionId==='train'){
-matchedEvents=evs.filter(e=>e.id==='train');
+matchedEvents=evs.filter(e=>e.id==='train'||e.id==='practice');
 }else if(actionId==='library'){
 matchedEvents=evs.filter(e=>e.id==='library'||e.id==='homework');
 }
 showScenePopup(info.scene,info.title,info.desc,matchedEvents,null);
+}
+
+// ===== RANDOM STROLL (explore and meet NPCs) =====
+function randomStroll(){
+let p=G.player;
+let locations=[
+  {name:'圣所主楼长廊',scene:'campus',desc:'沿着主楼的长廊漫步，气旋在穹顶流转，发出低沉的嗡鸣。'},
+  {name:'学院外归风坡',scene:'guifeng_slope',desc:'归风坡的风声与别处不同，像是有人在远处低声哼唱。'},
+  {name:'风痕市集小巷',scene:'market',desc:'市集的某个角落，阳光被棚顶的旗帜切割成碎片，洒在地面上。'},
+  {name:'霜余树下',scene:'guifeng_slope',desc:'霜余树的叶片在风中轻颤，投下斑驳的光影。'},
+  {name:'冥想池边',scene:'rain_college',desc:'冥想池的水面平静如镜，倒映着穹顶的纹路。'}
+];
+let loc=pick(locations);
+// Random NPC encounter
+let availableNpcs=Object.keys(G.npcs).filter(id=>!G.npcs[id].met);
+let encounterNpc=null;
+if(availableNpcs.length>0&&rand(1,100)<=40){
+  encounterNpc=pick(availableNpcs);
+}
+let resultMsg='';
+let resultImg='';
+if(encounterNpc){
+  let n=NPCS[encounterNpc];
+  let ni=G.npcs[encounterNpc];
+  ni.met=true;
+  let c=COLLEGES[n.college]||{badge:'badge-gold',name:'无灵者'};
+  resultMsg='<div style="text-align:center;margin-bottom:12px"><span class="badge '+c.badge+'">'+c.name+'</span></div>'+
+    '<div style="color:var(--gold);font-size:16px;margin-bottom:8px">你遇见了 '+n.name+'！</div>'+
+    '<div style="color:var(--txt2);margin-bottom:12px">'+n.desc+'</div>'+
+    '<div style="font-size:12px;color:var(--txt3)">位置: '+n.baseLocation+'</div>';
+  resultImg=getNpcPortraitImg(encounterNpc,120);
+  log('在市集的角落遇见了'+n.name+'！','event');
+}else{
+  // Random discovery
+  let discoveries=[
+    '在地上发现了一片形状奇特的风痕石碎片，隐隐有纹路浮现。',
+    '听到远处传来奇怪的乐器声，循声望去却只看到空无一人的走廊。',
+    '一阵不寻常的气旋卷起了地上的落叶，形成了某种你从未见过的图案。',
+    '在墙角发现了一段褪色的刻痕，写着某种你不认识的文字。',
+    '风突然静止了片刻，周围的空气变得异常沉重，随后又恢复正常。',
+    '你注意到穹顶的某处有一道若隐若现的光痕，但仔细看时又消失了。'
+  ];
+  resultMsg='<div style="color:var(--txt);margin-bottom:12px">'+pick(discoveries)+'</div>'+
+    '<div style="font-size:12px;color:var(--txt3)">似乎有什么在等待被发现...</div>';
+  resultImg='';
+  log('随便逛逛时'+pick(discoveries).split('。')[0]+'。','event');
+}
+// Small random stat changes
+let stressChange=rand(-2,2);
+p.stress=clamp(p.stress+stressChange,0,100);
+let hpChange=rand(-1,3);
+p.hp=clamp(p.hp+hpChange,0,p.maxHp);
+if(hpChange>0)resultMsg+='<div style="margin-top:8px;color:var(--green);font-size:12px">生命+'+hpChange+'</div>';
+if(stressChange!==0)resultMsg+='<div style="margin-top:4px;color:'+(stressChange<0?'var(--green)':'var(--orange)')+';font-size:12px">压力'+(stressChange>0?'+':'')+stressChange+'</div>';
+// Show popup
+showModal('🎲 随便逛逛 · '+loc.name,
+  '<div style="color:var(--txt2);margin-bottom:12px;font-size:13px">'+loc.desc+'</div>'+
+  (resultImg?'<div style="text-align:center;margin-bottom:12px">'+resultImg+'</div>':'')+
+  resultMsg,
+  [{text:'继续',onClick:()=>{hideModal();renderAll();}}]
+);
 }
 
 // Jump to market tab from map
@@ -2358,8 +2488,8 @@ function hideInventoryPanel(){document.getElementById('inventory-overlay').class
 
 function showTruthPanel(){
 let p=G.player;
-let html='<div style="font-size:13px;color:var(--txt2);margin-bottom:8px">已发现 '+p.truthFragments.length+'/7 个真相碎片</div>';
-if(p.truthFragments.length===0)html+='<div style="color:var(--txt3);text-align:center;padding:12px">尚未发现任何真相</div>';
+let html='<div style="font-size:13px;color:var(--txt2);margin-bottom:8px">已拼凑 '+p.truthFragments.length+'/7 块碎片</div>';
+if(p.truthFragments.length===0)html+='<div style="color:var(--txt3);text-align:center;padding:12px">你尚未发现任何异常。或者说——你尚未注意到。</div>';
 else p.truthFragments.forEach(t=>{html+='<div style="background:rgba(26,35,48,0.5);border:1px solid var(--border);border-radius:6px;padding:10px;margin-bottom:8px"><div style="color:var(--gold);font-size:13px;margin-bottom:4px">'+t.title+'</div><div style="color:var(--txt);font-size:12px;line-height:1.6">'+t.desc+'</div></div>';});
 document.getElementById('truth-panel-body').innerHTML=html;
 document.getElementById('truth-overlay').classList.add('show');
@@ -2649,8 +2779,7 @@ h+='<div style="font-size:12px;color:var(--green);margin-bottom:8px">✓ 已派�
 h+='<div class="event-slot" id="event-slot-'+e.id+'" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,\''+e.id+'\')">拖拽角色卡片到此处，或点击事件</div>';
 h+='</div>';
 });
-// End day button
-h+='<button class="btn btn-gold" style="width:100%;padding:10px;margin-top:8px" onclick="endDay()">结束今日 → 下一天</button>';
+// End day button removed from here - now in top bar
 h+='</div>';
 // Event log
 h+='<div class="event-card"><div class="event-title">📋 事件日志</div><div class="event-log">';
@@ -2666,6 +2795,7 @@ let p=G.player;
 let evs=[];
 evs.push({id:'class',title:'上课',desc:'参加今日课程，获得知识并产生作业',diceTarget:0});
 evs.push({id:'train',title:'训练',desc:'在训练场练习气旋操控，提升战力',diceTarget:8,attrName:'combat'});
+evs.push({id:'practice',title:'练习元素技巧',desc:'在训练场练习已习得的元素技巧，提升熟练度',diceTarget:0});
 evs.push({id:'meditate',title:'冥想',desc:'在冥想池静坐，提升感知',diceTarget:7,attrName:'perception'});
 let cl=COLLEGES[p.college];
 if(cl){
@@ -2913,7 +3043,7 @@ return h;
 let stages=[
 {num:1,title:'第一步 · 选题方向',desc:'大三第六学期末提交。需写明选题方向、初步构思、预期效果。不交=自动退学。',status:p.thesisStage>=1},
 {num:2,title:'第二步 · 反复修改',desc:'大四第一学期。提交完整方案，导师+评审团评估（创新性、可行性、安全性）。驳回后继续修改。',status:p.thesisStage>=2},
-{num:3,title:'第三步 · 执行',desc:'大四第二学期末。方案通过后获得执行许可，前往地球执行论文。',status:p.thesisStage>=3}
+{num:3,title:'第三步 · 执行',desc:'大四第二学期末。方案通过后获得执行许可，前往毕业穹厅。具体会发生什么——没有人提前告诉你。',status:p.thesisStage>=3}
 ];
 stages.forEach(s=>{
 h+='<div class="thesis-stage"><div class="thesis-stage-title">'+(s.status?'✅ ':'⬜ ')+s.title+'</div><div style="font-size:12px;color:var(--txt2)">'+s.desc+'</div></div>';
@@ -2941,11 +3071,11 @@ h+='</div>';
 }
 }
 if(p.thesisApproved&&!p.thesisExecuted){
-h+='<div class="thesis-approved"><b>✅ 方案已通过！</b><br>你已获得执行许可。选择合适时间前往地球执行毕业论文。</div>';
+h+='<div class="thesis-approved"><b>✅ 方案已通过！</b><br>你已获得执行许可。选择合适时间前往毕业穹厅执行毕业论文。</div>';
 h+='<button class="btn btn-gold" style="width:100%;padding:10px" onclick="executeThesis()">执行毕业论文</button>';
 }
 if(p.thesisExecuted){
-h+='<div class="thesis-approved"><b>✅ 论文已执行</b><br>你的气核能量在执行过程中耗尽。你完成了毕业论文。</div>';
+h+='<div class="thesis-approved"><b>✅ 论文已执行</b><br>你走进了光柱。之后的事——只有你自己知道。</div>';
 }
 h+='</div>';
 return h;
@@ -3067,6 +3197,28 @@ else if(eventId==='train'){
 let gain=rand(2,5);if(!isPlayer)gain=Math.floor(gain*0.6);
 p.combat+=gain;p.stamina-=rand(2,4);p.stress+=5;p.windOrderExp+=rand(3,8);
 result.msg=npcName+'训练，战力+'+gain;result.effects={combat:gain};
+}
+else if(eventId==='practice'){
+// Element proficiency practice - only player can do this
+if(isPlayer){
+if(!p.practiceElement){
+result.msg='练习已取消';result.success=false;
+}else{
+let el=p.practiceElement;
+let profGain=rand(1,3);
+let combatGain=rand(1,2);
+if(!p.skillProficiency)p.skillProficiency={};
+p.skillProficiency[el]=(p.skillProficiency[el]||0)+profGain;
+p.combat+=combatGain;
+p.stamina-=rand(2,3);p.stress+=3;p.windOrderExp+=rand(2,5);
+let elName=ELEMENTS[el]?.name||'普通';
+result.msg=npcName+'练习'+elName+'技巧，熟练度+'+profGain+'，战力+'+combatGain;
+result.effects={combat:combatGain,proficiency:profGain,element:elName};
+p.practiceElement=null; // clear after use
+}
+}else{
+result.msg=npcName+'没有参加练习';result.success=false;
+}
 }
 else if(eventId==='meditate'){
 let gain=rand(2,5);if(!isPlayer)gain=Math.floor(gain*0.6);
@@ -3231,8 +3383,6 @@ let svg=getNpcPortraitImg(id,80);
 let loveIcon=ni.romanceBroken?'💔 恋人线已断裂':(ni.romanceLevel>0?'❤️ 恋人':'');
 let opts=[
 {text:'聊天 (+好感)',onClick:()=>{let g=rand(3,8);ni.affinity=clamp(ni.affinity+g,0,100);log('与'+n.name+'聊天，好感+'+g,'event');hideModal();checkLoveEvent(id);renderAll();}},
-// v3.0: Duel with 7-day CD
-{text:'切磋 (7天冷却)',onClick:()=>duelNpc(id)},
 {text:'送礼物',onClick:()=>{showGiftList(id);}}
 ];
 if(ni.affinity>=30&&!ni.recruited)opts.push({text:'招募加入阵营 (好感'+ni.affinity+'/30)',onClick:()=>tryRecruit(id)});
@@ -3263,29 +3413,222 @@ opts);
 
 // v3.0: NPC Duel System with 7-day CD
 function duelNpc(id){
-let n=NPCS[id],ni=G.npcs[id];
-let cd=G.player.duelCooldowns[id]||0;
-if(cd>0){showModal('冷却中','与'+n.name+'的切磋还在冷却中。剩余 '+cd+' 天。',[{text:'返回',onClick:hideModal}]);return;}
-// Calculate duel result
+// Redirect to new combat system
+openCombatSelector();
+}
+
+// ===== ELEMENT COMBAT SYSTEM (Arena) =====
+let combatState=null;
+
+function openCombatSelector(){
 let p=G.player;
-let playerPower=p.combat*2+p.windOrder*5+p.stamina+rand(0,20);
-let npcPower=(ni.affinity/5)+rand(10,30)+15;
-if(n.college!=='none')npcPower+=10;
-let win=playerPower>=npcPower;
-G.player.duelCooldowns[id]=7;
-if(win){
+let h='<div style="color:var(--txt2);margin-bottom:12px">在对抗场选择一位对手进行切磋。切磋有7天冷却。</div>';
+let hasNpc=false;
+Object.keys(G.npcs).forEach(id=>{
+let ni=G.npcs[id];
+if(!ni.met)return;
+let cd=G.player.duelCooldowns[id]||0;
+let n=NPCS[id];
+let c=COLLEGES[n.college]||{badge:'badge-gold',name:'无灵者'};
+let cdText=cd>0?'<span style="color:var(--orange)">冷却'+cd+'天</span>':'<span style="color:var(--green)">可挑战</span>';
+hasNpc=true;
+h+='<div class="choice-btn" style="display:flex;justify-content:space-between;align-items:center" '+(cd>0?'':'onclick="hideModal();initCombat(\''+id+'\')"')+'>';
+h+='<span><span class="badge '+c.badge+'">'+c.name+'</span> '+n.name+'</span>';
+h+='<span>'+cdText+'</span></div>';
+});
+if(!hasNpc)h+='<div style="color:var(--txt3);text-align:center;padding:12px">你还没有认识任何可以切磋的人。去其他地方逛逛吧！</div>';
+showModal('⚔ 对抗场 · 选择对手',h,[{text:'返回',onClick:hideModal}]);
+}
+
+function initCombat(npcId){
+let n=NPCS[npcId],ni=G.npcs[npcId];
+let p=G.player;
+// Set cooldown
+G.player.duelCooldowns[npcId]=7;
+// Calculate NPC stats based on year
+let npcYear=Math.floor((G.day-1)/60)+1;
+let npcCombat=20+(npcYear-1)*5+rand(0,10)+(ni.affinity/10);
+let npcMaxHp=80+(npcYear-1)*10;
+// Player stats
+let playerCombat=p.combat+(p.windOrder*3);
+let playerMaxHp=p.maxHp;
+// Initialize state
+combatState={
+npcId:npcId,npcName:n.name,
+playerHp:p.hp,playerMaxHp:playerMaxHp,playerCombat:playerCombat,
+npcHp:npcMaxHp,npcMaxHp:npcMaxHp,npcCombat:npcCombat,
+round:1,turn:'player',log:[],
+playerElement:null,npcElement:n.college!=='none'?n.college:'wind',
+result:null
+};
+// Show combat UI
+document.getElementById('combat-overlay').classList.add('show');
+updateCombatUI();
+}
+
+function updateCombatUI(){
+let c=combatState;
+if(!c)return;
+let p=G.player;
+document.getElementById('combat-title').textContent='⚔ 第'+c.round+'回合 · '+c.npcName;
+// Player side
+let playerPortrait=getPlayerPortraitImg(p,60);
+let npcPortrait=getNpcPortraitImg(c.npcId,60);
+let playerHpPct=(c.playerHp/c.playerMaxHp*100);
+let npcHpPct=(c.npcHp/c.npcMaxHp*100);
+let playerHpColor=playerHpPct>60?'var(--green)':(playerHpPct>30?'var(--orange)':'var(--red)');
+let npcHpColor=npcHpPct>60?'var(--green)':(npcHpPct>30?'var(--orange)':'var(--red)');
+document.getElementById('combat-player-side').innerHTML=
+'<div class="combat-avatar">'+playerPortrait+'</div>'+
+'<div class="combat-name">'+p.name+'</div>'+
+'<div class="combat-hp-bar"><div class="combat-hp-fill" style="width:'+playerHpPct+'%;background:'+playerHpColor+'"></div></div>'+
+'<div class="combat-hp-text">'+c.playerHp+'/'+c.playerMaxHp+'</div>';
+document.getElementById('combat-npc-side').innerHTML=
+'<div class="combat-avatar">'+npcPortrait+'</div>'+
+'<div class="combat-name">'+c.npcName+'</div>'+
+'<div class="combat-hp-bar"><div class="combat-hp-fill" style="width:'+npcHpPct+'%;background:'+npcHpColor+'"></div></div>'+
+'<div class="combat-hp-text">'+c.npcHp+'/'+c.npcMaxHp+'</div>';
+// Log
+let logHtml=c.log.map(e=>'<div class="combat-log-entry '+e.type+'">'+e.text+'</div>').join('');
+document.getElementById('combat-log').innerHTML=logHtml;
+document.getElementById('combat-log').scrollTop=document.getElementById('combat-log').scrollHeight;
+// Actions
+if(c.result){
+let resultHtml='',resultBtn='';
+if(c.result==='win'){
+resultHtml='<div class="combat-result win">🏆 胜利！</div>';
+resultBtn='<button class="btn btn-gold" onclick="endCombat()">领取奖励</button>';
+}else if(c.result==='lose'){
+resultHtml='<div class="combat-result lose">💀 失败...</div>';
+resultBtn='<button class="btn btn-gold" onclick="endCombat()">结束</button>';
+}else{
+resultHtml='<div class="combat-result draw">🤝 平局</div>';
+resultBtn='<button class="btn btn-gold" onclick="endCombat()">结束</button>';
+}
+document.getElementById('combat-actions').innerHTML='<div class="combat-actions-title">'+resultHtml+resultBtn+'</div>';
+return;
+}
+// Player turn: show element selection
+let availableElements=[];
+// Default element (player's college)
+if(p.college!=='none')availableElements.push({id:p.college,name:ELEMENTS[p.college].name,color:ELEMENTS[p.college].color});
+// Learned skills (from learnSkill)
+if(p.learnedSkills){
+Object.keys(p.learnedSkills).forEach(el=>{
+if(el!==p.college&&ELEMENTS[el]&&p.learnedSkills[el]){
+availableElements.push({id:el,name:ELEMENTS[el].name,color:ELEMENTS[el].color});
+}
+});
+}
+let actionHtml='<div class="combat-actions-title">选择你的元素攻击：</div>';
+if(availableElements.length===0){
+actionHtml='<div class="combat-actions-title" style="color:var(--orange)">你还没有掌握任何元素技巧！</div>'+
+'<button class="btn btn-gold" onclick="combatTurn(\'none\')">普通攻击</button>';
+}else{
+availableElements.forEach(el=>{
+let skill=p.skillProficiency?.[el.id]||0;
+actionHtml+='<button class="combat-element-btn '+el.id+'" onclick="combatTurn(\''+el.id+'\')">'+el.name;
+if(skill>0)actionHtml+=' <small style="color:var(--txt3)">(熟练'+skill+')</small>';
+actionHtml+='</button>';
+});
+// Always add a basic attack option
+actionHtml+='<button class="combat-element-btn" onclick="combatTurn(\'none\')">⚔ 普通攻击</button>';
+}
+document.getElementById('combat-actions').innerHTML=actionHtml;
+}
+
+function combatTurn(playerElement){
+let c=combatState;
+if(!c||c.turn!=='player')return;
+let p=G.player;
+let n=NPCS[c.npcId],ni=G.npcs[c.npcId];
+let npcElement=c.npcElement;
+// Calculate element multiplier
+let playerElementInfo=ELEMENTS[playerElement];
+let npcElementInfo=ELEMENTS[npcElement];
+let elementMult=1.0;
+if(playerElementInfo){
+if(playerElementInfo.strong===npcElement)elementMult=1.5;
+else if(playerElementInfo.weak===npcElement)elementMult=0.6;
+}
+// Proficiency bonus
+let prof=p.skillProficiency?.[playerElement]||0;
+let profBonus=prof*2;
+// Player attack
+let playerBaseDmg=Math.max(5,c.playerCombat+rand(1,10)+profBonus);
+let playerDmg=Math.floor(playerBaseDmg*elementMult);
+let isCrit=rand(1,100)<=10+(p.perception/5);
+if(isCrit){playerDmg=Math.floor(playerDmg*1.5);}
+c.npcHp=Math.max(0,c.npcHp-playerDmg);
+// Log player attack
+let elementName=playerElement!=='none'?(ELEMENTS[playerElement]?.name||''):'';
+let hitText=isCrit?'暴击！':'';
+let advText=elementMult>1?' (属性克制！)':(elementMult<1?' (属性被克...)':'');
+c.log.push({type:'combat-log-player',text:'你使用'+elementName+hitText+'，造成 <span class="combat-log-damage">'+playerDmg+'</span> 点伤害'+advText});
+// Check if NPC defeated
+if(c.npcHp<=0){
+c.result='win';
+updateCombatUI();
+return;
+}
+// NPC turn
+// NPC element attack
+let npcElementMult=1.0;
+if(npcElementInfo&&playerElementInfo){
+if(npcElementInfo.strong===playerElement)npcElementMult=1.5;
+else if(npcElementInfo.weak===playerElement)npcElementMult=0.6;
+}
+let npcDmg=Math.max(3,Math.floor(c.npcCombat*npcElementMult)+rand(1,8));
+c.playerHp=Math.max(0,c.playerHp-npcDmg);
+// Update player HP
+p.hp=c.playerHp;
+let npcElName=ELEMENTS[npcElement]?.name||'未知';
+let npcAdv=npcElementMult>1?' (属性克制！)':(npcElementMult<1?' (属性被克)':'');
+c.log.push({type:'combat-log-npc',text:c.npcName+' 使用'+npcElName+'，造成 <span class="combat-log-damage">'+npcDmg+'</span> 点伤害'+npcAdv});
+// Check if player defeated
+if(c.playerHp<=0){
+c.result='lose';
+updateCombatUI();
+return;
+}
+// Next round
+c.round++;
+c.turn='player';
+updateCombatUI();
+}
+
+function endCombat(){
+let c=combatState;
+if(!c)return;
+let p=G.player;
+let n=NPCS[c.npcId],ni=G.npcs[c.npcId];
+if(c.result==='win'){
 let bonus=rand(1,3);
 p.combat+=bonus;
 ni.affinity=clamp(ni.affinity+rand(3,6),0,100);
 log('切磋胜利！与'+n.name+'切磋获胜，战力+'+bonus,'good');
-showModal('切磋胜利','<div style="color:var(--green);text-align:center;font-size:16px;margin-bottom:8px">你赢了！</div><div style="color:var(--txt);text-align:center">与'+n.name+'的切磋你获得了胜利。</div><div style="color:var(--gold);text-align:center;margin-top:8px">战力+'+bonus+'，好感+3~6</div>',[{text:'继续',onClick:()=>{hideModal();checkLoveEvent(id);renderAll();}}]);
-}else{
+// Gain proficiency for the element used in last turn
+if(c.playerElement&&c.playerElement!=='none'){
+p.skillProficiency=p.skillProficiency||{};
+p.skillProficiency[c.playerElement]=(p.skillProficiency[c.playerElement]||0)+1;
+}
+showModal('🏆 切磋胜利','<div style="color:var(--green);text-align:center;font-size:16px;margin-bottom:8px">你赢了！</div><div style="color:var(--txt);text-align:center">与'+n.name+'的切磋你获得了胜利。</div><div style="color:var(--gold);text-align:center;margin-top:8px">战力+'+bonus+'，好感+3~6</div>',[{text:'继续',onClick:()=>{hideModal();checkLoveEvent(c.npcId);closeCombat();renderAll();}}]);
+}else if(c.result==='lose'){
 p.hp=clamp(p.hp-15,0,p.maxHp);
 p.injuries.push({type:'duel',days:3});
 p.stress=clamp(p.stress+8,0,100);
 log('切磋失败！被'+n.name+'击败，受伤了','danger');
-showModal('切磋失败','<div style="color:var(--red);text-align:center;font-size:16px;margin-bottom:8px">你输了...</div><div style="color:var(--txt);text-align:center">与'+n.name+'的切磋你输了，受了伤。</div><div style="color:var(--orange);text-align:center;margin-top:8px">生命-15，压力+8，进入受伤状态(3天)</div>',[{text:'继续',onClick:()=>{hideModal();renderAll();}}]);
+showModal('💀 切磋失败','<div style="color:var(--red);text-align:center;font-size:16px;margin-bottom:8px">你输了...</div><div style="color:var(--txt);text-align:center">与'+n.name+'的切磋你输了，受了伤。</div><div style="color:var(--orange);text-align:center;margin-top:8px">生命-15，压力+8，进入受伤状态(3天)</div>',[{text:'继续',onClick:()=>{hideModal();closeCombat();renderAll();}}]);
+}else{
+// Draw
+log('与'+n.name+'切磋，打成平手','event');
+showModal('🤝 平局','与'+n.name+'的切磋不分胜负。',[{text:'继续',onClick:()=>{hideModal();closeCombat();renderAll();}}]);
 }
+}
+
+function closeCombat(){
+document.getElementById('combat-overlay').classList.remove('show');
+combatState=null;
 }
 
 function showGiftList(npcId){
@@ -3439,9 +3782,14 @@ function learnSkill(id){
 let n=NPCS[id];
 let skills={wind:'疾风斩',cloud:'云盾术',thunder:'雷击术',rain:'雨幕壁',none:'气旋冲撞'};
 let skill=skills[n.college]||'气旋冲撞';
+let el=n.college||'none';
 G.player.combat+=3;
+if(!G.player.learnedSkills)G.player.learnedSkills={};
+G.player.learnedSkills[el]=true;
+if(!G.player.skillProficiency)G.player.skillProficiency={};
+G.player.skillProficiency[el]=(G.player.skillProficiency[el]||0)+1;
 log('从'+n.name+'处习得'+skill+'！战力+3','good');
-showModal('习得技能','<div style="color:var(--gold);font-size:16px;margin-bottom:8px">'+skill+'</div><div style="color:var(--txt)">从'+n.name+'处习得了新技能。战力+3。</div>',[{text:'继续',onClick:()=>{hideModal();renderAll();}}]);
+showModal('习得技能','<div style="color:var(--gold);font-size:16px;margin-bottom:8px">'+skill+'</div><div style="color:var(--txt)">从'+n.name+'处习得了新元素技巧。战力+3，熟练度+1。</div><div style="color:var(--txt2);margin-top:8px;font-size:12px">现在你可以在对抗场切磋时使用'+ELEMENTS[el].name+'元素了。去训练场练习可以提升熟练度！</div>',[{text:'继续',onClick:()=>{hideModal();renderAll();}}]);
 }
 
 function sendSpiritMessage(npcId){
@@ -3482,8 +3830,8 @@ function discoverTruth(fragId){
 let frag=TRUTH_FRAGMENTS.find(f=>f.id===fragId);
 if(!frag||G.player.truthFragments.find(t=>t.id===fragId))return;
 G.player.truthFragments.push(frag);
-log('发现真相碎片：'+frag.title+'！','festival');
-showModal('🔮 真相碎片','<div style="color:var(--gold);font-size:16px;margin-bottom:12px">'+frag.title+'</div><div style="color:var(--txt);line-height:1.8">'+frag.desc+'</div><br><div style="color:var(--txt3);font-size:12px">已发现: '+G.player.truthFragments.length+'/7</div>',[{text:'继续',onClick:hideModal}]);
+log('注意到一些不对劲的事...','festival');
+showModal('🧩 碎片','<div style="color:var(--gold);font-size:16px;margin-bottom:12px">'+frag.title+'</div><div style="color:var(--txt);line-height:1.8">'+frag.desc+'</div><br><div style="color:var(--txt3);font-size:12px">已拼凑: '+G.player.truthFragments.length+'/7</div>',[{text:'继续',onClick:hideModal}]);
 }
 
 function triggerFactionEvent(fid){
@@ -3764,8 +4112,48 @@ return;
 let evs=getAvailableEvents();
 let evt=evs.find(e=>e.id===currentEventDetailId);
 if(!evt)return;
+// Special handling for practice event
+if(currentEventDetailId==='practice'){
+if(selectedEventCharId!=='player'){
+showModal('无法练习','只有你自己可以练习元素技巧。',[{text:'返回',onClick:hideModal}]);
+return;
+}
+let p=G.player;
+let availableElements=[];
+if(p.college!=='none')availableElements.push({id:p.college,name:ELEMENTS[p.college].name,color:ELEMENTS[p.college].color});
+if(p.learnedSkills){
+Object.keys(p.learnedSkills).forEach(el=>{
+if(el!==p.college&&ELEMENTS[el]&&p.learnedSkills[el]){
+availableElements.push({id:el,name:ELEMENTS[el].name,color:ELEMENTS[el].color});
+}
+});
+}
+if(availableElements.length===0){
+showModal('无法练习','你还没有掌握任何元素技巧。先去找NPC学习技能吧！',[{text:'返回',onClick:hideModal}]);
+return;
+}
+let html='<div style="margin-bottom:12px;color:var(--txt2)">选择要练习的元素：</div>';
+availableElements.forEach(el=>{
+let prof=p.skillProficiency?.[el.id]||0;
+html+='<button class="combat-element-btn '+el.id+'" style="display:block;width:100%;margin-bottom:8px" onclick="confirmPractice(\''+el.id+'\')">'+el.name;
+if(prof>0)html+=' <small style="color:var(--txt3)">(当前熟练度:'+prof+')</small>';
+html+='</button>';
+});
+showModal('练习元素技巧',html,[{text:'取消',onClick:hideModal}]);
+return;
+}
 document.getElementById('event-detail-overlay').classList.remove('show');
 executeEvent(currentEventDetailId,selectedEventCharId,evt);
+}
+
+function confirmPractice(elementId){
+let p=G.player;
+p.practiceElement=elementId;
+hideModal();
+document.getElementById('event-detail-overlay').classList.remove('show');
+let evs=getAvailableEvents();
+let evt=evs.find(e=>e.id==='practice');
+executeEvent('practice','player',evt);
 }
 function withdrawFromEvent(){
 if(!currentEventDetailId)return;
@@ -3871,8 +4259,8 @@ let pElement=p.element;
 let oElement=n.element||n.college||'wind';
 let pPower=p.combat*2+p.windOrder*3+rand(1,20);
 let oPower=(n.combat||10)*2+rand(1,20);
-let pAdv=ELEMENTS[pElement]&&ELEMENTS[pElement].strongVs===oElement;
-let oAdv=ELEMENTS[oElement]&&ELEMENTS[oElement].strongVs===pElement;
+let pAdv=ELEMENTS[pElement]&&ELEMENTS[pElement].strong===oElement;
+let oAdv=ELEMENTS[oElement]&&ELEMENTS[oElement].strong===pElement;
 if(pAdv)pPower*=1.3;
 if(oAdv)oPower*=1.3;
 let win=pPower>=oPower;
@@ -3955,7 +4343,7 @@ p.thesisFeedback='方案通过！创新性、可行性、安全性均达标。�
 log('毕业论文方案通过审核！修改了'+p.thesisRevisions+'次','good');
 showModal('✅ 方案通过！','<div style="color:var(--green);font-size:16px;margin-bottom:8px">恭喜！你的毕业论文方案已通过审核！</div><div style="color:var(--txt)">修改次数: '+p.thesisRevisions+'</div><div style="color:var(--txt2);margin-top:8px">你已获得执行许可。前往论文页面执行毕业论文。</div>',[{text:'继续',onClick:()=>{hideModal();renderAll();}}]);
 }else{
-let reasons=['创新性不足："这个方案与已有论文结构过于相似"','可行性存疑："气旋的维持时间不足以支撑论文落地"','安全性风险："论文执行可能对下界造成不可控影响"','理论不够充分："核心机制的推导过程存在逻辑断层"','能量预算超标："方案预估消耗的气核能量超出安全阈值"'];
+let reasons=['创新性不足："这个方案与已有论文结构过于相似"','可行性存疑："气旋的维持时间不足以支撑论文落地"','安全性风险："评审团拒绝说明具体原因，只在意见栏写了三个字——不可控"','理论不够充分："核心机制的推导过程存在逻辑断层"','能量预算超标："方案预估消耗的气核能量超出安全阈值"'];
 let reason=pick(reasons);
 p.thesisFeedback=reason;
 log('论文被驳回（第'+p.thesisRevisions+'次）','warning');
@@ -3966,8 +4354,8 @@ showModal('❌ 方案被驳回','<div style="color:var(--red);margin-bottom:8px"
 function executeThesis(){
 let p=G.player;
 if(!p.thesisApproved)return;
-showModal('执行毕业论文','<div style="color:var(--gold);margin-bottom:12px">你即将前往地球执行毕业论文。</div><div style="color:var(--txt2);margin-bottom:12px">执行后，你的气核能量将耗尽，意识消散。这就是"消散"。</div><div style="color:var(--txt3)">你的论文: '+p.thesisTopic.substring(0,50)+'...</div>',
-[{text:'执行',onClick:()=>{
+showModal('执行毕业论文','<div style="color:var(--gold);margin-bottom:12px">你走向毕业穹厅中央的光柱。</div><div style="color:var(--txt2);margin-bottom:12px">穹门在你头顶亮了起来。你感到气核在剧烈震动——然后，一种从未有过的平静。</div><div style="color:var(--txt3)">你看到了什么？你不确定。但你知道——你不会再回来了。</div>',
+[{text:'走进光柱',onClick:()=>{
 p.thesisExecuted=true;p.thesisStage=4;
 log('毕业论文已执行！','festival');
 hideModal();triggerEnding('graduation');
@@ -4382,7 +4770,7 @@ p.knowledge=Math.floor(p.knowledge*.75);
 let at=TRUTH_FRAGMENTS.find(t=>t.triggerSemester===p.semester&&!p.truthFragments.find(f=>f.id===t.id));
 if(at&&p.perception>=10)discoverTruth(at.id);
 if(p.semester>=3&&!p.faction&&p.truthFragments.length>=2){
-showModal('阵营选择','你已发现足够多的真相碎片。<br><br>选择你的道路：',
+showModal('一个选择','你注意到了一些别人不曾注意到的东西。<br><br>有人找到了你：',
 [{text:'加入归风者',onClick:()=>{joinFaction('guifeng');advanceSemester2();}},
 {text:'加入守密人',onClick:()=>{joinFaction('shoumi');advanceSemester2();}},
 {text:'加入信物守护者',onClick:()=>{joinFaction('xinwu');advanceSemester2();}},
@@ -4415,13 +4803,13 @@ if(!p.alive)return{title:'消散',desc:'你的气核在战斗中碎裂，意识�
 if(p.graduated){
 if(p.married){
 let n=NPCS[p.married];
-return{title:'伴侣结局：风与爱同在',desc:'你从穹霄圣所毕业了，与'+n.name+'携手走过穹门。你的论文留在了地球上，而你们的记忆留在了彼此心中。',quote:'"不管风把吹到哪里，我想和你在一起。"'};
+return{title:'伴侣结局：风与爱同在',desc:'你从穹霄圣所毕业了，与'+n.name+'携手走过穹门。身后发生的一切，你们彼此心知——或者说，彼此默契地不再提起。但风还在吹。',quote:'"不管风把我们吹到哪里，我想和你在一起。"'};
 }
-if(p.faction==='guifeng'&&p.truthFragments.length>=5)return{title:'归风者结局：风从地球吹回来',desc:'你在最终答辩中公开了论文制度的真相——毕业论文就是往地球送天象，消散就是献祭。变革开始了。风，终于从地球那边吹了回来。',quote:'"我们不是叛逆者。我们只是记住了——风从哪里来。"'};
-if(p.faction==='shoumi'&&p.truthFragments.length>=5)return{title:'守密人结局：被遗忘的守护',desc:'你选择守护秘密。你用余生确保没有人再发现真相。你自己的名字，也终将被遗忘。',quote:'"不是所有真相都该被知道。"'};
-if(p.faction==='xinwu'&&p.windOrder>=7)return{title:'信物守护者结局：与信物共生',desc:'你成为了四神信物的守护者。金色风船选择了你。你与信物建立了深度共鸣，用余生守护着四神留下的记忆。',quote:'"信物不是工具。信物是记忆。"'};
-if(p.faction===null&&p.truthFragments.length>=6&&p.windOrder>=8)return{title:'破壁者结局：九序归真',desc:'你不属于任何阵营。你理解了完整的能量循环。你的气核与天地循环完全融合——你成为了五千年来第二个达到九序的人。',quote:'"风起初不在高处——它只是最早睁开眼睛的那一个。"'};
-return{title:'毕业结局：风不停，路不止',desc:'你从穹霄圣所毕业了。你走过了穹门，执行了你的毕业论文。你消散了，但你的天气留了下来。',quote:'"他们最后都会变成天气，只是变成的天气不一样。"'};
+if(p.faction==='guifeng'&&p.truthFragments.length>=5)return{title:'归风者结局：风从某个方向吹回来',desc:'你站在毕业穹厅中，手中握着所有你拼凑出的碎片。你没有走进光柱。你转身，走向了穹门的另一侧——一扇从未被打开过的门。风，从那个方向吹了回来。',quote:'"我们不是叛逆者。我们只是记住了——风从哪里来。"'};
+if(p.faction==='shoumi'&&p.truthFragments.length>=5)return{title:'守密人结局：被遗忘的守护',desc:'你选择守护那些你拼凑出的碎片。你用余生确保没有人再拼出完整的图景。你自己的名字，也终将被遗忘——连同你知道的一切。',quote:'"不是所有真相都该被知道。"'};
+if(p.faction==='xinwu'&&p.windOrder>=7)return{title:'信物守护者结局：与信物共生',desc:'你成为了四神信物的守护者。金色风船选择了你。信物在你手中低语——它似乎想告诉你什么，但又似乎在等你自己想起来。',quote:'"信物不是工具。信物是记忆。"'};
+if(p.faction===null&&p.truthFragments.length>=6&&p.windOrder>=8)return{title:'破壁者结局：九序归真',desc:'你不属于任何阵营。你站在穹门之下，理解了某种完整的循环——但你说不出来。你的气核与天地共鸣，你成为了五千年来第二个达到九序的人。你看到了门的另一侧。但你选择不说。',quote:'"风起初不在高处——它只是最早睁开眼睛的那一个。"'};
+return{title:'毕业结局：风不停，路不止',desc:'你从穹霄圣所毕业了。你走进了光柱，然后——风还在吹。你的名字刻在了风碑上。至于风碑之后的事，没有人说，也没有人问。',quote:'"他们最后都去了同一个地方。但那个地方——没有人能说清它在哪里。"'};
 }
 return{title:'退学结局',desc:'你被穹霄圣所淘汰了。你离开了圣所，在风痕市集最远的陆块边缘开了一间很小的铺子。门口只挂一块旧木牌——"改到能过"。',quote:'"风不停，路不止。但不是每阵风都要走同一条路。"'};
 }
