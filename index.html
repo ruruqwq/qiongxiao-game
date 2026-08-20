@@ -1908,14 +1908,14 @@ document.getElementById('map-back-btn').style.display='none';
 document.getElementById('map-layer-list').style.display='none';
 hideMapInfo();
 // Three major zones as hotspots
-hs.innerHTML+='<div class="map-hotspot" style="left:25%;top:30%;width:25%;height:35%" onclick="enterLayerView()">'+
+hsContainer.innerHTML='<div class="map-hotspot" style="left:25%;top:30%;width:25%;height:35%" onclick="enterLayerView()">'+
 '<div class="map-hotspot-icon">🏛</div><div class="map-hotspot-label">学院</div></div>';
-hs.innerHTML+='<div class="map-hotspot" style="left:55%;top:45%;width:20%;height:25%" onclick="enterLayerView(5)">'+
+hsContainer.innerHTML+='<div class="map-hotspot" style="left:55%;top:45%;width:20%;height:25%" onclick="enterLayerView(5)">'+
 '<div class="map-hotspot-icon">🏪</div><div class="map-hotspot-label">集市</div></div>';
-hs.innerHTML+='<div class="map-hotspot" style="left:35%;top:70%;width:25%;height:20%" onclick="enterLayerView(6)">'+
+hsContainer.innerHTML+='<div class="map-hotspot" style="left:35%;top:70%;width:25%;height:20%" onclick="enterLayerView(6)">'+
 '<div class="map-hotspot-icon">🌍</div><div class="map-hotspot-label">学院外</div></div>';
 // Stroll button (random exploration)
-hs.innerHTML+='<div class="map-hotspot stroll-btn" style="left:80%;top:5%;width:18%;height:12%" onclick="randomStroll()">'+
+hsContainer.innerHTML+='<div class="map-hotspot stroll-btn" style="left:80%;top:5%;width:18%;height:12%" onclick="randomStroll()">'+
 '<div class="map-hotspot-icon">🎲</div><div class="map-hotspot-label">随便逛逛</div></div>';
 }
 
@@ -2318,7 +2318,6 @@ let largePortrait=getNpcPortraitImg(npcId,200);
 let loveIcon=ni.romanceBroken?'💔 恋人线已断裂':(ni.romanceLevel>0?'❤️ 恋人':'');
 let opts=[
 {text:'聊天 (+好感)',onClick:()=>{let g=rand(3,8);ni.affinity=clamp(ni.affinity+g,0,100);log('与'+n.name+'聊天，好感+'+g,'event');hideModal();showMapNpcDialog(npcId);checkLoveEvent(npcId);renderAll();}},
-{text:'切磋 (7天冷却)',onClick:()=>duelNpc(npcId)},
 {text:'送礼物',onClick:()=>{showGiftList(npcId);}}
 ];
 if(ni.affinity>=30&&!ni.recruited)opts.push({text:'招募加入阵营 (好感'+ni.affinity+'/30)',onClick:()=>tryRecruit(npcId)});
