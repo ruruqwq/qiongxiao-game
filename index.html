@@ -481,7 +481,7 @@ button{font-family:inherit;cursor:pointer;border:none;outline:none;transition:al
 /* v3.0: Mobile Settings Button */
 #mobile-settings-btn{display:none;padding:4px 8px;font-size:18px;background:none;border:none;color:var(--gold);cursor:pointer}
 #mobile-menu-btn{display:none;padding:4px 8px;font-size:20px;background:none;border:none;color:var(--gold);cursor:pointer;margin-right:8px}
-#end-day-btn{display:none;padding:5px 12px;font-size:12px;background:linear-gradient(135deg,rgba(138,109,26,0.85),rgba(212,175,55,0.85));color:#1a1a1a;font-weight:bold;border:1px solid var(--gold);border-radius:4px;cursor:pointer;margin-right:6px}
+#end-day-btn{display:inline-block;padding:5px 12px;font-size:12px;background:linear-gradient(135deg,rgba(138,109,26,0.85),rgba(212,175,55,0.85));color:#1a1a1a;font-weight:bold;border:1px solid var(--gold);border-radius:4px;cursor:pointer;margin-right:6px}
 #end-day-btn:hover{background:linear-gradient(135deg,rgba(170,141,42,0.9),rgba(244,208,63,0.9))}
 
 /* v3.0: Settings Panel */
@@ -3446,15 +3446,16 @@ let p=G.player;
 G.player.duelCooldowns[npcId]=7;
 // Calculate NPC stats based on year
 let npcYear=Math.floor((G.day-1)/60)+1;
-let npcCombat=20+(npcYear-1)*5+rand(0,10)+(ni.affinity/10);
+let npcCombat=20+(npcYear-1)*5+rand(0,10)+((ni.affinity||0)/10);
 let npcMaxHp=80+(npcYear-1)*10;
 // Player stats
-let playerCombat=p.combat+(p.windOrder*3);
-let playerMaxHp=p.maxHp;
+let playerCombat=(p.combat||0)+((p.windOrder||1)*3);
+let playerMaxHp=p.maxHp||80;
+let playerHp=Math.min(p.hp||playerMaxHp,playerMaxHp);
 // Initialize state
 combatState={
 npcId:npcId,npcName:n.name,
-playerHp:p.hp,playerMaxHp:playerMaxHp,playerCombat:playerCombat,
+playerHp:playerHp,playerMaxHp:playerMaxHp,playerCombat:playerCombat,
 npcHp:npcMaxHp,npcMaxHp:npcMaxHp,npcCombat:npcCombat,
 round:1,turn:'player',log:[],
 playerElement:null,npcElement:n.college!=='none'?n.college:'wind',
