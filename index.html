@@ -1669,6 +1669,7 @@ currentTab:'social',semesterDays:30,excursionDone:false,endingTriggered:false,
 draggedNpc:null,dayPhase:0,tutorialStep:0,tutorialDone:false,
 currentScene:'campus',
 charActions:{},
+strollUsedToday:false, // v3.1: random stroll once per day
 clubTasks:{}, // v3.0: club tasks per semester
 examQuestions:[], // v3.0: exam question queue
 bgmAudio:null,
@@ -1794,13 +1795,15 @@ renderAll();startTutorial();
 
 // ===== TUTORIAL =====
 const TUTORIAL_STEPS=[
-{title:'欢迎来到异世界学院模拟器',text:'这是一个回合制模拟游戏。你将在圣所度过8个学期，每个学期30天。手上有几张角色卡牌，每天就能派几个角色去不同地点执行任务，每个角色每天只能行动一次。',target:null},
-{title:'多角色行动',text:'你有几张角色卡牌，每天就可以派几个角色去不同地点！比如你有3张卡牌，就可以派3个角色分别去上课、训练、打工。每个角色每天只能行动一次。',target:'main-content'},
-{title:'属性面板',text:'左侧面板显示你的所有属性。知识是考试及格的关键，风痕笔是做作业的必需品。注意压力值，太高会扣血。',target:'lp-stats'},
-{title:'淘汰标准',text:'左侧面板底部显示本学期的淘汰要求。知识、学分、作业、上课次数都要达标，否则会被退学！当前是第1学期，共30天。',target:'lp-elim'},
-{title:'人物卡片',text:'底部的卡片栏显示你和已招募的NPC。好感度达到30的NPC会自动加入手牌！将卡片拖拽到事件槽中即可派遣执行。每个角色每天只能行动一次！',target:'bottom-bar'},
-{title:'结束今日',text:'安排好今天所有角色的行动后，点击"结束今日"按钮进入下一天。点击后会显示昨日结算：哪些事件成功了、骰子投了几点、获得了什么奖励。',target:null},
-{title:'开始游戏',text:'教学结束！记住：每学期需要足够的知识、学分、作业和上课次数才能通过考试。手上的角色越多，每天能做的事就越多！',target:null}
+{title:'欢迎来到异世界学院模拟器',text:'你将在穹霄圣所度过8个学期，每学期30天。每天可以安排角色去上课、训练、打工、探索。目标是顺利毕业——但这个世界的真相远比毕业复杂。',target:null},
+{title:'左侧功能菜单',text:'左侧面板（手机端点☰打开）是你的核心工具栏：角色查看属性、物品背包、风精管理、世界碎片、阵营信息、淘汰进度、作业列表，以及最重要的——地图！',target:'left-panel'},
+{title:'地图系统',text:'点击左侧"🗺 地图"可打开全景地图。地图分为三大区：学院、集市、学院外。点击进入可查看七层结构的详细场景。地图上还有"🎲 随便逛逛"按钮，每天可以随机探索一次，有几率遇到新NPC或发现隐藏事件！',target:null},
+{title:'多角色行动',text:'底部的卡片栏显示你和已招募的NPC。好感度达到30的NPC会自动加入手牌！将卡片拖拽到事件槽中即可派遣执行。每个角色每天只能行动一次。',target:'bottom-bar'},
+{title:'人脉关系与每日互动',text:'在"人脉"标签页可以与认识的NPC互动：聊天、送礼、学习技能、表达心意。每个NPC每天只能互动一次，互动后会显示"今日已互动"。提升好感可以解锁招募、学习技能和恋爱线！',target:null},
+{title:'元素战斗系统',text:'在地图第四层"训练场区"可以进入对抗场切磋。战斗采用元素克制系统：风克云、云克雷、雷克风、雨克雷。选择克制的元素攻击可造成1.5倍伤害！切磋有7天冷却，胜利可获得战力和好感奖励。',target:null},
+{title:'训练场练习',text:'训练场除了切磋，还可以"练习元素技巧"来提升元素熟练度。熟练度越高，战斗中该元素的伤害加成越大。好好学习多种元素，才能在战斗中灵活应对！',target:null},
+{title:'结束今日与每日限制',text:'安排好今天的行动后，点击右上角"📅 结束今日"按钮进入下一天。注意：随便逛逛每天1次、每个NPC互动每天1次、切磋有7天冷却——合理安排每天的行程是关键！',target:null},
+{title:'开始游戏',text:'教学结束！记住：每学期需要足够的知识、学分、作业和上课次数才能通过考试。多去地图探索、多交朋友、多练习元素技巧——祝你在穹霄圣所度过充实的学院生活！',target:null}
 ];
 function startTutorial(){if(G.tutorialDone)return;G.tutorialStep=0;showTutorialStep();}
 function showTutorialStep(){
@@ -1811,7 +1814,7 @@ document.getElementById('tutorial-overlay').classList.add('show');
 let bubble=document.getElementById('tut-bubble');
 // 移动端：如果目标在left-panel中，自动打开侧滑菜单
 let isMobile=window.innerWidth<=768;
-if(isMobile&&step.target&&(step.target==='lp-stats'||step.target==='lp-elim')){
+if(isMobile&&step.target&&(step.target==='left-panel')){
   toggleMobileMenu();
 }
 if(step.target){
@@ -1914,9 +1917,11 @@ hsContainer.innerHTML+='<div class="map-hotspot" style="left:55%;top:45%;width:2
 '<div class="map-hotspot-icon">🏪</div><div class="map-hotspot-label">集市</div></div>';
 hsContainer.innerHTML+='<div class="map-hotspot" style="left:35%;top:70%;width:25%;height:20%" onclick="enterLayerView(6)">'+
 '<div class="map-hotspot-icon">🌍</div><div class="map-hotspot-label">学院外</div></div>';
-// Stroll button (random exploration)
-hsContainer.innerHTML+='<div class="map-hotspot stroll-btn" style="left:80%;top:5%;width:18%;height:12%" onclick="randomStroll()">'+
-'<div class="map-hotspot-icon">🎲</div><div class="map-hotspot-label">随便逛逛</div></div>';
+// Stroll button (random exploration) — limited to once per day
+let strollLabel=G.strollUsedToday?'随便逛逛(已用)':'随便逛逛';
+let strollStyle=G.strollUsedToday?'opacity:0.4;':'';
+hsContainer.innerHTML+='<div class="map-hotspot stroll-btn" style="left:80%;top:5%;width:18%;height:12%;'+strollStyle+'" onclick="randomStroll()">'+
+'<div class="map-hotspot-icon">🎲</div><div class="map-hotspot-label">'+strollLabel+'</div></div>';
 }
 
 function enterLayerView(layerId){
@@ -2108,6 +2113,11 @@ showScenePopup(info.scene,info.title,info.desc,matchedEvents,null);
 // ===== RANDOM STROLL (explore and meet NPCs) =====
 function randomStroll(){
 let p=G.player;
+if(G.strollUsedToday){
+showModal('🎲 随便逛逛','<div style="color:var(--txt2);text-align:center;padding:12px">今天已经逛过了，明天再来吧！</div>',[{text:'返回',onClick:hideModal}]);
+return;
+}
+G.strollUsedToday=true;
 let locations=[
   {name:'圣所主楼长廊',scene:'campus',desc:'沿着主楼的长廊漫步，气旋在穹顶流转，发出低沉的嗡鸣。'},
   {name:'学院外归风坡',scene:'guifeng_slope',desc:'归风坡的风声与别处不同，像是有人在远处低声哼唱。'},
@@ -2853,12 +2863,14 @@ log(NPCS[id].name+'的好感达到30，已加入手牌！','good');
 }
 let n=NPCS[id],ni=G.npcs[id],c=COLLEGES[n.college]||{color:'#888',badge:'badge-gold',name:'无灵者'};
 let loveIcon=ni.romanceBroken?'💔':(ni.romanceLevel>0?'❤️':'');
-h+='<div style="display:flex;align-items:center;padding:8px;background:var(--bg3);border-radius:6px;margin-bottom:6px;cursor:pointer" onclick="interactNpc(\''+id+'\')">'+
+let interactedTag=ni.interactedToday>0?' · <span style="color:var(--txt3)">今日已互动</span>':'';
+let interactedStyle=ni.interactedToday>0?'opacity:0.6;':'';
+h+='<div style="display:flex;align-items:center;padding:8px;background:var(--bg3);border-radius:6px;margin-bottom:6px;cursor:pointer;'+interactedStyle+'" onclick="interactNpc(\''+id+'\')">'+
 '<div style="margin-right:10px">'+getNpcPortraitImg(id,40)+'</div>'+
 '<div style="flex:1"><div style="font-size:13px;color:var(--txt)">'+n.name+' '+loveIcon+' <span class="badge '+c.badge+'">'+c.name+'</span></div>'+
 '<div style="font-size:11px;color:var(--txt3)">'+n.desc+'</div>'+
 '<div class="bar" style="margin-top:3px"><div class="bar-fill '+(ni.romanceLevel>0?'bar-love':'bar-aff')+'" style="width:'+ni.affinity+'%"></div></div>'+
-'<div style="font-size:10px;color:var(--txt3)">好感: '+ni.affinity+(ni.recruited?' · 已招募':'')+(ni.romanceLevel>0?' · 恋人':'')+(ni.romanceBroken?' · 断裂':'')+'</div></div></div>';
+'<div style="font-size:10px;color:var(--txt3)">好感: '+ni.affinity+(ni.recruited?' · 已招募':'')+(ni.romanceLevel>0?' · 恋人':'')+(ni.romanceBroken?' · 断裂':'')+interactedTag+'</div></div></div>';
 });
 h+='</div>';
 return h;
@@ -3377,28 +3389,35 @@ renderAll();
 function interactNpc(id){
 let n=NPCS[id],ni=G.npcs[id];
 if(!ni.met)return;
+// v3.1: Each NPC can only be interacted with once per day
+if(ni.interactedToday>0){
+showModal(n.name,'<div style="text-align:center;margin-bottom:12px">'+getNpcPortraitImg(id,80)+'</div><div style="color:var(--txt2);text-align:center">今天已经和'+n.name+'互动过了，明天再来吧。</div>',[{text:'返回',onClick:hideModal}]);
+return;
+}
 let c=COLLEGES[n.college]||{color:'#888',badge:'badge-gold',name:'无灵者'};
 let svg=getNpcPortraitImg(id,80);
 let loveIcon=ni.romanceBroken?'💔 恋人线已断裂':(ni.romanceLevel>0?'❤️ 恋人':'');
+// Wrap each action to mark as interacted when actually performed
+function markInteracted(){ni.interactedToday=1;}
 let opts=[
-{text:'聊天 (+好感)',onClick:()=>{let g=rand(3,8);ni.affinity=clamp(ni.affinity+g,0,100);log('与'+n.name+'聊天，好感+'+g,'event');hideModal();checkLoveEvent(id);renderAll();}},
-{text:'送礼物',onClick:()=>{showGiftList(id);}}
+{text:'聊天 (+好感)',onClick:()=>{markInteracted();let g=rand(3,8);ni.affinity=clamp(ni.affinity+g,0,100);log('与'+n.name+'聊天，好感+'+g,'event');hideModal();checkLoveEvent(id);renderAll();}},
+{text:'送礼物',onClick:()=>{markInteracted();showGiftList(id);}}
 ];
-if(ni.affinity>=30&&!ni.recruited)opts.push({text:'招募加入阵营 (好感'+ni.affinity+'/30)',onClick:()=>tryRecruit(id)});
+if(ni.affinity>=30&&!ni.recruited)opts.push({text:'招募加入阵营 (好感'+ni.affinity+'/30)',onClick:()=>{markInteracted();tryRecruit(id);}});
 if(ni.affinity>=40&&n.subj!=='无'){
-opts.push({text:'学习技能: '+n.subj+' (好感40+)',onClick:()=>learnSkill(id)});
+opts.push({text:'学习技能: '+n.subj+' (好感40+)',onClick:()=>{markInteracted();learnSkill(id);}});
 }
 if(ni.affinity>=20&&!ni.romanceBroken&&ni.romanceLevel===0){
-opts.push({text:'❤️ 表达心意 (好感20+)',onClick:()=>expressFeelings(id),styleClass:' love'});
+opts.push({text:'❤️ 表达心意 (好感20+)',onClick:()=>{markInteracted();expressFeelings(id);},styleClass:' love'});
 }
 if(ni.affinity>=50){
-if(id==='fang_yan'&&!G.player.truthFragments.find(t=>t.id===1))opts.push({text:'询问关于论文的事',onClick:()=>{discoverTruth(1);hideModal();renderAll();}});
-if(id==='qi_yuan'&&!G.player.faction)opts.push({text:'与校长深谈',onClick:()=>triggerFactionEvent('guifeng')});
-if(id==='zhuo_yun'&&!G.player.faction)opts.push({text:'请求加入守密人',onClick:()=>triggerFactionEvent('shoumi')});
-if(id==='lu_ji'&&!G.player.truthFragments.find(t=>t.id===2))opts.push({text:'请他演奏雨铃',onClick:()=>{discoverTruth(2);hideModal();renderAll();}});
+if(id==='fang_yan'&&!G.player.truthFragments.find(t=>t.id===1))opts.push({text:'询问关于论文的事',onClick:()=>{markInteracted();discoverTruth(1);hideModal();renderAll();}});
+if(id==='qi_yuan'&&!G.player.faction)opts.push({text:'与校长深谈',onClick:()=>{markInteracted();triggerFactionEvent('guifeng');}});
+if(id==='zhuo_yun'&&!G.player.faction)opts.push({text:'请求加入守密人',onClick:()=>{markInteracted();triggerFactionEvent('shoumi');}});
+if(id==='lu_ji'&&!G.player.truthFragments.find(t=>t.id===2))opts.push({text:'请他演奏雨铃',onClick:()=>{markInteracted();discoverTruth(2);hideModal();renderAll();}});
 }
 if(G.player.spirits.length>0){
-opts.push({text:'🕊️ 用风精传信',onClick:()=>sendSpiritMessage(id)});
+opts.push({text:'🕊️ 用风精传信',onClick:()=>{markInteracted();sendSpiritMessage(id);}});
 }
 showModal(n.name+' '+loveIcon,
 '<div style="text-align:center;margin-bottom:8px">'+svg+'</div>'+
@@ -3444,12 +3463,12 @@ let n=NPCS[npcId],ni=G.npcs[npcId];
 let p=G.player;
 // Set cooldown
 G.player.duelCooldowns[npcId]=7;
-// Calculate NPC stats based on year
-let npcYear=Math.floor((G.day-1)/60)+1;
-let npcCombat=20+(npcYear-1)*5+rand(0,10)+((ni.affinity||0)/10);
-let npcMaxHp=80+(npcYear-1)*10;
-// Player stats
-let playerCombat=(p.combat||0)+((p.windOrder||1)*3);
+// Calculate NPC stats based on year — scaled down so player can win
+let npcYear=Math.ceil((p.semester||1)/2);
+let npcCombat=8+(npcYear-1)*3+rand(0,5)+Math.floor((ni.affinity||0)/15);
+let npcMaxHp=50+(npcYear-1)*8;
+// Player stats — player combat + windOrder + proficiency gives a fighting chance
+let playerCombat=(p.combat||0)+((p.windOrder||1)*2)+5;
 let playerMaxHp=p.maxHp||80;
 let playerHp=Math.min(p.hp||playerMaxHp,playerMaxHp);
 // Initialize state
@@ -3461,6 +3480,7 @@ round:1,turn:'player',log:[],
 playerElement:null,npcElement:n.college!=='none'?n.college:'wind',
 result:null
 };
+combatState.log.push({type:'combat-log-player',text:'切磋开始！'+n.name+' 气势如虹，准备应战。'});
 // Show combat UI
 document.getElementById('combat-overlay').classList.add('show');
 updateCombatUI();
@@ -3474,20 +3494,25 @@ document.getElementById('combat-title').textContent='⚔ 第'+c.round+'回合 ·
 // Player side
 let playerPortrait=getPlayerPortraitImg(p,60);
 let npcPortrait=getNpcPortraitImg(c.npcId,60);
-let playerHpPct=(c.playerHp/c.playerMaxHp*100);
-let npcHpPct=(c.npcHp/c.npcMaxHp*100);
+// Safe HP calculation — prevent NaN and negative values
+let safePlayerMaxHp=Math.max(1,c.playerMaxHp||1);
+let safeNpcMaxHp=Math.max(1,c.npcMaxHp||1);
+let safePlayerHp=Math.max(0,Math.min(c.playerHp||0,safePlayerMaxHp));
+let safeNpcHp=Math.max(0,Math.min(c.npcHp||0,safeNpcMaxHp));
+let playerHpPct=(safePlayerHp/safePlayerMaxHp*100);
+let npcHpPct=(safeNpcHp/safeNpcMaxHp*100);
 let playerHpColor=playerHpPct>60?'var(--green)':(playerHpPct>30?'var(--orange)':'var(--red)');
 let npcHpColor=npcHpPct>60?'var(--green)':(npcHpPct>30?'var(--orange)':'var(--red)');
 document.getElementById('combat-player-side').innerHTML=
 '<div class="combat-avatar">'+playerPortrait+'</div>'+
-'<div class="combat-name">'+p.name+'</div>'+
+'<div class="combat-name">'+(p.name||'玩家')+'</div>'+
 '<div class="combat-hp-bar"><div class="combat-hp-fill" style="width:'+playerHpPct+'%;background:'+playerHpColor+'"></div></div>'+
-'<div class="combat-hp-text">'+c.playerHp+'/'+c.playerMaxHp+'</div>';
+'<div class="combat-hp-text">'+safePlayerHp+'/'+safePlayerMaxHp+'</div>';
 document.getElementById('combat-npc-side').innerHTML=
 '<div class="combat-avatar">'+npcPortrait+'</div>'+
-'<div class="combat-name">'+c.npcName+'</div>'+
+'<div class="combat-name">'+(c.npcName||'对手')+'</div>'+
 '<div class="combat-hp-bar"><div class="combat-hp-fill" style="width:'+npcHpPct+'%;background:'+npcHpColor+'"></div></div>'+
-'<div class="combat-hp-text">'+c.npcHp+'/'+c.npcMaxHp+'</div>';
+'<div class="combat-hp-text">'+safeNpcHp+'/'+safeNpcMaxHp+'</div>';
 // Log
 let logHtml=c.log.map(e=>'<div class="combat-log-entry '+e.type+'">'+e.text+'</div>').join('');
 document.getElementById('combat-log').innerHTML=logHtml;
@@ -3543,8 +3568,10 @@ if(!c||c.turn!=='player')return;
 let p=G.player;
 let n=NPCS[c.npcId],ni=G.npcs[c.npcId];
 let npcElement=c.npcElement;
+// Track the element used for proficiency gain
+c.playerElement=playerElement;
 // Calculate element multiplier
-let playerElementInfo=ELEMENTS[playerElement];
+let playerElementInfo=playerElement!=='none'?ELEMENTS[playerElement]:null;
 let npcElementInfo=ELEMENTS[npcElement];
 let elementMult=1.0;
 if(playerElementInfo){
@@ -3553,15 +3580,15 @@ else if(playerElementInfo.weak===npcElement)elementMult=0.6;
 }
 // Proficiency bonus
 let prof=p.skillProficiency?.[playerElement]||0;
-let profBonus=prof*2;
-// Player attack
-let playerBaseDmg=Math.max(5,c.playerCombat+rand(1,10)+profBonus);
+let profBonus=Math.floor(prof*1.5);
+// Player attack — base damage scales with combat + windOrder + random
+let playerBaseDmg=Math.max(8,c.playerCombat+rand(2,12)+profBonus);
 let playerDmg=Math.floor(playerBaseDmg*elementMult);
-let isCrit=rand(1,100)<=10+(p.perception/5);
+let isCrit=rand(1,100)<=10+Math.floor((p.perception||0)/5);
 if(isCrit){playerDmg=Math.floor(playerDmg*1.5);}
 c.npcHp=Math.max(0,c.npcHp-playerDmg);
 // Log player attack
-let elementName=playerElement!=='none'?(ELEMENTS[playerElement]?.name||''):'';
+let elementName=playerElement!=='none'?(ELEMENTS[playerElement]?.name||''):'普攻';
 let hitText=isCrit?'暴击！':'';
 let advText=elementMult>1?' (属性克制！)':(elementMult<1?' (属性被克...)':'');
 c.log.push({type:'combat-log-player',text:'你使用'+elementName+hitText+'，造成 <span class="combat-log-damage">'+playerDmg+'</span> 点伤害'+advText});
@@ -3571,20 +3598,20 @@ c.result='win';
 updateCombatUI();
 return;
 }
-// NPC turn
-// NPC element attack
+// NPC turn — balanced damage: base + random, not multiplied by npcCombat directly
 let npcElementMult=1.0;
 if(npcElementInfo&&playerElementInfo){
 if(npcElementInfo.strong===playerElement)npcElementMult=1.5;
 else if(npcElementInfo.weak===playerElement)npcElementMult=0.6;
 }
-let npcDmg=Math.max(3,Math.floor(c.npcCombat*npcElementMult)+rand(1,8));
-c.playerHp=Math.max(0,c.playerHp-npcDmg);
+// NPC damage: lower base, scales with year but always beatable
+let npcBaseDmg=Math.max(5,Math.floor((c.npcCombat*0.4+8)*npcElementMult)+rand(1,8));
+c.playerHp=Math.max(0,c.playerHp-npcBaseDmg);
 // Update player HP
 p.hp=c.playerHp;
 let npcElName=ELEMENTS[npcElement]?.name||'未知';
 let npcAdv=npcElementMult>1?' (属性克制！)':(npcElementMult<1?' (属性被克)':'');
-c.log.push({type:'combat-log-npc',text:c.npcName+' 使用'+npcElName+'，造成 <span class="combat-log-damage">'+npcDmg+'</span> 点伤害'+npcAdv});
+c.log.push({type:'combat-log-npc',text:c.npcName+' 使用'+npcElName+'，造成 <span class="combat-log-damage">'+npcBaseDmg+'</span> 点伤害'+npcAdv});
 // Check if player defeated
 if(c.playerHp<=0){
 c.result='lose';
@@ -4437,6 +4464,7 @@ results.forEach(r=>{log(r.msg,r.success?'event':'danger');});
 G.charActions={};
 G.todayEventId=null;G.todayEventNpc=null;
 G.todayInteractNpc=null;G.todayInteractCount=0;
+G.strollUsedToday=false; // Reset random stroll daily limit
 for(let id in G.npcs)G.npcs[id].interactedToday=0;
 // v3.0: Duel cooldown countdown
 for(let id in p.duelCooldowns){if(p.duelCooldowns[id]>0)p.duelCooldowns[id]--;}
